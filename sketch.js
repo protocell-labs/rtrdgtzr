@@ -1,35 +1,34 @@
 /*
-
-
- █    ██  ███▄    █  ███▄    █  ▄▄▄       ███▄ ▄███▓▓█████ ▓█████▄
- ██  ▓██▒ ██ ▀█   █  ██ ▀█   █ ▒████▄    ▓██▒▀█▀ ██▒▓█   ▀ ▒██▀ ██▌
-▓██  ▒██░▓██  ▀█ ██▒▓██  ▀█ ██▒▒██  ▀█▄  ▓██    ▓██░▒███   ░██   █▌
-▓▓█  ░██░▓██▒  ▐▌██▒▓██▒  ▐▌██▒░██▄▄▄▄██ ▒██    ▒██ ▒▓█  ▄ ░▓█▄   ▌
-▒▒█████▓ ▒██░   ▓██░▒██░   ▓██░ ▓█   ▓██▒▒██▒   ░██▒░▒████▒░▒████▓
-░▒▓▒ ▒ ▒ ░ ▒░   ▒ ▒ ░ ▒░   ▒ ▒  ▒▒   ▓▒█░░ ▒░   ░  ░░░ ▒░ ░ ▒▒▓  ▒
-░░▒░ ░ ░ ░ ░░   ░ ▒░░ ░░   ░ ▒░  ▒   ▒▒ ░░  ░      ░ ░ ░  ░ ░ ▒  ▒
- ░░░ ░ ░    ░   ░ ░    ░   ░ ░   ░   ▒   ░      ░      ░    ░ ░  ░
-   ░              ░          ░       ░  ░       ░      ░  ░   ░
-                                                            ░
-
-WIP by {protocell:labs} and jrdsctt for Glitch Forge, 2022
+    ____  ________________  ____                                
+   / __ \/ ____/_  __/ __ \/ __ \                               
+  / /_/ / __/   / / / /_/ / / / /                               
+ / _, _/ /___  / / / _, _/ /_/ /                                
+/_/ |_/_____/ /_/_/_/_|_|\____/___________________   __________ 
+              / __ \/  _/ ____/  _/_  __/  _/__  /  / ____/ __ \
+             / / / // // / __ / /  / /  / /   / /  / __/ / /_/ /
+            / /_/ // // /_/ // /  / / _/ /   / /__/ /___/ _, _/ 
+           /_____/___/\____/___/ /_/ /___/  /____/_____/_/ |_|  
+                                                                                                                  
+R E T R O  D I G I T I Z E R  |  { p r o t o c e l l : l a b s }  |  2 0 2 3
 
 */
 
 // Defining parameters
 
+let seed;
 let img, input_img, input_img_2, input_img_3;
 let frame_1, frame_2, frame_3, frame_4, frame_5;
 let sortLength, randomColor, d, mixPercentage, pixelColor, colorHex;
 let unsorted, sorted;
 let gif, canvas;
 let row, column;
-let source_theme_nr, source_themes, source_theme, source_themes_size, source_theme_weights, source_nr, image_path;
+let source_theme_nr, source_themes, source_theme, source_themes_size, source_theme_weights, source_nr, image_path, source_name;
 
 let effects_stack_type; // Type of effects workflow to be used as a number
 let effects_stack_names, effects_stack_name; // Type of effects workflow to be used as a string
 let image_border; // Width of the border in pixels, [76, 76]
 let frame_duration; // In mms
+let output_type; // Type of output, "png", "gif"
 
 let blackValue; // Pixels darker than this will not be sorted, max is 100
 let brigthnessValue; // Value for sorting pixels according to brightness
@@ -115,10 +114,12 @@ let invert_mask = true; // Invert brightnessMask
 
 function preload() {
 
-  //randomSeed(44344446555); // set the seed of the random number generator
+  seed = 6; // define the seed of the random number generator
+  //randomSeed(seed); // set the seed of the random number generator
 
   image_border = [100, 100]; // width of the border in pixels, 900 + 100 = 1000 pix
   frame_duration = 100; // in mms
+  output_type = "png"; // "png", "gif"
 
   // SELECTION OF EFFECTS STACK
   // 0 -> Monochrome dither
@@ -129,7 +130,7 @@ function preload() {
 
   effects_stack_weights = [ [0, 20], [1, 20], [2, 20], [3, 20], [4, 20] ]; // these represent probabilities for choosing an effects stack number [element, probability]
   effects_stack_type = weightedChoice(effects_stack_weights); // type of effects workflow to be used as a number, 0-4
-  //effects_stack_type = 4; // override for the type of effects workflow to be used as a number, 0-4
+  effects_stack_type = 3; // override for the type of effects workflow to be used as a number, 0-4
   effects_stack_names = ["monochrome dither", "tinted dither", "color dither + pixel sorting", "pixel sorting + color dither", "abstract dither"]; // type of effects workflow to be used as a string
   effects_stack_name = effects_stack_names[effects_stack_type]; // type of effects workflow to be used as a string
 
@@ -146,7 +147,10 @@ function preload() {
   // DEFINING THE PATH TO THE SOURCE IMAGE
   source_theme = source_themes[source_theme_nr]; // 'citizen', 'cityscape', 'covers', 'scenes'
   source_nr = int(random(source_themes_size[source_theme_nr])) + 1; // image number
-  image_path = 'assets/midjourney/' + source_theme + '/' + source_theme + '_' + str(source_nr).padStart(3, '0') + '.png'; // path to source image like 'assets/midjourney/citizen/citizen_005.png'
+  //image_path = 'assets/midjourney/' + source_theme + '/' + source_theme + '_' + str(source_nr).padStart(3, '0') + '.png'; // path to source image like 'assets/midjourney/citizen/citizen_005.png'
+  
+  source_name = 'retroid_1_105';
+  image_path = 'assets/retroid_1/' + source_name + '.jpg';
   input_img = loadImage(image_path);
 
 }
@@ -181,6 +185,15 @@ function setup() {
 
   pixelDensity(1.0); // Need to fix this so the gif.js exports the correct size
   canvas = createCanvas(input_img.width + image_border[0], input_img.height + image_border[1]);
+
+  /*
+  const canvasp5 = document.getElementById("defaultCanvas0");
+  const ctx = canvasp5.getContext("2d", { willReadFrequently: true });
+  console.log(canvasp5);
+  console.log(ctx);
+  //canvas.getContext('2d', { willReadFrequently: true });
+  */
+
   background(0); // set black background for all images
 
 
@@ -218,10 +231,15 @@ function setup() {
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      //applyMonochromeDither(input_img); // apply and draw monochrome dither effect stack
+      if (output_type == "png") {
+        applyMonochromeDither(input_img); // apply and draw monochrome dither effect stack
+        const saveid = parseInt(Math.random()*10000000);
+        saveCanvas(canvas, `retro_digitizer_${seed}_${saveid}`, "png");
+      }
 
-      // make gif animation
-      animateMonochromeDither(input_img);
+      if (output_type == "gif") {
+        animateMonochromeDither(input_img); // make gif animation
+      }
 
       break;
 
@@ -247,11 +265,16 @@ function setup() {
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      //applyTintedDither(input_img); // apply and draw tinted dither effect stack
+      if (output_type == "png") {
+        applyTintedDither(input_img); // apply and draw tinted dither effect stack
+        const saveid = parseInt(Math.random()*10000000);
+        saveCanvas(canvas, `retro_digitizer_${seed}_${saveid}`, "png");
+      }
 
-      // make gif animation
-      animateTintedDither(input_img);
-
+      if (output_type == "gif") {
+        animateTintedDither(input_img); // make gif animation
+      }
+      
       break;
 
 
@@ -262,18 +285,18 @@ function setup() {
       brigthnessValue = 50;
       whiteValue = 70;
 
-      sorting_mode = randInt(0, 3); // 0, 1, 2
-      sorting_type = randInt(0, 2); // 0, 1
-      sorting_order = randInt(0, 4); // 0, 1, 2, 3
+      sorting_mode = 2; //randInt(0, 3); // 0, 1, 2
+      sorting_type = 0; //randInt(0, 2); // 0, 1
+      sorting_order = 1; //randInt(0, 4); // 0, 1, 2, 3
       color_noise_density = 5;
-      rand_color_bias_key = getRandomKey(color_bias_palette);
+      rand_color_bias_key = "green skewed blue"; //getRandomKey(color_bias_palette);
       color_noise_bias = color_bias_palette[rand_color_bias_key];
       color_noise_variation = 10000;
 
       nr_of_levels = 1;
       contrast = 0.15;
-      rand_dither_key_1 = getRandomKey(dither_params_json);
-      rand_dither_key_2 = getRandomKey(dither_params_json);
+      rand_dither_key_1 = "right down only"; //getRandomKey(dither_params_json);
+      rand_dither_key_2 = "standard"; //getRandomKey(dither_params_json);
       dither_params_1 = dither_params_json[rand_dither_key_1];
       dither_params_2 = dither_params_json[rand_dither_key_2];
       pix_scaling = 2.0;
@@ -281,18 +304,22 @@ function setup() {
       mask_contrast = 0.25;
       light_treshold = 50;
       invert_mask = false;
-      tinting_mode = randInt(0, 3); // 0, 1, 2
+      tinting_mode = 1; //randInt(0, 3); // 0, 1, 2
 
       new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
       delta_factor = 0.5; // scaling animation effects
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      //applyDitherSorting(input_img); // apply and draw color dither + pixel sorting effect stack
+      if (output_type == "png") {
+        applyDitherSorting(input_img); // apply and draw color dither + pixel sorting effect stack
+        const saveid = parseInt(Math.random()*10000000);
+        saveCanvas(canvas, `retro_digitizer_${seed}_${saveid}`, "png");
+      }
 
-      // make gif animation
-      animateDitherSorting(input_img);
-
+      if (output_type == "gif") {
+        animateDitherSorting(input_img); // make gif animation
+      }
       break;
 
     case 3: // Pixel sorting + color dither
@@ -302,18 +329,18 @@ function setup() {
       brigthnessValue = 50;
       whiteValue = 70;
 
-      sorting_mode = randInt(0, 3); // 0, 1, 2
-      sorting_type = randInt(0, 2); // 0, 1
-      sorting_order = randInt(0, 4); // 0, 1, 2, 3
+      sorting_mode = 2; //randInt(0, 3); // 0, 1, 2
+      sorting_type = 0; //randInt(0, 2); // 0, 1
+      sorting_order = 0; //randInt(0, 4); // 0, 1, 2, 3
       color_noise_density = 5;
-      rand_color_bias_key = getRandomKey(color_bias_palette);
+      rand_color_bias_key = "blue skewed green"; //getRandomKey(color_bias_palette);
       color_noise_bias = color_bias_palette[rand_color_bias_key];
       color_noise_variation = 10000; //10000
 
       nr_of_levels = 1;
       contrast = 0.15; // 15
-      rand_dither_key_1 = getRandomKey(dither_params_json);
-      rand_dither_key_2 = getRandomKey(dither_params_json);
+      rand_dither_key_1 = "right only"; //getRandomKey(dither_params_json);
+      rand_dither_key_2 = "right down only"; //getRandomKey(dither_params_json);
       dither_params_1 = dither_params_json[rand_dither_key_1];
       dither_params_2 = dither_params_json[rand_dither_key_2];
       pix_scaling = 2.0;
@@ -321,17 +348,23 @@ function setup() {
       mask_contrast = 0.25;
       light_treshold = 50;
       invert_mask = false;
-      tinting_mode = randInt(0, 3); // 0, 1, 2
+      tinting_mode = 2; //randInt(0, 3); // 0, 1, 2
 
       new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
       delta_factor = 0.5; // scaling animation effects
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      //applySortingDither(input_img); // apply and draw pixel sorting + color dither effect stack
+      if (output_type == "png") {
+        applySortingDither(input_img); // apply and draw pixel sorting + color dither effect stack
+        const saveid = parseInt(Math.random()*10000000);
+        //saveCanvas(canvas, `retro_digitizer_${seed}_${saveid}`, "png");
+        saveCanvas(canvas, source_name, "png");
+      }
 
-      // make gif animation
-      animateSortingDither(input_img);
+      if (output_type == "gif") {
+        animateSortingDither(input_img); // make gif animation
+      }
 
       break;
 
@@ -382,10 +415,15 @@ function setup() {
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      //applyAbstractDither(input_img); // apply and draw abstract dither effect stack
+      if (output_type == "png") {
+        applyAbstractDither(input_img); // apply and draw abstract dither effect stack
+        const saveid = parseInt(Math.random()*10000000);
+        saveCanvas(canvas, `retro_digitizer_${seed}_${saveid}`, "png");
+      }
 
-      // make gif animation
-      animateAbstractDither(input_img);
+      if (output_type == "gif") {
+        animateAbstractDither(input_img); // make gif animation
+      }
 
       break;
 

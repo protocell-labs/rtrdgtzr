@@ -20,7 +20,7 @@ function setupGif() {
         print('Finished creating gif')
         rendering = false;
         window.open(URL.createObjectURL(blob));
-        saveAs(blob, `test_gif_${uuid}.gif`);
+        saveAs(blob, `retro_digitizer_${seed}_${uuid}.gif`);
         setupGif();
     });
 }
@@ -98,7 +98,6 @@ function applyTintedDither(img) {
 
 // effect stack 2 -> Color dither + pixel sorting
 function applyDitherSorting(img) {
-
   setBrightness(img, new_brightness);
   img_2 = img.get(); // copy image pixels
 

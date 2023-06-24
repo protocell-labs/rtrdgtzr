@@ -20,7 +20,7 @@ function setupGif() {
         print('Finished creating gif')
         rendering = false;
         window.open(URL.createObjectURL(blob));
-        saveAs(blob, `retro_digitizer_${seed}_${uuid}.gif`);
+        saveAs(blob, `retro_digitizer_${effects_stack_type}_${seed}_${uuid}.gif`);
         setupGif();
     });
 }

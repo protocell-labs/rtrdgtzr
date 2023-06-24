@@ -29,7 +29,7 @@ function setupGif() {
 
 // EFFECT STACKS
 
-// effect stack 0 -> Monochrome dither
+// effect stack 0 -> mono
 function applyMonochromeDither(img) {
 
   setBrightness(img, new_brightness);
@@ -66,7 +66,7 @@ function applyMonochromeDither(img) {
 }
 
 
-// effect stack 1 -> Tinted dither
+// effect stack 1 -> hi-fi
 function applyTintedDither(img) {
 
   setBrightness(img, new_brightness);
@@ -96,7 +96,7 @@ function applyTintedDither(img) {
 }
 
 
-// effect stack 2 -> Color dither + pixel sorting
+// effect stack 2 -> noisy
 function applyDitherSorting(img) {
   setBrightness(img, new_brightness);
   img_2 = img.get(); // copy image pixels
@@ -162,7 +162,7 @@ function applyDitherSorting(img) {
 }
 
 
-// effect stack 3 -> Pixel sorting + color dither
+// effect stack 3 -> corrupted
 function applySortingDither(img) {
 
   setBrightness(img, new_brightness);
@@ -228,7 +228,7 @@ function applySortingDither(img) {
 }
 
 
-// effect stack 4 -> Abstract dither
+// effect stack 4 -> lo-fi
 function applyAbstractDither(img) {
 
   setBrightness(img, new_brightness);
@@ -621,17 +621,16 @@ function sortRow(img, sorting_mode, sorting_type, color_noise_density = 5, color
     unsorted = [];
     sorted = [];
 
-    //randomColor = color(random(255), random(255), random(255), 255);
-    randomColor = color(random(255)*color_noise_bias[0], random(255)*color_noise_bias[1], random(255)*color_noise_bias[2], 255);
+    randomColor = color(gene_rand_int(0, 255)*color_noise_bias[0], gene_rand_int(0, 255)*color_noise_bias[1], gene_rand_int(0, 255)*color_noise_bias[2], 255);
     d = 0;
 
-    if(random(100) < color_noise_density){
-         d = random(color_noise_variation);
+    if(gene_rand_int(0, 100) < color_noise_density){
+         d = gene_rand_int(0, color_noise_variation);
     }
 
     for(let i=0; i<sortLength; i= i+1) {
       if (d > 0){
-          mixPercentage = 0.5 + random(50)/100;
+          mixPercentage = 0.5 + gene_rand_int(0, 50)/100;
           pixelColor = getColorAtIndex(img, x + i, y);
           setColorAtIndex(img, x + i, y, lerpColor(pixelColor, randomColor, mixPercentage));
           d--;
@@ -703,17 +702,16 @@ function sortColumn(img, sorting_mode, sorting_type, color_noise_density = 5, co
     unsorted = [];
     sorted = [];
 
-    //randomColor = color(random(255), random(255), random(255), 255);
-    randomColor = color(random(255)*color_noise_bias[0], random(255)*color_noise_bias[1], random(255)*color_noise_bias[2], 255);
+    randomColor = color(gene_rand_int(0, 255)*color_noise_bias[0], gene_rand_int(0, 255)*color_noise_bias[1], gene_rand_int(0, 255)*color_noise_bias[2], 255);
     d = 0;
 
-    if(random(100) < color_noise_density){
-         d = random(color_noise_variation);
+    if(gene_rand_int(0, 100) < color_noise_density){
+         d = gene_rand_int(0, color_noise_variation);
     }
 
     for(let i=0; i<sortLength; i++) {
       if (d > 0){
-          mixPercentage = 0.5 + random(50)/100;
+          mixPercentage = 0.5 + gene_rand_int(0, 50)/100;
           pixelColor = getColorAtIndex(img, x + i, y);
           setColorAtIndex(img, x + i, y, lerpColor(pixelColor, randomColor, mixPercentage));
           d--;
@@ -1001,38 +999,6 @@ function hexToRgb(hex) {
     let g = (bigint >> 8) & 255;
     let b = bigint & 255;
     return color(r, g, b);
-}
-
-// return random integer from min to max number
-function randInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(random(min, max));
-}
-
-// return a random key from JSON dictionary
-function getRandomKey(json_dict){
-    let obj_keys = Object.keys(json_dict);
-    let ran_key = obj_keys[int(random(obj_keys.length))];
-    return ran_key;
-}
-
-// return random element from a list with set weights in form:
-// data = [ ["a", 50], ["b", 25], ["c", 25] ]; numbers are not strict probabilities so don't have to add up to 100
-function weightedChoice(data){
-  let total = 0;
-  for (let i = 0; i < data.length; ++i) {
-      total += data[i][1];
-  }
-  const threshold = random(total);
-  total = 0;
-  for (let i = 0; i < data.length - 1; ++i) {
-      total += data[i][1];
-      if (total >= threshold) {
-          return data[i][0];
-      }
-  }
-  return data[data.length - 1][0];
 }
 
 

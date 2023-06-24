@@ -15,7 +15,6 @@ R E T R O  D I G I T I Z E R  |  { p r o t o c e l l : l a b s }  |  2 0 2 3
 
 // Defining parameters
 
-let seed;
 let img, input_img, input_img_2, input_img_3;
 let frame_1, frame_2, frame_3, frame_4, frame_5;
 let sortLength, randomColor, d, mixPercentage, pixelColor, colorHex;
@@ -81,7 +80,7 @@ let sorting_mode = 2; // Pixel sorting color mode, 0 -> black, 1 -> bright, 2 ->
 let sorting_type = 1; // Pixel sorting type, 0 -> chaotic, 1 -> proper
 let sorting_order = 0; // Determines order of sorting, 0 -> column, 1 -> row, 2 -> column-row, 3 -> row-column (there are exceptions to this notation, see Abstract workflow)
 let color_noise_density = 5; // Density of color noise (0-100)
-let rand_color_bias_key = getRandomKey(color_bias_palette); // JSON key for color noise bias parameters
+let rand_color_bias_key = gene_pick_key(color_bias_palette); // JSON key for color noise bias parameters
 let color_noise_bias = [1, 0, 1]; // Array which skews the rgb color values of the noise using this factor (0-1)
 let color_noise_variation = 10000; // Variation of the color noise (10-10000)
 
@@ -93,7 +92,7 @@ let nr_of_levels = 1; // Number of color levels for FS dithering
 let contrast = 0.25; // Set image contrast - 0.0 is no change
 let new_brightness = 1.0; // Set image brightness - 1.0 is no change
 let dither_group = 0; // Number for the group of dither parameters to choose from
-let rand_dither_key = getRandomKey(dither_params_json); // Get random key for dither error distribution parameters
+let rand_dither_key = gene_pick_key(dither_params_json); // Get random key for dither error distribution parameters
 let dither_params = dither_params_json[rand_dither_key]; // Read error distribution parameters from a JSON fil
 let pix_scaling = 2.0; // Scales the size of pixels when applying effects
 let pix_scaling_dark = pix_scaling * 2;
@@ -114,31 +113,28 @@ let invert_mask = true; // Invert brightnessMask
 
 function preload() {
 
-  seed = 6; // define the seed of the random number generator
-  //randomSeed(seed); // set the seed of the random number generator
-
-  image_border = [100, 100]; // width of the border in pixels, 900 + 100 = 1000 pix
+  image_border = [60, 60]; // width of the border in pixels, 900 + 100 = 1000 pix
   frame_duration = 100; // in mms
   output_type = "png"; // "png", "gif"
 
   // SELECTION OF EFFECTS STACK
-  // 0 -> Monochrome dither
-  // 1 -> Tinted dither
-  // 2 -> Color dither + pixel sorting
-  // 3 -> Pixel sorting + color dither
-  // 4 -> Abstract dither
+  // 0 -> mono - monochrome dither
+  // 1 -> hi-fi - tinted dither
+  // 2 -> noisy - color dither + pixel sorting
+  // 3 -> corrupted - pixel sorting + color dither
+  // 4 -> lo-fi - abstract dither
 
   effects_stack_weights = [ [0, 20], [1, 20], [2, 20], [3, 20], [4, 20] ]; // these represent probabilities for choosing an effects stack number [element, probability]
-  effects_stack_type = weightedChoice(effects_stack_weights); // type of effects workflow to be used as a number, 0-4
+  effects_stack_type = gene_weighted_choice(effects_stack_weights); // type of effects workflow to be used as a number, 0-4
   effects_stack_type = 3; // override for the type of effects workflow to be used as a number, 0-4
-  effects_stack_names = ["monochrome dither", "tinted dither", "color dither + pixel sorting", "pixel sorting + color dither", "abstract dither"]; // type of effects workflow to be used as a string
+  effects_stack_names = ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"]; // type of effects workflow to be used as a string
   effects_stack_name = effects_stack_names[effects_stack_type]; // type of effects workflow to be used as a string
 
   // SELECTION OF SOURCE THEME
-  source_themes = ['citizen', 'cityscape', 'covers', 'scenes'];
+  source_themes = ["citizen", "cityscape", "covers", "scenes"];
   source_themes_size = [354, 290, 220, 46]; // 910 in total,  citizen 39%, cityscape 32%, covers 24%, scenes 5%
   source_theme_weights = [ [0, 35], [1, 35], [2, 25], [3, 5] ]; // these represent probabilities for choosing a source theme number [element, probability]
-  source_theme_nr = weightedChoice(source_theme_weights); // 0 -> citizen, 1 -> cityscape, 2 -> covers, 3 -> scenes
+  source_theme_nr = gene_weighted_choice(source_theme_weights); // 0 -> citizen, 1 -> cityscape, 2 -> covers, 3 -> scenes
   //source_theme_nr = 1; // override for the source theme
 
   // EXCEPTIONS - these skew the choice probabilities from above
@@ -149,8 +145,9 @@ function preload() {
   source_nr = int(random(source_themes_size[source_theme_nr])) + 1; // image number
   //image_path = 'assets/midjourney/' + source_theme + '/' + source_theme + '_' + str(source_nr).padStart(3, '0') + '.png'; // path to source image like 'assets/midjourney/citizen/citizen_005.png'
   
-  source_name = 'retroid_1_105';
-  image_path = 'assets/retroid_1/' + source_name + '.jpg';
+  //source_name = 'retroid_1_105';
+  //image_path = 'assets/retroid_1/' + source_name + '.jpg';
+  image_path = 'assets/jpg_thumbnail_test_nr03_10.png'
   input_img = loadImage(image_path);
 
 }
@@ -185,15 +182,6 @@ function setup() {
 
   pixelDensity(1.0); // Need to fix this so the gif.js exports the correct size
   canvas = createCanvas(input_img.width + image_border[0], input_img.height + image_border[1]);
-
-  /*
-  const canvasp5 = document.getElementById("defaultCanvas0");
-  const ctx = canvasp5.getContext("2d", { willReadFrequently: true });
-  console.log(canvasp5);
-  console.log(ctx);
-  //canvas.getContext('2d', { willReadFrequently: true });
-  */
-
   background(0); // set black background for all images
 
 
@@ -201,15 +189,15 @@ function setup() {
 
   switch(effects_stack_type) {
 
-    case 0: // Monochrome dither
+    case 0: // mono
 
       // Custom stack params
       nr_of_levels = 1;
       contrast = 0.15;
 
-      rand_dither_key_1 = getRandomKey(dither_params_json);
-      rand_dither_key_2 = getRandomKey(extreme_dither_params_json);
-      rand_dither_key_3 = getRandomKey(dither_params_json);
+      rand_dither_key_1 = gene_pick_key(dither_params_json);
+      rand_dither_key_2 = gene_pick_key(extreme_dither_params_json);
+      rand_dither_key_3 = gene_pick_key(dither_params_json);
 
       dither_params_1 = dither_params_json[rand_dither_key_1];
       dither_params_2 = extreme_dither_params_json[rand_dither_key_2];
@@ -221,7 +209,7 @@ function setup() {
       dark_treshold = 20;
       light_treshold = 80;
       invert_mask = false;
-      tint_palette_key = getRandomKey(three_bit_palette_reduced);
+      tint_palette_key = gene_pick_key(three_bit_palette_reduced);
       tint_palette = three_bit_palette_reduced[tint_palette_key];
       // if tint color is white or green (these are very bright) then the size of dither pixels in darkest regions is smallest possible
       pix_scaling_dark = (tint_palette_key == 'white') || (tint_palette_key == 'green') ? 1.0 : pix_scaling * 2;
@@ -234,7 +222,7 @@ function setup() {
       if (output_type == "png") {
         applyMonochromeDither(input_img); // apply and draw monochrome dither effect stack
         const saveid = parseInt(Math.random()*10000000);
-        saveCanvas(canvas, `retro_digitizer_${seed}_${saveid}`, "png");
+        //saveCanvas(canvas, `retro_digitizer_${effects_stack_type}_${saveid}`, "png");
       }
 
       if (output_type == "gif") {
@@ -243,13 +231,13 @@ function setup() {
 
       break;
 
-    case 1: // Tinted dither
+    case 1: // hi-fi
 
       // Custom stack params
       nr_of_levels = 1;
       contrast = 0.25;
-      rand_dither_key_1 = getRandomKey(dither_params_json);
-      rand_dither_key_2 = getRandomKey(dither_params_json);
+      rand_dither_key_1 = gene_pick_key(dither_params_json);
+      rand_dither_key_2 = gene_pick_key(dither_params_json);
       dither_params_1 = dither_params_json[rand_dither_key_1];
       dither_params_2 = dither_params_json[rand_dither_key_2];
       pix_scaling = 2.0;
@@ -257,7 +245,7 @@ function setup() {
       mask_contrast = 0.25;
       light_treshold = 50;
       invert_mask = false;
-      tint_palette_key = getRandomKey(three_bit_palette);
+      tint_palette_key = gene_pick_key(three_bit_palette);
       tint_palette = three_bit_palette[tint_palette_key];
 
       new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
@@ -268,7 +256,7 @@ function setup() {
       if (output_type == "png") {
         applyTintedDither(input_img); // apply and draw tinted dither effect stack
         const saveid = parseInt(Math.random()*10000000);
-        saveCanvas(canvas, `retro_digitizer_${seed}_${saveid}`, "png");
+        //saveCanvas(canvas, `retro_digitizer_${effects_stack_type}_${saveid}`, "png");
       }
 
       if (output_type == "gif") {
@@ -278,25 +266,25 @@ function setup() {
       break;
 
 
-    case 2: // Color dither + pixel sorting
+    case 2: // noisy
 
       // Custom stack params
       blackValue = 10;
       brigthnessValue = 50;
       whiteValue = 70;
 
-      sorting_mode = 2; //randInt(0, 3); // 0, 1, 2
-      sorting_type = 0; //randInt(0, 2); // 0, 1
-      sorting_order = 1; //randInt(0, 4); // 0, 1, 2, 3
+      sorting_mode = gene_rand_int(0, 3); // 0, 1, 2
+      sorting_type = gene_rand_int(0, 2); // 0, 1
+      sorting_order = gene_rand_int(0, 4); // 0, 1, 2, 3
       color_noise_density = 5;
-      rand_color_bias_key = "green skewed blue"; //getRandomKey(color_bias_palette);
+      rand_color_bias_key = gene_pick_key(color_bias_palette);
       color_noise_bias = color_bias_palette[rand_color_bias_key];
       color_noise_variation = 10000;
 
       nr_of_levels = 1;
       contrast = 0.15;
-      rand_dither_key_1 = "right down only"; //getRandomKey(dither_params_json);
-      rand_dither_key_2 = "standard"; //getRandomKey(dither_params_json);
+      rand_dither_key_1 = gene_pick_key(dither_params_json);
+      rand_dither_key_2 = gene_pick_key(dither_params_json);
       dither_params_1 = dither_params_json[rand_dither_key_1];
       dither_params_2 = dither_params_json[rand_dither_key_2];
       pix_scaling = 2.0;
@@ -304,7 +292,7 @@ function setup() {
       mask_contrast = 0.25;
       light_treshold = 50;
       invert_mask = false;
-      tinting_mode = 1; //randInt(0, 3); // 0, 1, 2
+      tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
 
       new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
       delta_factor = 0.5; // scaling animation effects
@@ -314,7 +302,7 @@ function setup() {
       if (output_type == "png") {
         applyDitherSorting(input_img); // apply and draw color dither + pixel sorting effect stack
         const saveid = parseInt(Math.random()*10000000);
-        saveCanvas(canvas, `retro_digitizer_${seed}_${saveid}`, "png");
+        //saveCanvas(canvas, `retro_digitizer_${effects_stack_type}_${saveid}`, "png");
       }
 
       if (output_type == "gif") {
@@ -322,25 +310,25 @@ function setup() {
       }
       break;
 
-    case 3: // Pixel sorting + color dither
+    case 3: // corrupted
 
       // Custom stack params
       blackValue = 10;
       brigthnessValue = 50;
       whiteValue = 70;
 
-      sorting_mode = 2; //randInt(0, 3); // 0, 1, 2
-      sorting_type = 0; //randInt(0, 2); // 0, 1
-      sorting_order = 0; //randInt(0, 4); // 0, 1, 2, 3
+      sorting_mode = gene_rand_int(0, 3); // 0, 1, 2
+      sorting_type = gene_rand_int(0, 2); // 0, 1
+      sorting_order = gene_rand_int(0, 4); // 0, 1, 2, 3
       color_noise_density = 5;
-      rand_color_bias_key = "blue skewed green"; //getRandomKey(color_bias_palette);
+      rand_color_bias_key = gene_pick_key(color_bias_palette);
       color_noise_bias = color_bias_palette[rand_color_bias_key];
       color_noise_variation = 10000; //10000
 
       nr_of_levels = 1;
       contrast = 0.15; // 15
-      rand_dither_key_1 = "right only"; //getRandomKey(dither_params_json);
-      rand_dither_key_2 = "right down only"; //getRandomKey(dither_params_json);
+      rand_dither_key_1 = gene_pick_key(dither_params_json);
+      rand_dither_key_2 = gene_pick_key(dither_params_json);
       dither_params_1 = dither_params_json[rand_dither_key_1];
       dither_params_2 = dither_params_json[rand_dither_key_2];
       pix_scaling = 2.0;
@@ -348,7 +336,7 @@ function setup() {
       mask_contrast = 0.25;
       light_treshold = 50;
       invert_mask = false;
-      tinting_mode = 2; //randInt(0, 3); // 0, 1, 2
+      tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
 
       new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
       delta_factor = 0.5; // scaling animation effects
@@ -358,8 +346,7 @@ function setup() {
       if (output_type == "png") {
         applySortingDither(input_img); // apply and draw pixel sorting + color dither effect stack
         const saveid = parseInt(Math.random()*10000000);
-        //saveCanvas(canvas, `retro_digitizer_${seed}_${saveid}`, "png");
-        saveCanvas(canvas, source_name, "png");
+        //saveCanvas(canvas, `retro_digitizer_${effects_stack_type}_${saveid}`, "png");
       }
 
       if (output_type == "gif") {
@@ -369,7 +356,7 @@ function setup() {
       break;
 
 
-    case 4: // Abstract dither
+    case 4: // lo-fi
 
       // Custom stack params
       blackValue = 10;
@@ -377,10 +364,10 @@ function setup() {
       whiteValue = 70;
 
       sorting_mode = 2; // this mode works best for this workflow
-      sorting_type = randInt(0, 2); // 0, 1
-      sorting_order = randInt(0, 3); // 0, 1, 2
+      sorting_type = gene_rand_int(0, 2); // 0, 1
+      sorting_order = gene_rand_int(0, 3); // 0, 1, 2
       color_noise_density = 5;
-      rand_color_bias_key = getRandomKey(color_bias_palette);
+      rand_color_bias_key = gene_pick_key(color_bias_palette);
       color_noise_bias = color_bias_palette[rand_color_bias_key];
       color_noise_variation = 10000;
 
@@ -388,15 +375,15 @@ function setup() {
       contrast = 0.25;
 
       dither_group_weights = [ [0, 75], [1, 25] ]; // these represent probabilities for choosing a dither group number [element, probability]
-      dither_group = weightedChoice(dither_group_weights); // type of effects workflow to be used as a number, 0-4
+      dither_group = gene_weighted_choice(dither_group_weights); // type of effects workflow to be used as a number, 0-4
 
       switch(dither_group) {
         case 0: // smaller pixels, less abstract, common
-          rand_dither_key_1 = getRandomKey(dither_params_json);
+          rand_dither_key_1 = gene_pick_key(dither_params_json);
           dither_params_1 = dither_params_json[rand_dither_key_1];
           break;
         case 1: // larger pixels, more abstract, rare
-          rand_dither_key_1 = getRandomKey(extreme_dither_params_json);
+          rand_dither_key_1 = gene_pick_key(extreme_dither_params_json);
           dither_params_1 = extreme_dither_params_json[rand_dither_key_1];
           break;
         default:
@@ -408,7 +395,7 @@ function setup() {
       mask_contrast = 0.25;
       light_treshold = 50;
       invert_mask = false;
-      tinting_mode = randInt(0, 3); // 0, 1, 2
+      tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
 
       new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
       delta_factor = 0.05; // scaling animation effects
@@ -418,7 +405,7 @@ function setup() {
       if (output_type == "png") {
         applyAbstractDither(input_img); // apply and draw abstract dither effect stack
         const saveid = parseInt(Math.random()*10000000);
-        saveCanvas(canvas, `retro_digitizer_${seed}_${saveid}`, "png");
+        //saveCanvas(canvas, `retro_digitizer_${effects_stack_type}_${saveid}`, "png");
       }
 
       if (output_type == "gif") {
@@ -433,7 +420,7 @@ function setup() {
 
   }
 
-
+  
 
 
   // Print some info to the console

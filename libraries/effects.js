@@ -20,7 +20,7 @@ function setupGif() {
         print('Finished creating gif')
         rendering = false;
         window.open(URL.createObjectURL(blob));
-        saveAs(blob, `retro_digitizer_${effects_stack_type}_${seed}_${uuid}.gif`);
+        saveAs(blob, `retro_digitizer_${effects_stack_type}_${uuid}.gif`);
         setupGif();
     });
 }
@@ -268,8 +268,8 @@ function applyAbstractDither(img) {
 
 // MAKE GIF ANIMATION
 
-// create 5 frame animation using monochrome dither effect stack
-function animateMonochromeDither(img) {
+// create 5 frame animation using one of the effect stacks - function is passed as a parameter
+function animateEffectStack(img, effect_function) {
 
   setupGif(); // setup gif
 
@@ -284,35 +284,35 @@ function animateMonochromeDither(img) {
   // apply effects to individual frames and add them to the gif animation
 
   background(0);
-  applyMonochromeDither(frame_1);
+  effect_function(frame_1);
   gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
 
   contrast += contrast_delta[0] * delta_factor;
   new_brightness += brightness_delta[0] * delta_factor;
 
   background(0);
-  applyMonochromeDither(frame_2);
+  effect_function(frame_2);
   gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
 
   contrast += contrast_delta[1] * delta_factor;
   new_brightness += brightness_delta[1] * delta_factor;
 
   background(0);
-  applyMonochromeDither(frame_3);
+  effect_function(frame_3);
   gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
 
   contrast += contrast_delta[2] * delta_factor;
   new_brightness += brightness_delta[2] * delta_factor;
 
   background(0);
-  applyMonochromeDither(frame_4);
+  effect_function(frame_4);
   gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
 
   contrast += contrast_delta[3] * delta_factor;
   new_brightness += brightness_delta[3] * delta_factor;
 
   background(0);
-  applyMonochromeDither(frame_5);
+  effect_function(frame_5);
   gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
 
   gif.render(); // render gif when done
@@ -320,218 +320,19 @@ function animateMonochromeDither(img) {
 }
 
 
-// create 5 frame animation using tinted dither effect stack
-function animateTintedDither(img) {
+// GENERATE OUTPUT - PNG OR GIF
 
-  setupGif(); // setup gif
+function generateOutput(img, effect_function) {
+  if (output_type == "png") {
+    effect_function(input_img); // apply and draw monochrome dither effect stack
+    const saveid = parseInt(Math.random()*10000000);
+    //saveCanvas(canvas, `retro_digitizer_${effects_stack_type}_${saveid}`, "png");
+  }
 
-  // make source image copies
-
-  frame_1 = img.get();
-  frame_2 = img.get();
-  frame_3 = img.get();
-  frame_4 = img.get();
-  frame_5 = img.get();
-
-  // apply effects to individual frames and add them to the gif animation
-
-  background(0);
-  applyTintedDither(frame_1);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[0] * delta_factor;
-  new_brightness += brightness_delta[0] * delta_factor;
-
-  background(0);
-  applyTintedDither(frame_2);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[1] * delta_factor;
-  new_brightness += brightness_delta[1] * delta_factor;
-
-  background(0);
-  applyTintedDither(frame_3);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[2] * delta_factor;
-  new_brightness += brightness_delta[2] * delta_factor;
-
-  background(0);
-  applyTintedDither(frame_4);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[3] * delta_factor;
-  new_brightness += brightness_delta[3] * delta_factor;
-
-  background(0);
-  applyTintedDither(frame_5);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  gif.render(); // render gif when done
-
+  if (output_type == "gif") {
+    animateEffectStack(input_img, effect_function); // make gif animation
+  }
 }
-
-
-
-// create 5 frame animation using color dither + pixel sorting effect stack
-function animateDitherSorting(img) {
-
-  setupGif(); // setup gif
-
-  // make source image copies
-
-  frame_1 = img.get();
-  frame_2 = img.get();
-  frame_3 = img.get();
-  frame_4 = img.get();
-  frame_5 = img.get();
-
-  // apply effects to individual frames and add them to the gif animation
-
-  background(0);
-  applyDitherSorting(frame_1);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[0] * delta_factor;
-  new_brightness += brightness_delta[0] * delta_factor;
-
-  background(0);
-  applyDitherSorting(frame_2);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[1] * delta_factor;
-  new_brightness += brightness_delta[1] * delta_factor;
-
-  background(0);
-  applyDitherSorting(frame_3);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[2] * delta_factor;
-  new_brightness += brightness_delta[2] * delta_factor;
-
-  background(0);
-  applyDitherSorting(frame_4);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[3] * delta_factor;
-  new_brightness += brightness_delta[3] * delta_factor;
-
-  background(0);
-  applyDitherSorting(frame_5);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  gif.render(); // render gif when done
-
-}
-
-
-
-// create 5 frame animation using pixel sorting + color dither effect stack
-function animateSortingDither(img) {
-
-  setupGif(); // setup gif
-
-  // make source image copies
-
-  frame_1 = img.get();
-  frame_2 = img.get();
-  frame_3 = img.get();
-  frame_4 = img.get();
-  frame_5 = img.get();
-
-  // apply effects to individual frames and add them to the gif animation
-
-  background(0);
-  applySortingDither(frame_1);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[0] * delta_factor;
-  new_brightness += brightness_delta[0] * delta_factor;
-
-  background(0);
-  applySortingDither(frame_2);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[1] * delta_factor;
-  new_brightness += brightness_delta[1] * delta_factor;
-
-  background(0);
-  applySortingDither(frame_3);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[2] * delta_factor;
-  new_brightness += brightness_delta[2] * delta_factor;
-
-  background(0);
-  applySortingDither(frame_4);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[3] * delta_factor;
-  new_brightness += brightness_delta[3] * delta_factor;
-
-  background(0);
-  applySortingDither(frame_5);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  gif.render(); // render gif when done
-
-}
-
-
-
-
-// create 5 frame animation using abstract dither effect stack
-function animateAbstractDither(img) {
-
-  setupGif(); // setup gif
-
-  // make source image copies
-
-  frame_1 = img.get();
-  frame_2 = img.get();
-  frame_3 = img.get();
-  frame_4 = img.get();
-  frame_5 = img.get();
-
-  // apply effects to individual frames and add them to the gif animation
-
-  background(0);
-  applyAbstractDither(frame_1);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[0] * delta_factor;
-  new_brightness += brightness_delta[0] * delta_factor;
-
-  background(0);
-  applyAbstractDither(frame_2);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[1] * delta_factor;
-  new_brightness += brightness_delta[1] * delta_factor;
-
-  background(0);
-  applyAbstractDither(frame_3);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[2] * delta_factor;
-  new_brightness += brightness_delta[2] * delta_factor;
-
-  background(0);
-  applyAbstractDither(frame_4);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[3] * delta_factor;
-  new_brightness += brightness_delta[3] * delta_factor;
-
-  background(0);
-  applyAbstractDither(frame_5);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  gif.render(); // render gif when done
-
-}
-
-
 
 
 // ASDFPixelSort_Color - rewritten from Java to JavaScript by @lukapiskorec

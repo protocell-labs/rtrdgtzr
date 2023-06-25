@@ -21,7 +21,7 @@ let sortLength, randomColor, d, mixPercentage, pixelColor, colorHex;
 let unsorted, sorted;
 let gif, canvas;
 let row, column;
-let source_theme_nr, source_themes, source_theme, source_themes_size, source_theme_weights, source_nr, image_path, source_name;
+let image_path;
 
 let effects_stack_type; // Type of effects workflow to be used as a number
 let effects_stack_names, effects_stack_name; // Type of effects workflow to be used as a string
@@ -63,57 +63,12 @@ let light_treshold; // Brightness treshold for the image when taking brightnessM
 let dark_treshold; // Brightness treshold for the image when taking brightnessMask
 let invert_mask; // Invert brightnessMask
 
-/*
-// Examples of parameters
-
-let source_themes = ['citizen', 'cityscape', 'covers', 'scenes'];
-let source_themes_size = [354, 290, 220, 46]; // 910 in total,  citizen 39%, cityscape 32%, covers 24%, scenes 5%
-let effects_stack_type = 1; // Type of effects workflow to be used
-let effects_stack_name = "Monochrome"; // Type of effects workflow to be used as a string
-let image_border = [100, 100]; // Width of the border in pixels, [76, 76]
-let frame_duration = 200; // In mms
-
-let blackValue = 15; // Pixels darker than this will not be sorted, max is 100
-let brigthnessValue = 50; // Value for sorting pixels according to brightness
-let whiteValue = 70; // Pixels lighter than this will not be sorted, max is 100
-let sorting_mode = 2; // Pixel sorting color mode, 0 -> black, 1 -> bright, 2 -> white
-let sorting_type = 1; // Pixel sorting type, 0 -> chaotic, 1 -> proper
-let sorting_order = 0; // Determines order of sorting, 0 -> column, 1 -> row, 2 -> column-row, 3 -> row-column (there are exceptions to this notation, see Abstract workflow)
-let color_noise_density = 5; // Density of color noise (0-100)
-let rand_color_bias_key = gene_pick_key(color_bias_palette); // JSON key for color noise bias parameters
-let color_noise_bias = [1, 0, 1]; // Array which skews the rgb color values of the noise using this factor (0-1)
-let color_noise_variation = 10000; // Variation of the color noise (10-10000)
-
-let stripe_width = 5; // Width of black stripes
-let stripe_offset = 1; // Offset of black stripes, note this cannot be bigger than stripe_width-1 !
-let invert_stripes = false; // Inverts the striped pattern
-
-let nr_of_levels = 1; // Number of color levels for FS dithering
-let contrast = 0.25; // Set image contrast - 0.0 is no change
-let new_brightness = 1.0; // Set image brightness - 1.0 is no change
-let dither_group = 0; // Number for the group of dither parameters to choose from
-let rand_dither_key = gene_pick_key(dither_params_json); // Get random key for dither error distribution parameters
-let dither_params = dither_params_json[rand_dither_key]; // Read error distribution parameters from a JSON fil
-let pix_scaling = 2.0; // Scales the size of pixels when applying effects
-let pix_scaling_dark = pix_scaling * 2;
-let layer_shift = 4; // Shift in x and y direction for every consecutive layer
-let tint_palette_key = 'blue'; // JSON key for tint palette colors
-let tint_palette = three_bit_palette['magenta']; // RGB array with values for tinting
-let tinting_mode = 0; // Type of tinting selected, 0 is always no tinting
-
-let mask_contrast = 0.0; // Contrast value for the image when taking brightnessMask
-let light_treshold = 80; // Brightness treshold for the image when taking brightnessMask
-let dark_treshold = 20; // Brightness treshold for the image when taking brightnessMask
-let invert_mask = true; // Invert brightnessMask
-*/
-
-
 
 
 
 function preload() {
 
-  image_border = [60, 60]; // width of the border in pixels, 900 + 100 = 1000 pix
+  image_border = [60, 60]; // width of the border in pixels
   frame_duration = 100; // in mms
   output_type = "png"; // "png", "gif"
 
@@ -124,29 +79,13 @@ function preload() {
   // 3 -> corrupted - pixel sorting + color dither
   // 4 -> lo-fi - abstract dither
 
+  effects_stack_names = ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"]; // type of effects workflow to be used as a string
   effects_stack_weights = [ [0, 20], [1, 20], [2, 20], [3, 20], [4, 20] ]; // these represent probabilities for choosing an effects stack number [element, probability]
   effects_stack_type = gene_weighted_choice(effects_stack_weights); // type of effects workflow to be used as a number, 0-4
   effects_stack_type = 3; // override for the type of effects workflow to be used as a number, 0-4
-  effects_stack_names = ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"]; // type of effects workflow to be used as a string
   effects_stack_name = effects_stack_names[effects_stack_type]; // type of effects workflow to be used as a string
 
-  // SELECTION OF SOURCE THEME
-  source_themes = ["citizen", "cityscape", "covers", "scenes"];
-  source_themes_size = [354, 290, 220, 46]; // 910 in total,  citizen 39%, cityscape 32%, covers 24%, scenes 5%
-  source_theme_weights = [ [0, 35], [1, 35], [2, 25], [3, 5] ]; // these represent probabilities for choosing a source theme number [element, probability]
-  source_theme_nr = gene_weighted_choice(source_theme_weights); // 0 -> citizen, 1 -> cityscape, 2 -> covers, 3 -> scenes
-  //source_theme_nr = 1; // override for the source theme
-
-  // EXCEPTIONS - these skew the choice probabilities from above
-  if (effects_stack_type == 4) {source_theme_nr = 0}; // Abstract dither effect stack works only with citizen theme
-
   // DEFINING THE PATH TO THE SOURCE IMAGE
-  source_theme = source_themes[source_theme_nr]; // 'citizen', 'cityscape', 'covers', 'scenes'
-  source_nr = int(random(source_themes_size[source_theme_nr])) + 1; // image number
-  //image_path = 'assets/midjourney/' + source_theme + '/' + source_theme + '_' + str(source_nr).padStart(3, '0') + '.png'; // path to source image like 'assets/midjourney/citizen/citizen_005.png'
-  
-  //source_name = 'retroid_1_105';
-  //image_path = 'assets/retroid_1/' + source_name + '.jpg';
   image_path = 'assets/jpg_thumbnail_test_nr03_10.png'
   input_img = loadImage(image_path);
 
@@ -155,28 +94,6 @@ function preload() {
 
 
 function setup() {
-
-  /*
-  // Effects which can be used - these are loaded from effects.js or sometimes from P5.min.js
-
-  input_img.resize(input_img.width / pix_scaling, 0); // Resize the image using smooth interpolation - 0 means image is scaled proportionally to the other parameter
-  input_img.resizeNN(input_img.width * pix_scaling, 0); // Resize the image using nearest-neighbour interpolation - 0 means image is scaled proportionally to the other parameter
-  grayscale(input_img, contrast); // Make image grayscale
-  makeStriped(input_img, stripe_step, invert_stripes); // Stripes the image with black bands
-  makeDithered(input_img, nr_of_levels, dither_params); // Apply Floyd-Steinberg dithering with custom error diffusion parameters
-  pixelSortColor(input_img, sorting_type, color_noise_density, color_noise_bias, color_noise_variation); // Apply color pixel sorting with color abberation
-  pixelSortRow(input_img, sorting_type, color_noise_density, color_noise_bias, color_noise_variation); // Apply color pixel sorting with color abberation
-  pixelSortColumn(input_img, sorting_type, color_noise_density, color_noise_bias, color_noise_variation); // Apply color pixel sorting with color abberation
-  brightnessMask(input_img, contrast, treshold, invert); // Make parts of the image transparent based on brightness (0-100)
-  tint(r, g, b); // Colorize the image using RGB values
-  flipHorizontal(input_img); // Flip image horizontally
-  applyMonochromeDither(input_img); // apply and draw monochrome dither effect stack
-  applyTintedDither(img); // apply and draw tinted dither effect stack
-  applyDitherSorting(input_img); // apply and draw color dither + pixel sorting effect stack
-  applySortingDither(input_img); // apply and draw pixel sorting + color dither effect stack
-  applyAbstractDither(input_img); // apply and draw abstract dither effect stack
-  */
-
 
   // ARTWORK GENERATION
 
@@ -219,15 +136,7 @@ function setup() {
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      if (output_type == "png") {
-        applyMonochromeDither(input_img); // apply and draw monochrome dither effect stack
-        const saveid = parseInt(Math.random()*10000000);
-        //saveCanvas(canvas, `retro_digitizer_${effects_stack_type}_${saveid}`, "png");
-      }
-
-      if (output_type == "gif") {
-        animateMonochromeDither(input_img); // make gif animation
-      }
+      generateOutput(input_img, applyMonochromeDither);
 
       break;
 
@@ -253,15 +162,7 @@ function setup() {
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      if (output_type == "png") {
-        applyTintedDither(input_img); // apply and draw tinted dither effect stack
-        const saveid = parseInt(Math.random()*10000000);
-        //saveCanvas(canvas, `retro_digitizer_${effects_stack_type}_${saveid}`, "png");
-      }
-
-      if (output_type == "gif") {
-        animateTintedDither(input_img); // make gif animation
-      }
+      generateOutput(input_img, applyTintedDither);
       
       break;
 
@@ -299,15 +200,8 @@ function setup() {
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      if (output_type == "png") {
-        applyDitherSorting(input_img); // apply and draw color dither + pixel sorting effect stack
-        const saveid = parseInt(Math.random()*10000000);
-        //saveCanvas(canvas, `retro_digitizer_${effects_stack_type}_${saveid}`, "png");
-      }
+      generateOutput(input_img, applyDitherSorting);
 
-      if (output_type == "gif") {
-        animateDitherSorting(input_img); // make gif animation
-      }
       break;
 
     case 3: // corrupted
@@ -343,15 +237,7 @@ function setup() {
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      if (output_type == "png") {
-        applySortingDither(input_img); // apply and draw pixel sorting + color dither effect stack
-        const saveid = parseInt(Math.random()*10000000);
-        //saveCanvas(canvas, `retro_digitizer_${effects_stack_type}_${saveid}`, "png");
-      }
-
-      if (output_type == "gif") {
-        animateSortingDither(input_img); // make gif animation
-      }
+      generateOutput(input_img, applySortingDither);
 
       break;
 
@@ -402,15 +288,7 @@ function setup() {
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      if (output_type == "png") {
-        applyAbstractDither(input_img); // apply and draw abstract dither effect stack
-        const saveid = parseInt(Math.random()*10000000);
-        //saveCanvas(canvas, `retro_digitizer_${effects_stack_type}_${saveid}`, "png");
-      }
-
-      if (output_type == "gif") {
-        animateAbstractDither(input_img); // make gif animation
-      }
+      generateOutput(input_img, applyAbstractDither);
 
       break;
 
@@ -425,11 +303,10 @@ function setup() {
 
   // Print some info to the console
 
-  print('Source theme: ', source_theme);
   print('Effect stack: ', effects_stack_name);
 
-  print('Dither error distribution 1: ', rand_dither_key_1, dither_params_1);
-  print('Dither error distribution 2: ', rand_dither_key_2, dither_params_2);
+  print('Dither error distribution 1: ', rand_dither_key_1);
+  print('Dither error distribution 2: ', rand_dither_key_2);
   print('Source image path: ', image_path);
 
   print('Sorting mode: ', sorting_mode);

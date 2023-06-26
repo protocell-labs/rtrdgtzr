@@ -16,7 +16,9 @@ R E T R O  D I G I T I Z E R  |  { p r o t o c e l l : l a b s }  |  2 0 2 3
 // Defining parameters
 
 let img, input_img, input_img_2, input_img_3;
-let frame_1, frame_2, frame_3, frame_4, frame_5;
+let frame_to_draw, frames;
+let buffer_width, buffer_height, buffer_frames;
+
 let sortLength, randomColor, d, mixPercentage, pixelColor, colorHex;
 let unsorted, sorted;
 let gif, canvas;
@@ -25,9 +27,11 @@ let image_path;
 
 let effects_stack_type; // Type of effects workflow to be used as a number
 let effects_stack_names, effects_stack_name; // Type of effects workflow to be used as a string
+let chosen_effect_function; // Function that applies the chosen effect stack
 let image_border; // Width of the border in pixels, [76, 76]
 let frame_duration; // In mms
-let output_type; // Type of output, "png", "gif"
+let frame_rate; // Number of frames per second, calculated as 1000/frame_duration
+let frame_counter; // Counts the frames for display in the browser
 
 let blackValue; // Pixels darker than this will not be sorted, max is 100
 let brigthnessValue; // Value for sorting pixels according to brightness
@@ -70,22 +74,21 @@ function preload() {
 
   image_border = [60, 60]; // width of the border in pixels
   frame_duration = 100; // in mms
-  output_type = "png"; // "png", "gif"
+  frame_rate = 1000/frame_duration;
+  frameRate(frame_rate); 
 
-  // SELECTION OF EFFECTS STACK
-  // 0 -> mono - monochrome dither
-  // 1 -> hi-fi - tinted dither
-  // 2 -> noisy - color dither + pixel sorting
-  // 3 -> corrupted - pixel sorting + color dither
-  // 4 -> lo-fi - abstract dither
-
+  /*
   effects_stack_names = ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"]; // type of effects workflow to be used as a string
   effects_stack_weights = [ [0, 20], [1, 20], [2, 20], [3, 20], [4, 20] ]; // these represent probabilities for choosing an effects stack number [element, probability]
   effects_stack_type = gene_weighted_choice(effects_stack_weights); // type of effects workflow to be used as a number, 0-4
   effects_stack_type = 3; // override for the type of effects workflow to be used as a number, 0-4
   effects_stack_name = effects_stack_names[effects_stack_type]; // type of effects workflow to be used as a string
+  */
+
+  effects_stack_name = $fx.getParam("effect_name");
 
   // DEFINING THE PATH TO THE SOURCE IMAGE
+
   image_path = 'assets/jpg_thumbnail_test_nr03_10.png'
   input_img = loadImage(image_path);
 
@@ -101,12 +104,13 @@ function setup() {
   canvas = createCanvas(input_img.width + image_border[0], input_img.height + image_border[1]);
   background(0); // set black background for all images
 
+  frame_counter = 0; // This will increment inside draw()
 
   // THE MAIN EFFECT STACK SWITCH
 
-  switch(effects_stack_type) {
+  switch(effects_stack_name) {
 
-    case 0: // mono
+    case "mono":
 
       // Custom stack params
       nr_of_levels = 1;
@@ -136,11 +140,12 @@ function setup() {
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      generateOutput(input_img, applyMonochromeDither);
+      chosen_effect_function = applyMonochromeDither;
+      animateEffectStack(input_img, chosen_effect_function, false);
 
       break;
 
-    case 1: // hi-fi
+    case "hi-fi":
 
       // Custom stack params
       nr_of_levels = 1;
@@ -162,12 +167,13 @@ function setup() {
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      generateOutput(input_img, applyTintedDither);
-      
+      chosen_effect_function = applyTintedDither;
+      animateEffectStack(input_img, chosen_effect_function, false);
+
       break;
 
 
-    case 2: // noisy
+    case "noisy":
 
       // Custom stack params
       blackValue = 10;
@@ -200,11 +206,12 @@ function setup() {
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      generateOutput(input_img, applyDitherSorting);
+      chosen_effect_function = applyDitherSorting;
+      animateEffectStack(input_img, chosen_effect_function, false);
 
       break;
 
-    case 3: // corrupted
+    case "corrupted":
 
       // Custom stack params
       blackValue = 10;
@@ -237,12 +244,13 @@ function setup() {
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      generateOutput(input_img, applySortingDither);
+      chosen_effect_function = applySortingDither;
+      animateEffectStack(input_img, chosen_effect_function, false);
 
       break;
 
 
-    case 4: // lo-fi
+    case "lo-fi": 
 
       // Custom stack params
       blackValue = 10;
@@ -288,7 +296,8 @@ function setup() {
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      generateOutput(input_img, applyAbstractDither);
+      chosen_effect_function = applyAbstractDither;
+      animateEffectStack(input_img, chosen_effect_function, false);
 
       break;
 
@@ -299,8 +308,6 @@ function setup() {
   }
 
   
-
-
   // Print some info to the console
 
   print('Effect stack: ', effects_stack_name);
@@ -316,7 +323,36 @@ function setup() {
   print('Tint palette: ', tint_palette_key);
   print('Color noise bias: ', rand_color_bias_key);
 
+  //copy(buffer_1, 0, 0, buffer_1.width, buffer_1.height, 0, 0, input_img.width + image_border[0], input_img.height + image_border[1])
+
 }
 
 
-// This code does not use function draw() {}
+function draw() {
+
+  background(0);
+
+  // decide which frame to draw - we will loop through all 5 frames repeatedly to imitate the gif animation
+  frame_to_draw = buffer_frames[frame_counter % 5];
+
+  // draw appropriate frame
+  copy(frame_to_draw, 0, 0, frame_to_draw.width, frame_to_draw.height, 0, 0, input_img.width + image_border[0], input_img.height + image_border[1])
+
+  // increment the frame counter
+  frame_counter++ 
+  
+}
+
+
+
+// triggers when a key is pressed
+function keyPressed() {
+
+  if (keyCode === 71) { // "g" - save gif
+    animateEffectStack(input_img, chosen_effect_function, true);
+
+  } else if (keyCode === 83) { // "s" - save png
+    const saveid = parseInt(Math.random()*10000000);
+    saveCanvas(canvas, `retro_digitizer_${effects_stack_name}_still_${saveid}`, "png");
+  }
+}

@@ -9,7 +9,7 @@
 function setupGif() {
     gif = new GIF({
         workers: 2,
-        quality: 10, //pixel sample interval, lower is better
+        quality: 10, // pixel sample interval, lower is better
         workerScript: 'libraries/gif.worker.js',
         width: input_img.width + image_border[0],
         height: input_img.height + image_border[1]
@@ -20,7 +20,7 @@ function setupGif() {
         print('Finished creating gif')
         rendering = false;
         window.open(URL.createObjectURL(blob));
-        saveAs(blob, `retro_digitizer_${effects_stack_type}_${uuid}.gif`);
+        saveAs(blob, `retro_digitizer_${effects_stack_name}_anim_${uuid}.gif`);
         setupGif();
     });
 }
@@ -266,72 +266,56 @@ function applyAbstractDither(img) {
 }
 
 
-// MAKE GIF ANIMATION
+// MAKE ANIMATION
 
 // create 5 frame animation using one of the effect stacks - function is passed as a parameter
-function animateEffectStack(img, effect_function) {
-
-  setupGif(); // setup gif
+// also triggers gif export when "g" is pressed by passing download = true
+function animateEffectStack(img, effect_function, download = false) {
+  // setup gif
+  if (download == true) {setupGif();}
 
   // make source image copies
+  frames = [];
+  for(let i = 0; i < 5; i++) {
+    let frame = img.get();
+    frames.push(frame);
+  }
 
-  frame_1 = img.get();
-  frame_2 = img.get();
-  frame_3 = img.get();
-  frame_4 = img.get();
-  frame_5 = img.get();
+  // make graphic buffers to store canvas copise for each frame
+  buffer_frames = [];
+  for(let i = 0; i < 5; i++) {
+    let buffer_frame = createGraphics(input_img.width + image_border[0], input_img.height + image_border[1]);
+    buffer_frames.push(buffer_frame);
+  }
+
+  buffer_width = input_img.width + image_border[0];
+  buffer_height = input_img.height + image_border[1];
+
+  // save original contrast and brightness so we can restore them later
+  let original_contrast = contrast;
+  let original_new_brightness = new_brightness;
 
   // apply effects to individual frames and add them to the gif animation
+  for(let i = 0; i < 5; i++) {
+    background(0);
+    // apply effect stack to canvas
+    effect_function(frames[i]);
+    // add frame to gif with canvas.elt which calls underlying HTML element
+    if (download == true) {gif.addFrame(canvas.elt, {delay: frame_duration, copy: true });}
+    // copy canvas to buffer object so it can be used later for display in draw()
+    buffer_frames[i].copy(canvas, 0, 0, input_img.width + image_border[0], input_img.height + image_border[1], 0, 0, buffer_width, buffer_height);
 
-  background(0);
-  effect_function(frame_1);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[0] * delta_factor;
-  new_brightness += brightness_delta[0] * delta_factor;
-
-  background(0);
-  effect_function(frame_2);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[1] * delta_factor;
-  new_brightness += brightness_delta[1] * delta_factor;
-
-  background(0);
-  effect_function(frame_3);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[2] * delta_factor;
-  new_brightness += brightness_delta[2] * delta_factor;
-
-  background(0);
-  effect_function(frame_4);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  contrast += contrast_delta[3] * delta_factor;
-  new_brightness += brightness_delta[3] * delta_factor;
-
-  background(0);
-  effect_function(frame_5);
-  gif.addFrame(canvas.elt, {delay: frame_duration, copy: true }); // add frame to gif with canvas.elt which calls underlying HTML element
-
-  gif.render(); // render gif when done
-
-}
-
-
-// GENERATE OUTPUT - PNG OR GIF
-
-function generateOutput(img, effect_function) {
-  if (output_type == "png") {
-    effect_function(input_img); // apply and draw monochrome dither effect stack
-    const saveid = parseInt(Math.random()*10000000);
-    //saveCanvas(canvas, `retro_digitizer_${effects_stack_type}_${saveid}`, "png");
+    // change contrast and brightness slightly to get a shimmering effect during animation
+    contrast += contrast_delta[0] * delta_factor;
+    new_brightness += brightness_delta[0] * delta_factor;
   }
 
-  if (output_type == "gif") {
-    animateEffectStack(input_img, effect_function); // make gif animation
-  }
+  // restoring values for contrast and brightness so they don't accumulate every time we save the gif animation
+  contrast = original_contrast;
+  new_brightness = original_new_brightness;
+
+  // render gif when done
+  if (download == true) {gif.render();}
 }
 
 

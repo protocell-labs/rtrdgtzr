@@ -156,22 +156,22 @@ let alphaSquaresToSignalMap = {};
 
 
 
-
+//////PRELOAD//////
 
 function preload() {
 
+  // GLTCHVRS PART WITH EFFECTS
+  /*
   image_border = [60, 60]; // width of the border in pixels
   frame_duration = 100; // in mms
   frame_rate = 1000/frame_duration;
   frameRate(frame_rate); 
 
-  /*
-  effects_stack_names = ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"]; // type of effects workflow to be used as a string
-  effects_stack_weights = [ [0, 20], [1, 20], [2, 20], [3, 20], [4, 20] ]; // these represent probabilities for choosing an effects stack number [element, probability]
-  effects_stack_type = gene_weighted_choice(effects_stack_weights); // type of effects workflow to be used as a number, 0-4
-  effects_stack_type = 3; // override for the type of effects workflow to be used as a number, 0-4
-  effects_stack_name = effects_stack_names[effects_stack_type]; // type of effects workflow to be used as a string
-  */
+  //effects_stack_names = ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"]; // type of effects workflow to be used as a string
+  //effects_stack_weights = [ [0, 20], [1, 20], [2, 20], [3, 20], [4, 20] ]; // these represent probabilities for choosing an effects stack number [element, probability]
+  //effects_stack_type = gene_weighted_choice(effects_stack_weights); // type of effects workflow to be used as a number, 0-4
+  //effects_stack_type = 3; // override for the type of effects workflow to be used as a number, 0-4
+  //effects_stack_name = effects_stack_names[effects_stack_type]; // type of effects workflow to be used as a string
 
   effects_stack_name = $fx.getParam("effect_name");
 
@@ -179,13 +179,22 @@ function preload() {
 
   image_path = 'assets/jpg_thumbnail_test_nr03_10.png'
   input_img = loadImage(image_path);
+  */
+  // END OF GLTCHVRS PART WITH EFFECTS
+
+
+
+  manaspace = loadFont('assets/manaspc.ttf');
 
 }
 
 
+//////SETUP//////
 
 function setup() {
 
+  // GLTCHVRS PART WITH EFFECTS
+  /*
   // ARTWORK GENERATION
 
   pixelDensity(1.0); // Need to fix this so the gif.js exports the correct size
@@ -259,7 +268,6 @@ function setup() {
       animateEffectStack(input_img, chosen_effect_function, false);
 
       break;
-
 
     case "noisy":
 
@@ -337,7 +345,6 @@ function setup() {
 
       break;
 
-
     case "lo-fi": 
 
       // Custom stack params
@@ -395,7 +402,6 @@ function setup() {
 
   }
 
-  
   // Print some info to the console
 
   print('Effect stack: ', effects_stack_name);
@@ -412,12 +418,46 @@ function setup() {
   print('Color noise bias: ', rand_color_bias_key);
 
   //copy(buffer_1, 0, 0, buffer_1.width, buffer_1.height, 0, 0, input_img.width + image_border[0], input_img.height + image_border[1])
+  */
+  // END OF GLTCHVRS PART WITH EFFECTS
+
+
+
+
+  canvas = createCanvas(canvas_dim[0], canvas_dim[1]);
+      
+  // change id of the canvas
+  select('canvas').id('retrodigitizer');
+  // move canvas to the middle of the browser window
+  select('canvas').position((windowWidth - width)/2, (windowHeight - height)/2);
+
+
+  frameRate(10);
+  frame_counter = 0; // this will increment inside draw()
+  frame_counter_after_drop = 0; // this will increment inside draw()
+
+  // DESERIALIZE AN INPUT IMAGE - if signal param is not empty, which means it was stored already before
+  if ($fx.getParam("signal").length != 0) {
+
+      // turn off showing the start and drop screens
+      start_screen = false;
+      drop_screen = false;
+
+      // store the signal param data into a new variable - this way we avoid the maxLength limit
+      signal = $fx.getParam("signal");
+
+  }
 
 }
 
 
+
+//////DRAW - MAIN ANIMATION LOOP//////
+
 function draw() {
 
+  // GLTCHVRS PART WITH EFFECTS
+  /*
   background(0);
 
   // decide which frame to draw - we will loop through all 5 frames repeatedly to imitate the gif animation
@@ -425,9 +465,64 @@ function draw() {
 
   // draw appropriate frame
   copy(frame_to_draw, 0, 0, frame_to_draw.width, frame_to_draw.height, 0, 0, input_img.width + image_border[0], input_img.height + image_border[1])
+  */
+  // END OF GLTCHVRS PART WITH EFFECTS
 
-  // increment the frame counter
+
+
+
+  // START SCREEN - will disappear when any key is pressed
+  if (start_screen) {
+
+      showStartScreen();
+  }
+
+
+  // DROP SCREEN - will disappear when the image is dropped onto the canvas
+  if (drop_screen) {
+
+      showDropScreen();
+
+      // DRAG AND DROP IMAGE
+      canvas.drop(gotFile, dropped); // callback to recieve the loaded file, callback triggered when files are dropped
+      canvas.dragOver(highlightDrop); // triggered when we drag a file over the canvas to drop it
+      canvas.dragLeave(unhighlightDrop); // triggered when we finish dragging the file over the canvas to drop it
+  }
+
+  // SHOW DROPED IMAGE - if signal is not empty, draw the image on the screen
+  if (signal.length != 0) {
+      
+      // deserializes the signal and draws the image every 5th frame
+      if (frame_counter % 5 == 0) {
+          // standard background so we see transparent squares
+          background(0, 0, 255); 
+          deserializeSignal(signal);
+      }
+
+      if (!display_signal) {
+          // shows signal and control info as text on the canvas
+          showSignalInfo();
+          showControlInfo();
+      } else {
+          // show signal characters as text on the canvas
+          showSignalOnScreen();
+      }
+  }
+
+
+  // AFTER IMAGE DROP TEXT - execute only if the dropped_image is loaded, will disappear after a short time
+  if ((thumbnail) && (thumbnail_ready) && (frame_counter_after_drop < 50)) {
+
+      // shows load info as text on the canvas
+      showAfterImageLoad();
+
+      // increment the frame counter - this will make the loading text disappear
+      frame_counter_after_drop++
+  }
+
+
+
+  // increment the frame counter - this controls the animations
   frame_counter++ 
-  
 }
 

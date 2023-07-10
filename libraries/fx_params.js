@@ -3,13 +3,72 @@
 
 $fx.params([
     {
+      id: "signal",
+      name: "Signal",
+      type: "string",
+      default: "",
+      update: "code-driven",
+      options: {
+        minLength: 0,
+        maxLength: 1900, // 1900
+      }
+    },
+    {
+      id: "format",
+      name: "Format",
+      type: "select",
+      default: "square",
+      update: "code-driven",
+      options: {
+        options: ["square", "portrait", "landscape"],
+      }
+    },
+    {
+      id: "quality",
+      name: "Quality",
+      type: "number",
+      default: 10,
+      update: "code-driven",
+      options: {
+        min: 1,
+        max: 10,
+        step: 1,
+      },
+    },
+    {
+      id: "quant_f",
+      name: "Quantization",
+      type: "number",
+      default: 1,
+      update: "code-driven",
+      options: {
+        min: 1,
+        max: 10,
+        step: 1,
+      },
+    },
+    {
       id: "effect_name",
       name: "Effect stack",
       type: "select",
       default: "corrupted",
+      update: "page-reload",
       options: {
         options: ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"],
       }
     },
   ]);
 
+
+// maximum length for a string param on fxhash (July 2023)
+
+// 1. maxLength: 3900 in fxlens (Chrome)
+
+// 2. maxLength: 1900 while minting the token on fxhash
+//    413 ERROR - The request could not be satisfied.
+
+// 3. maxLength: 900 is the max in fxhash sandbox
+//    Uncaught (in promise) TypeError: Failed to construct 'URL': Invalid URL at worker.js:14:15
+
+// who? - 8k character limit on urls served via cloudfront - that's consistent with point 2. for you, each string param character gets encoded as 4 hex url param characters
+// ciphrd - cloudfront has a 20480 bytes request limit (each string character is 2 bytes - 4 hex values, 16 bits)

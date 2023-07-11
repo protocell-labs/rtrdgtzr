@@ -1,63 +1,63 @@
-//////FXHASH PARAMS//////
+////// FXHASH PARAMS //////
 // we can use $fx.getParam("param_id") to get the selected param in the code
 
 $fx.params([
-    {
-      id: "signal",
-      name: "Signal",
-      type: "string",
-      default: "",
-      update: "code-driven",
-      options: {
-        minLength: 0,
-        maxLength: 1900, // 1900
-      }
+  {
+    id: "signal",
+    name: "Signal",
+    type: "string",
+    default: "",
+    update: "code-driven",
+    options: {
+      minLength: 0,
+      maxLength: 1900, // 1900
+    }
+  },
+  {
+    id: "format",
+    name: "Format",
+    type: "select",
+    default: "square",
+    update: "code-driven",
+    options: {
+      options: ["square", "portrait", "landscape"],
+    }
+  },
+  {
+    id: "quality",
+    name: "Quality",
+    type: "number",
+    default: 10,
+    update: "code-driven",
+    options: {
+      min: 1,
+      max: 10,
+      step: 1,
     },
-    {
-      id: "format",
-      name: "Format",
-      type: "select",
-      default: "square",
-      update: "code-driven",
-      options: {
-        options: ["square", "portrait", "landscape"],
-      }
+  },
+  {
+    id: "quant_f",
+    name: "Quantization",
+    type: "number",
+    default: 1,
+    update: "code-driven",
+    options: {
+      min: 1,
+      max: 10,
+      step: 1,
     },
-    {
-      id: "quality",
-      name: "Quality",
-      type: "number",
-      default: 10,
-      update: "code-driven",
-      options: {
-        min: 1,
-        max: 10,
-        step: 1,
-      },
-    },
-    {
-      id: "quant_f",
-      name: "Quantization",
-      type: "number",
-      default: 1,
-      update: "code-driven",
-      options: {
-        min: 1,
-        max: 10,
-        step: 1,
-      },
-    },
-    {
-      id: "effect_name",
-      name: "Effect stack",
-      type: "select",
-      default: "corrupted",
-      update: "page-reload",
-      options: {
-        options: ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"],
-      }
-    },
-  ]);
+  },
+  {
+    id: "effect_name",
+    name: "Effect stack",
+    type: "select",
+    default: "corrupted",
+    update: "page-reload",
+    options: {
+      options: ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"],
+    }
+  },
+]);
 
 
 // maximum length for a string param on fxhash (July 2023)

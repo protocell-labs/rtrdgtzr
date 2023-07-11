@@ -1,4 +1,4 @@
-// Collection of json files for storing parameters and asset data
+////// COLLECTION OF JSON FILES FOR STORING PARAMETERS AND ASSET DATA //////
 // by @LukaPiskorec
 
 

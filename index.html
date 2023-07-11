@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>retro digitizer</title>
   <meta charset="utf-8">
@@ -8,7 +9,7 @@
     //---- do not edit the following code (you can indent as you wish)
     let search = new URLSearchParams(window.location.search)
     let alphabet = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
-    let b58dec = str=>[...str].reduce((p,c)=>p*alphabet.length+alphabet.indexOf(c)|0, 0)
+    let b58dec = str => [...str].reduce((p, c) => p * alphabet.length + alphabet.indexOf(c) | 0, 0)
     let sfc32 = (a, b, c, d) => {
       return () => {
         a |= 0; b |= 0; c |= 0; d |= 0
@@ -21,8 +22,8 @@
         return (t >>> 0) / 4294967296
       }
     }
-    let rndHash = (n) => Array(n).fill(0).map(_=>alphabet[(Math.random()*alphabet.length)|0]).join("")
-    let matcher = (str, start) => str.slice(start).match(new RegExp(".{"+((str.length-start)>>2)+"}","g")).map(b58dec)
+    let rndHash = (n) => Array(n).fill(0).map(_ => alphabet[(Math.random() * alphabet.length) | 0]).join("")
+    let matcher = (str, start) => str.slice(start).match(new RegExp(".{" + ((str.length - start) >> 2) + "}", "g")).map(b58dec)
     // make fxrand from hash
     var fxhash = search.get("fxhash") || "oo" + rndHash(49)
     var fxrand = sfc32(...matcher(fxhash, 2))
@@ -48,7 +49,7 @@
         if (!isThrottled) {
           func.apply(this, args)
           isThrottled = true
-          
+
           setTimeout(() => {
             isThrottled = false
           }, delay)
@@ -153,11 +154,11 @@
           do {
             random = BigInt(
               "0b" +
-                Array.from(
-                  crypto.getRandomValues(new Uint8Array(Math.ceil(bits / 8)))
-                )
-                  .map((b) => b.toString(2).padStart(8, "0"))
-                  .join("")
+              Array.from(
+                crypto.getRandomValues(new Uint8Array(Math.ceil(bits / 8)))
+              )
+                .map((b) => b.toString(2).padStart(8, "0"))
+                .join("")
             )
           } while (random > range)
           return random + min
@@ -166,7 +167,7 @@
       boolean: {
         serialize: (input) =>
           (typeof input === "boolean" && input) ||
-          (typeof input === "string" && input === "true")
+            (typeof input === "string" && input === "true")
             ? "01"
             : "00",
         // if value is "00" -> 0 -> false, otherwise we consider it's 1
@@ -413,17 +414,17 @@
       },
       _emitParams: function (newRawValues) {
         const constrainedValues = Object.keys(newRawValues).reduce(
-            (acc, paramId) => {
-              acc[paramId] = processParam(
-                paramId,
-                newRawValues[paramId],
-                this._params,
-                "constrain"
-              )
-              return acc
-            },
-            {}
-          )
+          (acc, paramId) => {
+            acc[paramId] = processParam(
+              paramId,
+              newRawValues[paramId],
+              this._params,
+              "constrain"
+            )
+            return acc
+          },
+          {}
+        )
         this._receiveUpdateParams(constrainedValues, () => {
           parent.postMessage(
             {
@@ -445,7 +446,7 @@
 
       preview: fxpreview,
       isPreview: isFxpreview,
-      params: function(definition) {
+      params: function (definition) {
         this._params = definition
         this._rawValues = deserializeParams(initialInputBytes, definition)
         this._paramValues = processParams(
@@ -455,42 +456,42 @@
         )
         this._updateInputBytes()
       },
-      features: function(features) {
+      features: function (features) {
         this._features = features
       },
-      getFeature: function(id) {
+      getFeature: function (id) {
         return this._features[id]
       },
-      getFeatures: function() {
+      getFeatures: function () {
         return this._features
       },
-      getParam: function(id) {
+      getParam: function (id) {
         return this._paramValues[id]
       },
-      getParams: function() {
+      getParams: function () {
         return this._paramValues
       },
-      getRawParam: function(id) {
+      getRawParam: function (id) {
         return this._rawValues[id]
       },
-      getRawParams: function() {
+      getRawParams: function () {
         return this._rawValues
       },
-      getRandomParam: function(id) {
+      getRandomParam: function (id) {
         const definition = this._params.find(d => d.id === id)
         const processor = processors[definition.type]
         return processor.random(definition)
       },
-      getDefinitions: function() {
+      getDefinitions: function () {
         return this._params
       },
-      stringifyParams: function(params) {
+      stringifyParams: function (params) {
         return JSON.stringify(
           params || this._rawValues,
           (key, value) => {
             if (typeof value === "bigint") return value.toString()
             return value
-          }, 
+          },
           2,
         )
       },
@@ -548,7 +549,7 @@
       if (event.data === "fxhash_getInfo") {
         parent.postMessage({
           id: "fxhash_getInfo",
-          data: { 
+          data: {
             version: window.$fx._version,
             hash: window.$fx.hash,
             iteration: window.$fx.iteration,
@@ -593,4 +594,5 @@
 <body>
   <script language="javascript" type="text/javascript" src="sketch.js"></script>
 </body>
+
 </html>

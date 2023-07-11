@@ -69,7 +69,7 @@ let invert_mask; // Invert brightnessMask
 
 
 
-//////IMPORTED FROM JPG-PARAMS//////
+////// IMPORTED FROM JPG-PARAMS //////
 
 // Discrete Cosine Transform code based on Matthias Liszt's "Discrete Cosine Transform On Images" repo
 // from: https://github.com/MatthiasLiszt/discreteCosineTransformOnImages/blob/master/dct2d.js
@@ -80,9 +80,9 @@ let thumbnail_square;
 
 let format = $fx.getParam("format"); // get format string from params
 let squares_nr; // number of image squares, each one is 8x8 pixels
-if (format == "portrait") {squares_nr = [16, 25];} // portrait proportion
-else if (format == "landscape") {squares_nr = [25, 16];} // landscape proportion
-else {squares_nr = [20, 20];} // square proportion
+if (format == "portrait") { squares_nr = [16, 25]; } // portrait proportion
+else if (format == "landscape") { squares_nr = [25, 16]; } // landscape proportion
+else { squares_nr = [20, 20]; } // square proportion
 
 let w_h_ratio = squares_nr[0] / squares_nr[1];
 let target_dim = [squares_nr[0] * 8, squares_nr[1] * 8]; // target dimensions for the source image in pixels
@@ -121,7 +121,7 @@ const jpeg_lum_quant_table = [[16, 11, 10, 16, 24,  40,  51,  61],
                               [24, 35, 55, 64, 81,  104, 113, 92],
                               [49, 64, 78, 87, 103, 121, 120, 101],
                               [72, 92, 95, 98, 112, 100, 103, 99]];
-      
+
 
 // calculate the table for quantization levels
 const quant_levels_table = calculateQuantizationLevels(jpeg_lum_quant_table, 2040, 2); // quant_table, coefficients_delta, buffer
@@ -156,7 +156,9 @@ let alphaSquaresToSignalMap = {};
 
 
 
-//////PRELOAD//////
+
+////// PRELOAD //////
+
 
 function preload() {
 
@@ -189,7 +191,10 @@ function preload() {
 }
 
 
-//////SETUP//////
+
+
+////// SETUP //////
+
 
 function setup() {
 
@@ -425,11 +430,11 @@ function setup() {
 
 
   canvas = createCanvas(canvas_dim[0], canvas_dim[1]);
-      
+
   // change id of the canvas
   select('canvas').id('retrodigitizer');
   // move canvas to the middle of the browser window
-  select('canvas').position((windowWidth - width)/2, (windowHeight - height)/2);
+  select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2);
 
 
   frameRate(10);
@@ -439,12 +444,12 @@ function setup() {
   // DESERIALIZE AN INPUT IMAGE - if signal param is not empty, which means it was stored already before
   if ($fx.getParam("signal").length != 0) {
 
-      // turn off showing the start and drop screens
-      start_screen = false;
-      drop_screen = false;
+    // turn off showing the start and drop screens
+    start_screen = false;
+    drop_screen = false;
 
-      // store the signal param data into a new variable - this way we avoid the maxLength limit
-      signal = $fx.getParam("signal");
+    // store the signal param data into a new variable - this way we avoid the maxLength limit
+    signal = $fx.getParam("signal");
 
   }
 
@@ -452,7 +457,9 @@ function setup() {
 
 
 
-//////DRAW - MAIN ANIMATION LOOP//////
+
+////// DRAW - MAIN ANIMATION LOOP //////
+
 
 function draw() {
 
@@ -474,55 +481,55 @@ function draw() {
   // START SCREEN - will disappear when any key is pressed
   if (start_screen) {
 
-      showStartScreen();
+    showStartScreen();
   }
 
 
   // DROP SCREEN - will disappear when the image is dropped onto the canvas
   if (drop_screen) {
 
-      showDropScreen();
+    showDropScreen();
 
-      // DRAG AND DROP IMAGE
-      canvas.drop(gotFile, dropped); // callback to recieve the loaded file, callback triggered when files are dropped
-      canvas.dragOver(highlightDrop); // triggered when we drag a file over the canvas to drop it
-      canvas.dragLeave(unhighlightDrop); // triggered when we finish dragging the file over the canvas to drop it
+    // DRAG AND DROP IMAGE
+    canvas.drop(gotFile, dropped); // callback to recieve the loaded file, callback triggered when files are dropped
+    canvas.dragOver(highlightDrop); // triggered when we drag a file over the canvas to drop it
+    canvas.dragLeave(unhighlightDrop); // triggered when we finish dragging the file over the canvas to drop it
   }
 
   // SHOW DROPED IMAGE - if signal is not empty, draw the image on the screen
   if (signal.length != 0) {
-      
-      // deserializes the signal and draws the image every 5th frame
-      if (frame_counter % 5 == 0) {
-          // standard background so we see transparent squares
-          background(0, 0, 255); 
-          deserializeSignal(signal);
-      }
 
-      if (!display_signal) {
-          // shows signal and control info as text on the canvas
-          showSignalInfo();
-          showControlInfo();
-      } else {
-          // show signal characters as text on the canvas
-          showSignalOnScreen();
-      }
+    // deserializes the signal and draws the image every 5th frame
+    if (frame_counter % 5 == 0) {
+      // standard background so we see transparent squares
+      background(0, 0, 255);
+      deserializeSignal(signal);
+    }
+
+    if (!display_signal) {
+      // shows signal and control info as text on the canvas
+      showSignalInfo();
+      showControlInfo();
+    } else {
+      // show signal characters as text on the canvas
+      showSignalOnScreen();
+    }
   }
 
 
   // AFTER IMAGE DROP TEXT - execute only if the dropped_image is loaded, will disappear after a short time
   if ((thumbnail) && (thumbnail_ready) && (frame_counter_after_drop < 50)) {
 
-      // shows load info as text on the canvas
-      showAfterImageLoad();
+    // shows load info as text on the canvas
+    showAfterImageLoad();
 
-      // increment the frame counter - this will make the loading text disappear
-      frame_counter_after_drop++
+    // increment the frame counter - this will make the loading text disappear
+    frame_counter_after_drop++
   }
 
 
 
   // increment the frame counter - this controls the animations
-  frame_counter++ 
+  frame_counter++
 }
 

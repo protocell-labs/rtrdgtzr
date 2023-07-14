@@ -19,6 +19,7 @@ function setupGif() {
   });
 
   const uuid = parseInt(Math.random() * 10000000);
+
   gif.on('finished', function (blob) {
     print('Finished creating gif')
     rendering = false;
@@ -32,6 +33,197 @@ function setupGif() {
 
 
 ////// EFFECT STACKS //////
+
+
+// sets global data for the effect stack
+function setEffectData(effects_stack_name) {
+
+  switch(effects_stack_name) {
+
+    case "mono":
+
+      nr_of_levels = 1;
+      contrast = 0.15;
+
+      rand_dither_key_1 = gene_pick_key(dither_params_json);
+      rand_dither_key_2 = gene_pick_key(extreme_dither_params_json);
+      rand_dither_key_3 = gene_pick_key(dither_params_json);
+
+      dither_params_1 = dither_params_json[rand_dither_key_1];
+      dither_params_2 = extreme_dither_params_json[rand_dither_key_2];
+      dither_params_3 = dither_params_json[rand_dither_key_3];
+
+      pix_scaling = 2.0;
+      layer_shift = 4;
+      mask_contrast = 0.0;
+      dark_treshold = 20;
+      light_treshold = 80;
+      invert_mask = false;
+      tint_palette_key = gene_pick_key(three_bit_palette_reduced);
+      tint_palette = three_bit_palette_reduced[tint_palette_key];
+      // if tint color is white or green (these are very bright) then the size of dither pixels in darkest regions is smallest possible
+      pix_scaling_dark = (tint_palette_key == 'white') || (tint_palette_key == 'green') ? 1.0 : pix_scaling * 2;
+
+      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
+      delta_factor = 0.5; // scaling animation effects
+      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
+      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
+
+      chosen_effect_function = applyMonochromeDither;
+
+      break;
+
+    case "hi-fi":
+
+      nr_of_levels = 1;
+      contrast = 0.25;
+      rand_dither_key_1 = gene_pick_key(dither_params_json);
+      rand_dither_key_2 = gene_pick_key(dither_params_json);
+      dither_params_1 = dither_params_json[rand_dither_key_1];
+      dither_params_2 = dither_params_json[rand_dither_key_2];
+      pix_scaling = 2.0;
+      layer_shift = 4;
+      mask_contrast = 0.25;
+      light_treshold = 50;
+      invert_mask = false;
+      tint_palette_key = gene_pick_key(three_bit_palette);
+      tint_palette = three_bit_palette[tint_palette_key];
+
+      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
+      delta_factor = 0.5; // scaling animation effects
+      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
+      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
+
+      chosen_effect_function = applyTintedDither;
+
+      break;
+
+    case "noisy":
+
+      blackValue = 10;
+      brigthnessValue = 50;
+      whiteValue = 70;
+
+      sorting_mode = gene_rand_int(0, 3); // 0, 1, 2
+      sorting_type = gene_rand_int(0, 2); // 0, 1
+      sorting_order = gene_rand_int(0, 4); // 0, 1, 2, 3
+      color_noise_density = 5;
+      rand_color_bias_key = gene_pick_key(color_bias_palette);
+      color_noise_bias = color_bias_palette[rand_color_bias_key];
+      color_noise_variation = 10000;
+
+      nr_of_levels = 1;
+      contrast = 0.15;
+      rand_dither_key_1 = gene_pick_key(dither_params_json);
+      rand_dither_key_2 = gene_pick_key(dither_params_json);
+      dither_params_1 = dither_params_json[rand_dither_key_1];
+      dither_params_2 = dither_params_json[rand_dither_key_2];
+      pix_scaling = 2.0;
+      layer_shift = 4;
+      mask_contrast = 0.25;
+      light_treshold = 50;
+      invert_mask = false;
+      tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
+
+      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
+      delta_factor = 0.5; // scaling animation effects
+      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
+      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
+
+      chosen_effect_function = applyDitherSorting;
+
+      break;
+
+    case "corrupted":
+
+      blackValue = 10;
+      brigthnessValue = 50;
+      whiteValue = 70;
+
+      sorting_mode = gene_rand_int(0, 3); // 0, 1, 2
+      sorting_type = gene_rand_int(0, 2); // 0, 1
+      sorting_order = gene_rand_int(0, 4); // 0, 1, 2, 3
+      color_noise_density = 5;
+      rand_color_bias_key = gene_pick_key(color_bias_palette);
+      color_noise_bias = color_bias_palette[rand_color_bias_key];
+      color_noise_variation = 10000; //10000
+
+      nr_of_levels = 1;
+      contrast = 0.15; // 15
+      rand_dither_key_1 = gene_pick_key(dither_params_json);
+      rand_dither_key_2 = gene_pick_key(dither_params_json);
+      dither_params_1 = dither_params_json[rand_dither_key_1];
+      dither_params_2 = dither_params_json[rand_dither_key_2];
+      pix_scaling = 2.0;
+      layer_shift = 4;
+      mask_contrast = 0.25;
+      light_treshold = 50;
+      invert_mask = false;
+      tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
+
+      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
+      delta_factor = 0.5; // scaling animation effects
+      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
+      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
+
+      chosen_effect_function = applySortingDither;
+
+      break;
+
+    case "lo-fi": 
+
+      blackValue = 10;
+      brigthnessValue = 50;
+      whiteValue = 70;
+
+      sorting_mode = 2; // this mode works best for this workflow
+      sorting_type = gene_rand_int(0, 2); // 0, 1
+      sorting_order = gene_rand_int(0, 3); // 0, 1, 2
+      color_noise_density = 5;
+      rand_color_bias_key = gene_pick_key(color_bias_palette);
+      color_noise_bias = color_bias_palette[rand_color_bias_key];
+      color_noise_variation = 10000;
+
+      nr_of_levels = 1;
+      contrast = 0.25;
+
+      dither_group_weights = [ [0, 75], [1, 25] ]; // these represent probabilities for choosing a dither group number [element, probability]
+      dither_group = gene_weighted_choice(dither_group_weights); // type of effects workflow to be used as a number, 0-4
+
+      switch(dither_group) {
+        case 0: // smaller pixels, less abstract, common
+          rand_dither_key_1 = gene_pick_key(dither_params_json);
+          dither_params_1 = dither_params_json[rand_dither_key_1];
+          break;
+        case 1: // larger pixels, more abstract, rare
+          rand_dither_key_1 = gene_pick_key(extreme_dither_params_json);
+          dither_params_1 = extreme_dither_params_json[rand_dither_key_1];
+          break;
+        default:
+          break;
+      }
+
+      pix_scaling = dither_group == 0 ? 8.0 : 16.0; // larger dither pixels for extreme dither parameters
+      layer_shift = 4;
+      mask_contrast = 0.25;
+      light_treshold = 50;
+      invert_mask = false;
+      tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
+
+      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
+      delta_factor = 0.05; // scaling animation effects
+      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
+      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
+
+      chosen_effect_function = applyAbstractDither;
+
+      break;
+
+    default:
+      break;
+
+  }
+}
 
 
 // apply effect stack "mono"
@@ -271,9 +463,9 @@ function applyAbstractDither(img) {
 }
 
 
-// create 5 frame animation using one of the effect stacks - function is passed as a parameter
+// create 5 frame animation using one of the effect stacks
 // also triggers gif export when "g" is pressed by passing download = true
-function animateEffectStack(img, effect_function, download = false) {
+function animateEffectStack(img, download = false) {
   // setup gif
   if (download == true) { setupGif(); }
 
@@ -284,7 +476,7 @@ function animateEffectStack(img, effect_function, download = false) {
     frames.push(frame);
   }
 
-  // make graphic buffers to store canvas copise for each frame
+  // make graphic buffers to store canvas copies for each frame
   buffer_frames = [];
   for (let i = 0; i < 5; i++) {
     let buffer_frame = createGraphics(input_img.width + image_border[0], input_img.height + image_border[1]);
@@ -302,7 +494,7 @@ function animateEffectStack(img, effect_function, download = false) {
   for (let i = 0; i < 5; i++) {
     background(0);
     // apply effect stack to canvas
-    effect_function(frames[i]);
+    chosen_effect_function(frames[i]);
     // add frame to gif with canvas.elt which calls underlying HTML element
     if (download == true) { gif.addFrame(canvas.elt, { delay: frame_duration, copy: true }); }
     // copy canvas to buffer object so it can be used later for display in draw()
@@ -1770,6 +1962,60 @@ function deserializeSignal(signal) {
 }
 
 
+// deserializes and draws the image from the signal string param
+function deserializeSignalToImage(signal) {
+
+  let buffer_frame = createGraphics(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
+  buffer_frame.background(0);
+
+  buffer_width = canvas_dim[0] + image_border[0];
+  buffer_height = canvas_dim[1] + image_border[1];
+
+  // serialized signal will be compressed and needs to be decompressed before deserialization
+  signal = decompressSignal(signal, repeatingBufferChars, repeatingAlphaChars);
+
+  let square_counter = 0;
+  for (let i = 0; i < squares_nr[0]; i++) {
+    for (let j = 0; j < squares_nr[1]; j++) {
+
+      let start_idx = square_counter * quality;
+      let end_idx = start_idx + quality;
+      let coeff_string = signal.substring(start_idx, end_idx);
+
+      [alpha_on, coefficients] = deserializeCoefficients(coeff_string, charToCoeffMap, bufferChar, alphaChar);
+
+      // if alpha_on == false, draw the square on canvas, otherwise it will be skipped
+      if (!alpha_on) {
+        coefficients = dequantizeCoefficients(coefficients, jpeg_lum_quant_table, quant_f);
+        pixelvalues = dcTransformInverse(coefficients);
+
+        // function draw_data(pixelvalues, pixel_dim, offset_x, offset_y, offset_rgb)
+
+        buffer_frame.noStroke();
+        buffer_frame.rectMode(CORNER);
+      
+        let pixel_dim = thumbnail_scale;
+        let offset_x = i * 8 * thumbnail_scale;
+        let offset_y = j * 8 * thumbnail_scale;
+
+        for (let n = 0; n < pixelvalues.length; n++) {
+          for (let m = 0; m < pixelvalues[0].length; m++) {
+            buffer_frame.fill(pixelvalues[n][m], pixelvalues[n][m], pixelvalues[n][m]);
+            buffer_frame.rect(n * pixel_dim + offset_x, m * pixel_dim + offset_y, pixel_dim, pixel_dim);
+          }
+        }
+
+        //draw_data(pixelvalues, thumbnail_scale, i * 8 * thumbnail_scale, j * 8 * thumbnail_scale, offset_rgb); // pixels, pixel dim, offset x, offset y, offset_rgb
+      }
+
+      square_counter++
+    }
+  }
+
+  return buffer_frame;
+}
+
+
 // serializes the image and returns the signal string param, updates all params
 function serializeSignal(thumbnail) {
   // characters for the image coefficients will be stored here
@@ -2018,7 +2264,7 @@ function keyPressed() {
 
   } else if (keyCode === 71) { // "g" - save gif
 
-    animateEffectStack(input_img, chosen_effect_function, true);
+    animateEffectStack(input_img, true);
 
   } else if (keyCode === 83) { // "s" - save png
 

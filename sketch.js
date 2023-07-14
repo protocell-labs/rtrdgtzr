@@ -1,15 +1,25 @@
 /*
-    ____  ________________  ____                                
-   / __ \/ ____/_  __/ __ \/ __ \                               
-  / /_/ / __/   / / / /_/ / / / /                               
- / _, _/ /___  / / / _, _/ /_/ /                                
-/_/ |_/_____/ /_/_/_/_|_|\____/___________________   __________ 
-              / __ \/  _/ ____/  _/_  __/  _/__  /  / ____/ __ \
-             / / / // // / __ / /  / /  / /   / /  / __/ / /_/ /
-            / /_/ // // /_/ // /  / / _/ /   / /__/ /___/ _, _/ 
-           /_____/___/\____/___/ /_/ /___/  /____/_____/_/ |_|  
-                                                                                                                  
-R E T R O  D I G I T I Z E R  |  { p r o t o c e l l : l a b s }  |  2 0 2 3
+
+ ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+ ::::::::::::::'########::'########:'########:'########:::'#######:::::::::::::::
+ :::::::::::::: ##.... ##: ##.....::... ##..:: ##.... ##:'##.... ##::::::::::::::
+ :::::::::::::: ##:::: ##: ##:::::::::: ##:::: ##:::: ##: ##:::: ##::::::::::::::
+ :::::::::::::: ########:: ######:::::: ##:::: ########:: ##:::: ##::::::::::::::
+ :::::::::::::: ##.. ##::: ##...::::::: ##:::: ##.. ##::: ##:::: ##::::::::::::::
+ :::::::::::::: ##::. ##:: ##:::::::::: ##:::: ##::. ##:: ##:::: ##::::::::::::::
+ :::::::::::::: ##:::. ##: ########:::: ##:::: ##:::. ##:. #######:::::::::::::::
+ ::::::::::::::..:::::..::........:::::..:::::..:::::..:::.......::::::::::::::::
+'########::'####::'######:::'####:'########:'####:'########:'########:'########::
+ ##.... ##:. ##::'##... ##::. ##::... ##..::. ##::..... ##:: ##.....:: ##.... ##:
+ ##:::: ##:: ##:: ##:::..:::: ##::::: ##::::: ##:::::: ##::: ##::::::: ##:::: ##:
+ ##:::: ##:: ##:: ##::'####:: ##::::: ##::::: ##::::: ##:::: ######::: ########::
+ ##:::: ##:: ##:: ##::: ##::: ##::::: ##::::: ##:::: ##::::: ##...:::: ##.. ##:::
+ ##:::: ##:: ##:: ##::: ##::: ##::::: ##::::: ##::: ##:::::: ##::::::: ##::. ##::
+ ########::'####:. ######:::'####:::: ##::::'####: ########: ########: ##:::. ##:
+........:::....:::......::::....:::::..:::::....::........::........::..:::::..::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+  r e t r o  d i g i t i z e r  |  { p r o t o c e l l : l a b s }  |  2 0 2 3   
 
 */
 
@@ -26,7 +36,10 @@ let row, column;
 let image_path;
 
 let effects_stack_type; // Type of effects workflow to be used as a number
-let effects_stack_names, effects_stack_name; // Type of effects workflow to be used as a string
+let effects_stack_names; // Type of effects workflow to be used as a string
+
+let effects_stack_name = $fx.getParam("effect_name"); // type of effects workflow to be used as a string
+
 let chosen_effect_function; // Function that applies the chosen effect stack
 let image_border; // Width of the border in pixels, [76, 76]
 let frame_duration; // In mms
@@ -157,35 +170,13 @@ let alphaSquaresToSignalMap = {};
 
 
 
+
 ////// PRELOAD //////
 
 
 function preload() {
 
-  // GLTCHVRS PART WITH EFFECTS
-  /*
-  image_border = [60, 60]; // width of the border in pixels
-  frame_duration = 100; // in mms
-  frame_rate = 1000/frame_duration;
-  frameRate(frame_rate); 
-
-  //effects_stack_names = ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"]; // type of effects workflow to be used as a string
-  //effects_stack_weights = [ [0, 20], [1, 20], [2, 20], [3, 20], [4, 20] ]; // these represent probabilities for choosing an effects stack number [element, probability]
-  //effects_stack_type = gene_weighted_choice(effects_stack_weights); // type of effects workflow to be used as a number, 0-4
-  //effects_stack_type = 3; // override for the type of effects workflow to be used as a number, 0-4
-  //effects_stack_name = effects_stack_names[effects_stack_type]; // type of effects workflow to be used as a string
-
-  effects_stack_name = $fx.getParam("effect_name");
-
-  // DEFINING THE PATH TO THE SOURCE IMAGE
-
-  image_path = 'assets/jpg_thumbnail_test_nr03_10.png'
-  input_img = loadImage(image_path);
-  */
-  // END OF GLTCHVRS PART WITH EFFECTS
-
-
-
+  // load font used in Squaresoft's 'Secret of Mana' for Super Nintendo
   manaspace = loadFont('assets/manaspc.ttf');
 
 }
@@ -198,246 +189,22 @@ function preload() {
 
 function setup() {
 
-  // GLTCHVRS PART WITH EFFECTS
-  /*
-  // ARTWORK GENERATION
+  pixelDensity(1.0); // need to fix this so the gif.js exports the correct size
 
-  pixelDensity(1.0); // Need to fix this so the gif.js exports the correct size
-  canvas = createCanvas(input_img.width + image_border[0], input_img.height + image_border[1]);
+  image_border = [0, 0]; // width of the border in pixels
+  canvas = createCanvas(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
+
   background(0); // set black background for all images
-
-  frame_counter = 0; // This will increment inside draw()
-
-  // THE MAIN EFFECT STACK SWITCH
-
-  switch(effects_stack_name) {
-
-    case "mono":
-
-      // Custom stack params
-      nr_of_levels = 1;
-      contrast = 0.15;
-
-      rand_dither_key_1 = gene_pick_key(dither_params_json);
-      rand_dither_key_2 = gene_pick_key(extreme_dither_params_json);
-      rand_dither_key_3 = gene_pick_key(dither_params_json);
-
-      dither_params_1 = dither_params_json[rand_dither_key_1];
-      dither_params_2 = extreme_dither_params_json[rand_dither_key_2];
-      dither_params_3 = dither_params_json[rand_dither_key_3];
-
-      pix_scaling = 2.0;
-      layer_shift = 4;
-      mask_contrast = 0.0;
-      dark_treshold = 20;
-      light_treshold = 80;
-      invert_mask = false;
-      tint_palette_key = gene_pick_key(three_bit_palette_reduced);
-      tint_palette = three_bit_palette_reduced[tint_palette_key];
-      // if tint color is white or green (these are very bright) then the size of dither pixels in darkest regions is smallest possible
-      pix_scaling_dark = (tint_palette_key == 'white') || (tint_palette_key == 'green') ? 1.0 : pix_scaling * 2;
-
-      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
-      delta_factor = 0.5; // scaling animation effects
-      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
-      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
-
-      chosen_effect_function = applyMonochromeDither;
-      animateEffectStack(input_img, chosen_effect_function, false);
-
-      break;
-
-    case "hi-fi":
-
-      // Custom stack params
-      nr_of_levels = 1;
-      contrast = 0.25;
-      rand_dither_key_1 = gene_pick_key(dither_params_json);
-      rand_dither_key_2 = gene_pick_key(dither_params_json);
-      dither_params_1 = dither_params_json[rand_dither_key_1];
-      dither_params_2 = dither_params_json[rand_dither_key_2];
-      pix_scaling = 2.0;
-      layer_shift = 4;
-      mask_contrast = 0.25;
-      light_treshold = 50;
-      invert_mask = false;
-      tint_palette_key = gene_pick_key(three_bit_palette);
-      tint_palette = three_bit_palette[tint_palette_key];
-
-      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
-      delta_factor = 0.5; // scaling animation effects
-      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
-      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
-
-      chosen_effect_function = applyTintedDither;
-      animateEffectStack(input_img, chosen_effect_function, false);
-
-      break;
-
-    case "noisy":
-
-      // Custom stack params
-      blackValue = 10;
-      brigthnessValue = 50;
-      whiteValue = 70;
-
-      sorting_mode = gene_rand_int(0, 3); // 0, 1, 2
-      sorting_type = gene_rand_int(0, 2); // 0, 1
-      sorting_order = gene_rand_int(0, 4); // 0, 1, 2, 3
-      color_noise_density = 5;
-      rand_color_bias_key = gene_pick_key(color_bias_palette);
-      color_noise_bias = color_bias_palette[rand_color_bias_key];
-      color_noise_variation = 10000;
-
-      nr_of_levels = 1;
-      contrast = 0.15;
-      rand_dither_key_1 = gene_pick_key(dither_params_json);
-      rand_dither_key_2 = gene_pick_key(dither_params_json);
-      dither_params_1 = dither_params_json[rand_dither_key_1];
-      dither_params_2 = dither_params_json[rand_dither_key_2];
-      pix_scaling = 2.0;
-      layer_shift = 4;
-      mask_contrast = 0.25;
-      light_treshold = 50;
-      invert_mask = false;
-      tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
-
-      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
-      delta_factor = 0.5; // scaling animation effects
-      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
-      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
-
-      chosen_effect_function = applyDitherSorting;
-      animateEffectStack(input_img, chosen_effect_function, false);
-
-      break;
-
-    case "corrupted":
-
-      // Custom stack params
-      blackValue = 10;
-      brigthnessValue = 50;
-      whiteValue = 70;
-
-      sorting_mode = gene_rand_int(0, 3); // 0, 1, 2
-      sorting_type = gene_rand_int(0, 2); // 0, 1
-      sorting_order = gene_rand_int(0, 4); // 0, 1, 2, 3
-      color_noise_density = 5;
-      rand_color_bias_key = gene_pick_key(color_bias_palette);
-      color_noise_bias = color_bias_palette[rand_color_bias_key];
-      color_noise_variation = 10000; //10000
-
-      nr_of_levels = 1;
-      contrast = 0.15; // 15
-      rand_dither_key_1 = gene_pick_key(dither_params_json);
-      rand_dither_key_2 = gene_pick_key(dither_params_json);
-      dither_params_1 = dither_params_json[rand_dither_key_1];
-      dither_params_2 = dither_params_json[rand_dither_key_2];
-      pix_scaling = 2.0;
-      layer_shift = 4;
-      mask_contrast = 0.25;
-      light_treshold = 50;
-      invert_mask = false;
-      tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
-
-      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
-      delta_factor = 0.5; // scaling animation effects
-      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
-      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
-
-      chosen_effect_function = applySortingDither;
-      animateEffectStack(input_img, chosen_effect_function, false);
-
-      break;
-
-    case "lo-fi": 
-
-      // Custom stack params
-      blackValue = 10;
-      brigthnessValue = 50;
-      whiteValue = 70;
-
-      sorting_mode = 2; // this mode works best for this workflow
-      sorting_type = gene_rand_int(0, 2); // 0, 1
-      sorting_order = gene_rand_int(0, 3); // 0, 1, 2
-      color_noise_density = 5;
-      rand_color_bias_key = gene_pick_key(color_bias_palette);
-      color_noise_bias = color_bias_palette[rand_color_bias_key];
-      color_noise_variation = 10000;
-
-      nr_of_levels = 1;
-      contrast = 0.25;
-
-      dither_group_weights = [ [0, 75], [1, 25] ]; // these represent probabilities for choosing a dither group number [element, probability]
-      dither_group = gene_weighted_choice(dither_group_weights); // type of effects workflow to be used as a number, 0-4
-
-      switch(dither_group) {
-        case 0: // smaller pixels, less abstract, common
-          rand_dither_key_1 = gene_pick_key(dither_params_json);
-          dither_params_1 = dither_params_json[rand_dither_key_1];
-          break;
-        case 1: // larger pixels, more abstract, rare
-          rand_dither_key_1 = gene_pick_key(extreme_dither_params_json);
-          dither_params_1 = extreme_dither_params_json[rand_dither_key_1];
-          break;
-        default:
-          break;
-      }
-
-      pix_scaling = dither_group == 0 ? 8.0 : 16.0; // larger dither pixels for extreme dither parameters
-      layer_shift = 4;
-      mask_contrast = 0.25;
-      light_treshold = 50;
-      invert_mask = false;
-      tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
-
-      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
-      delta_factor = 0.05; // scaling animation effects
-      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
-      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
-
-      chosen_effect_function = applyAbstractDither;
-      animateEffectStack(input_img, chosen_effect_function, false);
-
-      break;
-
-
-    default:
-      break;
-
-  }
-
-  // Print some info to the console
-
-  print('Effect stack: ', effects_stack_name);
-
-  print('Dither error distribution 1: ', rand_dither_key_1);
-  print('Dither error distribution 2: ', rand_dither_key_2);
-  print('Source image path: ', image_path);
-
-  print('Sorting mode: ', sorting_mode);
-  print('Sorting type: ', sorting_type);
-  print('Sorting order: ', sorting_order);
-
-  print('Tint palette: ', tint_palette_key);
-  print('Color noise bias: ', rand_color_bias_key);
-
-  //copy(buffer_1, 0, 0, buffer_1.width, buffer_1.height, 0, 0, input_img.width + image_border[0], input_img.height + image_border[1])
-  */
-  // END OF GLTCHVRS PART WITH EFFECTS
-
-
-
-
-  canvas = createCanvas(canvas_dim[0], canvas_dim[1]);
 
   // change id of the canvas
   select('canvas').id('retrodigitizer');
   // move canvas to the middle of the browser window
   select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2);
 
+  frame_duration = 100; // in mms
+  frame_rate = 1000/frame_duration;
+  frameRate(frame_rate); 
 
-  frameRate(10);
   frame_counter = 0; // this will increment inside draw()
   frame_counter_after_drop = 0; // this will increment inside draw()
 
@@ -451,6 +218,35 @@ function setup() {
     // store the signal param data into a new variable - this way we avoid the maxLength limit
     signal = $fx.getParam("signal");
 
+    // deserialize signal data into an input image - this is the starting point for all effect stacks
+    input_img = deserializeSignalToImage(signal);
+
+    // sets global data for the effect stack
+    setEffectData(effects_stack_name);
+
+    // create 5 frame animation using one of the effect stacks
+    animateEffectStack(input_img, false);
+
+
+    /*
+
+    // print some info to the console
+
+    print('Effect stack: ', effects_stack_name);
+
+    print('Dither error distribution 1: ', rand_dither_key_1);
+    print('Dither error distribution 2: ', rand_dither_key_2);
+    print('Source image path: ', image_path);
+
+    print('Sorting mode: ', sorting_mode);
+    print('Sorting type: ', sorting_type);
+    print('Sorting order: ', sorting_order);
+
+    print('Tint palette: ', tint_palette_key);
+    print('Color noise bias: ', rand_color_bias_key);
+
+    */
+
   }
 
 }
@@ -462,21 +258,6 @@ function setup() {
 
 
 function draw() {
-
-  // GLTCHVRS PART WITH EFFECTS
-  /*
-  background(0);
-
-  // decide which frame to draw - we will loop through all 5 frames repeatedly to imitate the gif animation
-  frame_to_draw = buffer_frames[frame_counter % 5];
-
-  // draw appropriate frame
-  copy(frame_to_draw, 0, 0, frame_to_draw.width, frame_to_draw.height, 0, 0, input_img.width + image_border[0], input_img.height + image_border[1])
-  */
-  // END OF GLTCHVRS PART WITH EFFECTS
-
-
-
 
   // START SCREEN - will disappear when any key is pressed
   if (start_screen) {
@@ -496,8 +277,8 @@ function draw() {
     canvas.dragLeave(unhighlightDrop); // triggered when we finish dragging the file over the canvas to drop it
   }
 
-  // SHOW DROPED IMAGE - if signal is not empty, draw the image on the screen
-  if (signal.length != 0) {
+  // EDITING SIGNAL - if signal is not empty and thumbnail is loaded, draw the image on the screen
+  if ((signal.length != 0) && (thumbnail)) {
 
     // deserializes the signal and draws the image every 5th frame
     if (frame_counter % 5 == 0) {
@@ -517,7 +298,7 @@ function draw() {
   }
 
 
-  // AFTER IMAGE DROP TEXT - execute only if the dropped_image is loaded, will disappear after a short time
+  // EDITING SIGNAL (TEXT AFTER IMAGE DROP) - execute only if the dropped_image is loaded, will disappear after a short time
   if ((thumbnail) && (thumbnail_ready) && (frame_counter_after_drop < 50)) {
 
     // shows load info as text on the canvas
@@ -528,8 +309,20 @@ function draw() {
   }
 
 
+  // EDITING EFFECTS (AFTER REFRESH) - execute if the signal is not empty but the thumbnail is not defined (we lost it after the refresh)
+  if ((signal.length != 0) && (thumbnail == undefined)) {
+
+    background(0);
+
+    // decide which frame to draw - we will loop through all 5 frames repeatedly to imitate the gif animation
+    frame_to_draw = buffer_frames[frame_counter % 5];
+  
+    // draw appropriate frame
+    copy(frame_to_draw, 0, 0, frame_to_draw.width, frame_to_draw.height, 0, 0, input_img.width + image_border[0], input_img.height + image_border[1])
+  }
+
+
 
   // increment the frame counter - this controls the animations
   frame_counter++
 }
-

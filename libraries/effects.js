@@ -38,12 +38,23 @@ function setupGif() {
 // sets global data for the effect stack
 function setEffectData(effects_stack_name) {
 
+  // settings taken from params are defined here
+
+  new_brightness = $fx.getParam("brightness");
+  contrast = $fx.getParam("contrast");
+  mask_contrast = $fx.getParam("mask_contrast");
+  light_treshold = $fx.getParam("light_treshold");
+  
+
+
+
+  // settings defined under effect stacks are defined here
   switch(effects_stack_name) {
 
     case "mono":
 
       nr_of_levels = 1;
-      contrast = 0.15;
+      //contrast = 0.15;
 
       rand_dither_key_1 = gene_pick_key(dither_params_json);
       rand_dither_key_2 = gene_pick_key(extreme_dither_params_json);
@@ -55,46 +66,46 @@ function setEffectData(effects_stack_name) {
 
       pix_scaling = 2.0;
       layer_shift = 4;
-      mask_contrast = 0.0;
+      //mask_contrast = 0.0;
       dark_treshold = 20;
-      light_treshold = 80;
+      //light_treshold = 80;
       invert_mask = false;
       tint_palette_key = gene_pick_key(three_bit_palette_reduced);
       tint_palette = three_bit_palette_reduced[tint_palette_key];
       // if tint color is white or green (these are very bright) then the size of dither pixels in darkest regions is smallest possible
       pix_scaling_dark = (tint_palette_key == 'white') || (tint_palette_key == 'green') ? 1.0 : pix_scaling * 2;
 
-      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
+      //new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
       delta_factor = 0.5; // scaling animation effects
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      chosen_effect_function = applyMonochromeDither;
+      chosen_effect_function = applyMonoEffect;
 
       break;
 
     case "hi-fi":
 
       nr_of_levels = 1;
-      contrast = 0.25;
+      //contrast = 0.25;
       rand_dither_key_1 = gene_pick_key(dither_params_json);
       rand_dither_key_2 = gene_pick_key(dither_params_json);
       dither_params_1 = dither_params_json[rand_dither_key_1];
       dither_params_2 = dither_params_json[rand_dither_key_2];
       pix_scaling = 2.0;
       layer_shift = 4;
-      mask_contrast = 0.25;
-      light_treshold = 50;
+      //mask_contrast = 0.25;
+      //light_treshold = 50;
       invert_mask = false;
       tint_palette_key = gene_pick_key(three_bit_palette);
       tint_palette = three_bit_palette[tint_palette_key];
 
-      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
+      //new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
       delta_factor = 0.5; // scaling animation effects
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      chosen_effect_function = applyTintedDither;
+      chosen_effect_function = applyHiFiEffect;
 
       break;
 
@@ -113,24 +124,24 @@ function setEffectData(effects_stack_name) {
       color_noise_variation = 10000;
 
       nr_of_levels = 1;
-      contrast = 0.15;
+      //contrast = 0.15;
       rand_dither_key_1 = gene_pick_key(dither_params_json);
       rand_dither_key_2 = gene_pick_key(dither_params_json);
       dither_params_1 = dither_params_json[rand_dither_key_1];
       dither_params_2 = dither_params_json[rand_dither_key_2];
       pix_scaling = 2.0;
       layer_shift = 4;
-      mask_contrast = 0.25;
-      light_treshold = 50;
+      //mask_contrast = 0.25;
+      //light_treshold = 50;
       invert_mask = false;
       tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
 
-      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
+      //new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
       delta_factor = 0.5; // scaling animation effects
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      chosen_effect_function = applyDitherSorting;
+      chosen_effect_function = applyNoisyEffect;
 
       break;
 
@@ -149,24 +160,24 @@ function setEffectData(effects_stack_name) {
       color_noise_variation = 10000; //10000
 
       nr_of_levels = 1;
-      contrast = 0.15; // 15
+      //contrast = 0.15; // 15
       rand_dither_key_1 = gene_pick_key(dither_params_json);
       rand_dither_key_2 = gene_pick_key(dither_params_json);
       dither_params_1 = dither_params_json[rand_dither_key_1];
       dither_params_2 = dither_params_json[rand_dither_key_2];
       pix_scaling = 2.0;
       layer_shift = 4;
-      mask_contrast = 0.25;
-      light_treshold = 50;
+      //mask_contrast = 0.25;
+      //light_treshold = 50;
       invert_mask = false;
       tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
 
-      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
+      //new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
       delta_factor = 0.5; // scaling animation effects
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      chosen_effect_function = applySortingDither;
+      chosen_effect_function = applyCorruptedEffect;
 
       break;
 
@@ -185,7 +196,7 @@ function setEffectData(effects_stack_name) {
       color_noise_variation = 10000;
 
       nr_of_levels = 1;
-      contrast = 0.25;
+      //contrast = 0.25;
 
       dither_group_weights = [ [0, 75], [1, 25] ]; // these represent probabilities for choosing a dither group number [element, probability]
       dither_group = gene_weighted_choice(dither_group_weights); // type of effects workflow to be used as a number, 0-4
@@ -205,17 +216,17 @@ function setEffectData(effects_stack_name) {
 
       pix_scaling = dither_group == 0 ? 8.0 : 16.0; // larger dither pixels for extreme dither parameters
       layer_shift = 4;
-      mask_contrast = 0.25;
-      light_treshold = 50;
+      //mask_contrast = 0.25;
+      //light_treshold = 50;
       invert_mask = false;
       tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
 
-      new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
+      //new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
       delta_factor = 0.05; // scaling animation effects
       contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-      chosen_effect_function = applyAbstractDither;
+      chosen_effect_function = applyLoFiEffect;
 
       break;
 
@@ -227,7 +238,7 @@ function setEffectData(effects_stack_name) {
 
 
 // apply effect stack "mono"
-function applyMonochromeDither(img) {
+function applyMonoEffect(img) {
 
   setBrightness(img, new_brightness);
   grayscale(img, contrast);
@@ -264,7 +275,7 @@ function applyMonochromeDither(img) {
 
 
 // apply effect stack "hi-fi"
-function applyTintedDither(img) {
+function applyHiFiEffect(img) {
 
   setBrightness(img, new_brightness);
   img_2 = img.get(); // copy image pixels
@@ -294,7 +305,7 @@ function applyTintedDither(img) {
 
 
 // apply effect stack "noisy"
-function applyDitherSorting(img) {
+function applyNoisyEffect(img) {
   setBrightness(img, new_brightness);
   img_2 = img.get(); // copy image pixels
 
@@ -360,7 +371,7 @@ function applyDitherSorting(img) {
 
 
 // apply effect stack "corrupted"
-function applySortingDither(img) {
+function applyCorruptedEffect(img) {
 
   setBrightness(img, new_brightness);
   img_2 = img.get(); // copy image pixels
@@ -426,7 +437,7 @@ function applySortingDither(img) {
 
 
 // apply effect stack "lo-fi"
-function applyAbstractDither(img) {
+function applyLoFiEffect(img) {
 
   setBrightness(img, new_brightness);
 

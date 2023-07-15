@@ -57,6 +57,54 @@ $fx.params([
       options: ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"],
     }
   },
+  {
+    id: "brightness",
+    name: "Brightness",
+    type: "number",
+    default: "1.0",
+    update: "page-reload",
+    options: {
+      min: 0,
+      max: 2,
+      step: 0.05,
+    },
+  },
+  {
+    id: "contrast",
+    name: "Contrast",
+    type: "number",
+    default: "0.25",
+    update: "page-reload",
+    options: {
+      min: 0,
+      max: 1,
+      step: 0.05,
+    },
+  },
+  {
+    id: "mask_contrast",
+    name: "Mask contrast",
+    type: "number",
+    default: "0.25",
+    update: "page-reload",
+    options: {
+      min: 0,
+      max: 1,
+      step: 0.05,
+    },
+  },
+  {
+    id: "light_treshold",
+    name: "Light treshold",
+    type: "number",
+    default: "50",
+    update: "page-reload",
+    options: {
+      min: 0,
+      max: 100,
+      step: 5,
+    },
+  },
 ]);
 
 

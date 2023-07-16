@@ -48,10 +48,20 @@ $fx.params([
     },
   },
   {
-    id: "effect_name",
-    name: "Effect stack",
+    id: "effect_main",
+    name: "Effect main",
     type: "select",
     default: "hi-fi colored",
+    update: "page-reload",
+    options: {
+      options: ["mono", "hi-fi", "hi-fi colored", "noisy", "corrupted", "lo-fi"],
+    }
+  },
+  {
+    id: "effect_background",
+    name: "Effect background",
+    type: "select",
+    default: "corrupted",
     update: "page-reload",
     options: {
       options: ["mono", "hi-fi", "hi-fi colored", "noisy", "corrupted", "lo-fi"],

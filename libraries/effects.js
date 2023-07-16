@@ -24,7 +24,7 @@ function setupGif() {
     print('Finished creating gif')
     rendering = false;
     window.open(URL.createObjectURL(blob));
-    saveAs(blob, `retro_digitizer_${effects_stack_name}_anim_${uuid}.gif`);
+    saveAs(blob, `retro_digitizer_${effects_main_name}_anim_${uuid}.gif`);
     setupGif();
   });
 }
@@ -38,246 +38,221 @@ function setupGif() {
 // sets global data for the effect stack
 function setEffectData(effects_stack_name) {
 
-  // settings taken from params are defined here
+  // initialize a data object which will store all the parameters
+  let data = {};
 
-  new_brightness = $fx.getParam("brightness");
-  contrast = $fx.getParam("contrast");
-  mask_contrast = $fx.getParam("mask_contrast");
-  light_treshold = $fx.getParam("light_treshold");
-  alpha_brightness = $fx.getParam("alpha_brightness");
+  // settings taken from params are defined here
+  data["new_brightness"] = $fx.getParam("brightness");
+  data["contrast"] = $fx.getParam("contrast");
+  data["mask_contrast"] = $fx.getParam("mask_contrast");
+  data["light_treshold"] = $fx.getParam("light_treshold");
+  data["alpha_brightness"] = $fx.getParam("alpha_brightness");
   
+  data["contrast_delta"] = animation_params["contrast t1"]; // values from this list will be added to the contrast for each frame
+  data["brightness_delta"] = animation_params["brightness t1"]; // values from this list will be added to the brightness for each frame
+
 
   // settings defined under effect stacks are defined here
   switch(effects_stack_name) {
 
     case "mono":
 
-      nr_of_levels = 1;
-      //contrast = 0.15;
+      data["nr_of_levels"] = 1;
 
-      rand_dither_key_1 = gene_pick_key(dither_params_json);
-      rand_dither_key_2 = gene_pick_key(extreme_dither_params_json);
-      rand_dither_key_3 = gene_pick_key(dither_params_json);
+      data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
+      data["rand_dither_key_2"] = gene_pick_key(extreme_dither_params_json);
+      data["rand_dither_key_3"] = gene_pick_key(dither_params_json);
 
-      dither_params_1 = dither_params_json[rand_dither_key_1];
-      dither_params_2 = extreme_dither_params_json[rand_dither_key_2];
-      dither_params_3 = dither_params_json[rand_dither_key_3];
+      data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"] ];
+      data["dither_params_2"] = extreme_dither_params_json[ data["rand_dither_key_2"] ];
+      data["dither_params_3"] = dither_params_json[ data["rand_dither_key_3"] ];
 
-      pix_scaling = 2.0;
-      layer_shift = 4;
-      //mask_contrast = 0.0;
-      dark_treshold = 20;
-      //light_treshold = 80;
-      invert_mask = false;
-      tint_palette_key = gene_pick_key(three_bit_palette_reduced);
-      tint_palette = three_bit_palette_reduced[tint_palette_key];
+      data["pix_scaling"] = 2.0;
+      data["layer_shift"] = 4;
+      data["dark_treshold"] = 20;
+      data["invert_mask"] = false;
+
+      data["tint_palette_key_1"] = gene_pick_key(three_bit_palette_reduced);
+      data["tint_palette_1"] = three_bit_palette_reduced[ data["tint_palette_key_1"] ];
+
       // if tint color is white or green (these are very bright) then the size of dither pixels in darkest regions is smallest possible
-      pix_scaling_dark = (tint_palette_key == 'white') || (tint_palette_key == 'green') ? 1.0 : pix_scaling * 2;
+      data["pix_scaling_dark"] = (data["tint_palette_key_1"] == 'white') || (data["tint_palette_key_1"] == 'green') ? 1.0 : data["pix_scaling"] * 2;
 
-      //new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
-      delta_factor = 0.5; // scaling animation effects
-      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
-      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
-
-      chosen_effect_function = applyMonoEffect;
+      data["delta_factor"] = 0.5; // scaling animation effects
+      data["chosen_effect_function"] = applyMonoEffect;
 
       break;
 
     case "hi-fi":
 
-      nr_of_levels = 1;
-      //contrast = 0.25;
-      rand_dither_key_1 = gene_pick_key(dither_params_json);
-      rand_dither_key_2 = gene_pick_key(dither_params_json);
-      dither_params_1 = dither_params_json[rand_dither_key_1];
-      dither_params_2 = dither_params_json[rand_dither_key_2];
-      pix_scaling = 2.0;
-      layer_shift = 4;
-      //mask_contrast = 0.25;
-      //light_treshold = 50;
-      invert_mask = false;
-      tint_palette_key = gene_pick_key(three_bit_palette);
-      tint_palette = three_bit_palette[tint_palette_key];
+      data["nr_of_levels"] = 1;
 
-      //new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
-      delta_factor = 0.5; // scaling animation effects
-      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
-      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
+      data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
+      data["rand_dither_key_2"] = gene_pick_key(dither_params_json);
 
-      chosen_effect_function = applyHiFiEffect;
+      data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"] ];
+      data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"] ];
+
+      data["pix_scaling"] = 2.0;
+      data["layer_shift"] = 4;
+      data["invert_mask"] = false;
+
+      data["tint_palette_key_1"] = gene_pick_key(three_bit_palette);
+      data["tint_palette_1"] = three_bit_palette[ data["tint_palette_key_1"] ];
+
+      data["delta_factor"] = 0.5; // scaling animation effects
+      data["chosen_effect_function"] = applyHiFiEffect;
 
       break;
 
     case "hi-fi colored":
 
-      blackValue = 10;
-      brigthnessValue = 50;
-      whiteValue = 70;
+      data["blackValue"] = 10;
+      data["brigthnessValue"] = 50;
+      data["whiteValue"] = 70;
 
-      sorting_mode = gene_rand_int(0, 3); // 0, 1, 2
-      sorting_type = gene_rand_int(0, 2); // 0, 1
-      sorting_order = gene_rand_int(0, 4); // 0, 1, 2, 3
-      color_noise_density = 50; //5
-      rand_color_bias_key = gene_pick_key(color_bias_palette);
-      color_noise_bias = color_bias_palette[rand_color_bias_key];
-      color_noise_variation = 10000; //10000
+      data["sorting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
+      data["sorting_type"] = gene_rand_int(0, 2); // 0, 1
+      data["sorting_order"] = gene_rand_int(0, 4); // 0, 1, 2, 3
+      data["color_noise_density"] = 50; //5
+      data["rand_color_bias_key"] = gene_pick_key(color_bias_palette);
+      data["color_noise_bias"] = color_bias_palette[ data["rand_color_bias_key"] ];
+      data["color_noise_variation"] = 10000; //10000
 
-      tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
+      data["tinting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
 
       ///////////////////////////////////////////////////////////////
 
-      nr_of_levels = 1;
-      //contrast = 0.25;
-      rand_dither_key_1 = gene_pick_key(dither_params_json);
-      rand_dither_key_2 = gene_pick_key(dither_params_json);
-      rand_dither_key_3 = gene_pick_key(dither_params_json);
+      data["nr_of_levels"] = 1;
 
-      dither_params_1 = dither_params_json[rand_dither_key_1];
-      dither_params_2 = dither_params_json[rand_dither_key_2];
-      dither_params_3 = dither_params_json[rand_dither_key_3];
+      data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
+      data["rand_dither_key_2"] = gene_pick_key(dither_params_json);
+      data["rand_dither_key_3"] = gene_pick_key(dither_params_json);
 
-      pix_scaling = 2.0;
-      layer_shift = 4;
-      //mask_contrast = 0.25;
-      //light_treshold = 50;
-      dark_treshold = 30;
-      invert_mask = false;
+      data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"] ];
+      data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"] ];
+      data["dither_params_3"] = dither_params_json[ data["rand_dither_key_3"] ];
 
-      //tint_palette_key = gene_pick_key(three_bit_palette);
-      //tint_palette = three_bit_palette[tint_palette_key];
-      tint_palette_1 = three_bit_palette['red'];
-      tint_palette_2 = three_bit_palette['blue'];
-      //tint_palette_3 = three_bit_palette['red'];
+      data["pix_scaling"] = 2.0;
+      data["layer_shift"] = 4;
 
-      pix_scaling_dark = 1.0;
+      data["dark_treshold"] = 30;
+      data["invert_mask"] = false;
 
-      //new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
-      delta_factor = 0.5; // scaling animation effects
-      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
-      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
+      data["tint_palette_key_1"] = gene_pick_key(three_bit_palette);
+      data["tint_palette_key_2"] = gene_pick_key(three_bit_palette);
+      data["tint_palette_1"] = three_bit_palette[ data["tint_palette_key_1"] ];
+      data["tint_palette_2"] = three_bit_palette[ data["tint_palette_key_2"] ];
 
-      chosen_effect_function = applyHiFiColoredEffect;
+      data["pix_scaling_dark"] = 1.0;
+
+      data["delta_factor"] = 0.5; // scaling animation effects
+      data["chosen_effect_function"] = applyHiFiColoredEffect;
 
       break;
 
     case "noisy":
 
-      blackValue = 10;
-      brigthnessValue = 50;
-      whiteValue = 70;
+      data["blackValue"] = 10;
+      data["brigthnessValue"] = 50;
+      data["whiteValue"] = 70;
 
-      sorting_mode = gene_rand_int(0, 3); // 0, 1, 2
-      sorting_type = gene_rand_int(0, 2); // 0, 1
-      sorting_order = gene_rand_int(0, 4); // 0, 1, 2, 3
-      color_noise_density = 5;
-      rand_color_bias_key = gene_pick_key(color_bias_palette);
-      color_noise_bias = color_bias_palette[rand_color_bias_key];
-      color_noise_variation = 10000;
+      data["sorting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
+      data["sorting_type"] = gene_rand_int(0, 2); // 0, 1
+      data["sorting_order"] = gene_rand_int(0, 4); // 0, 1, 2, 3
+      data["color_noise_density"] = 5;
+      data["rand_color_bias_key"] = gene_pick_key(color_bias_palette);
+      data["color_noise_bias"] = color_bias_palette[ data["rand_color_bias_key"] ];
+      data["color_noise_variation"] = 10000;
 
-      nr_of_levels = 1;
-      //contrast = 0.15;
-      rand_dither_key_1 = gene_pick_key(dither_params_json);
-      rand_dither_key_2 = gene_pick_key(dither_params_json);
-      dither_params_1 = dither_params_json[rand_dither_key_1];
-      dither_params_2 = dither_params_json[rand_dither_key_2];
-      pix_scaling = 2.0;
-      layer_shift = 4;
-      //mask_contrast = 0.25;
-      //light_treshold = 50;
-      invert_mask = false;
-      tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
+      data["nr_of_levels"] = 1;
 
-      //new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
-      delta_factor = 0.5; // scaling animation effects
-      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
-      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
+      data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
+      data["rand_dither_key_2"] = gene_pick_key(dither_params_json);
+      data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"] ];
+      data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"] ];
+      data["pix_scaling"] = 2.0;
+      data["layer_shift"] = 4;
 
-      chosen_effect_function = applyNoisyEffect;
+      data["invert_mask"] = false;
+      data["tinting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
+
+      data["delta_factor"] = 0.5; // scaling animation effects
+      data["chosen_effect_function"] = applyNoisyEffect;
 
       break;
 
     case "corrupted":
 
-      blackValue = 10;
-      brigthnessValue = 50;
-      whiteValue = 70;
+      data["blackValue"] = 10;
+      data["brigthnessValue"] = 50;
+      data["whiteValue"] = 70;
 
-      sorting_mode = gene_rand_int(0, 3); // 0, 1, 2
-      sorting_type = gene_rand_int(0, 2); // 0, 1
-      sorting_order = gene_rand_int(0, 4); // 0, 1, 2, 3
-      color_noise_density = 5;
-      rand_color_bias_key = gene_pick_key(color_bias_palette);
-      color_noise_bias = color_bias_palette[rand_color_bias_key];
-      color_noise_variation = 10000; //10000
+      data["sorting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
+      data["sorting_type"] = gene_rand_int(0, 2); // 0, 1
+      data["sorting_order"] = gene_rand_int(0, 4); // 0, 1, 2, 3
+      data["color_noise_density"] = 5;
+      data["rand_color_bias_key"] = gene_pick_key(color_bias_palette);
+      data["color_noise_bias"] = color_bias_palette[ data["rand_color_bias_key"]];
+      data["color_noise_variation"] = 10000; //10000
 
-      nr_of_levels = 1;
-      //contrast = 0.15; // 15
-      rand_dither_key_1 = gene_pick_key(dither_params_json);
-      rand_dither_key_2 = gene_pick_key(dither_params_json);
-      dither_params_1 = dither_params_json[rand_dither_key_1];
-      dither_params_2 = dither_params_json[rand_dither_key_2];
-      pix_scaling = 2.0;
-      layer_shift = 4;
-      //mask_contrast = 0.25;
-      //light_treshold = 50;
-      invert_mask = false;
-      tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
+      data["nr_of_levels"] = 1;
 
-      //new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
-      delta_factor = 0.5; // scaling animation effects
-      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
-      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
+      data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
+      data["rand_dither_key_2"] = gene_pick_key(dither_params_json);
+      data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"]];
+      data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"]];
+      data["pix_scaling"] = 2.0;
+      data["layer_shift"] = 4;
 
-      chosen_effect_function = applyCorruptedEffect;
+      data["invert_mask"] = false;
+      data["tinting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
+
+      data["delta_factor"] = 0.5; // scaling animation effects
+      data["chosen_effect_function"] = applyCorruptedEffect;
 
       break;
 
     case "lo-fi": 
 
-      blackValue = 10;
-      brigthnessValue = 50;
-      whiteValue = 70;
+      data["blackValue"] = 10;
+      data["brigthnessValue"] = 50;
+      data["whiteValue"] = 70;
 
-      sorting_mode = 2; // this mode works best for this workflow
-      sorting_type = gene_rand_int(0, 2); // 0, 1
-      sorting_order = gene_rand_int(0, 3); // 0, 1, 2
-      color_noise_density = 5;
-      rand_color_bias_key = gene_pick_key(color_bias_palette);
-      color_noise_bias = color_bias_palette[rand_color_bias_key];
-      color_noise_variation = 10000;
+      data["sorting_mode"] = 2; // this mode works best for this workflow
+      data["sorting_type"] = gene_rand_int(0, 2); // 0, 1
+      data["sorting_order"] = gene_rand_int(0, 3); // 0, 1, 2
+      data["color_noise_density"] = 5;
+      data["rand_color_bias_key"] = gene_pick_key(color_bias_palette);
+      data["color_noise_bias"] = color_bias_palette[ data["rand_color_bias_key"] ];
+      data["color_noise_variation"] = 10000;
 
-      nr_of_levels = 1;
-      //contrast = 0.25;
+      data["nr_of_levels"] = 1;
 
-      dither_group_weights = [ [0, 75], [1, 25] ]; // these represent probabilities for choosing a dither group number [element, probability]
-      dither_group = gene_weighted_choice(dither_group_weights); // type of effects workflow to be used as a number, 0-4
+      data["dither_group_weights"] = [ [0, 75], [1, 25] ]; // these represent probabilities for choosing a dither group number [element, probability]
+      data["dither_group"] = gene_weighted_choice( data["dither_group_weights"] ); // type of effects workflow to be used as a number, 0-4
 
-      switch(dither_group) {
+      switch( data["dither_group"]) {
         case 0: // smaller pixels, less abstract, common
-          rand_dither_key_1 = gene_pick_key(dither_params_json);
-          dither_params_1 = dither_params_json[rand_dither_key_1];
+          data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
+          data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"] ];
           break;
         case 1: // larger pixels, more abstract, rare
-          rand_dither_key_1 = gene_pick_key(extreme_dither_params_json);
-          dither_params_1 = extreme_dither_params_json[rand_dither_key_1];
+          data["rand_dither_key_1"] = gene_pick_key(extreme_dither_params_json);
+          data["dither_params_1"] = extreme_dither_params_json[ data["rand_dither_key_1"] ];
           break;
         default:
           break;
       }
 
-      pix_scaling = dither_group == 0 ? 8.0 : 16.0; // larger dither pixels for extreme dither parameters
-      layer_shift = 4;
-      //mask_contrast = 0.25;
-      //light_treshold = 50;
-      invert_mask = false;
-      tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
+      data["pix_scaling"] = data["dither_group"] == 0 ? 8.0 : 16.0; // larger dither pixels for extreme dither parameters
+      data["layer_shift"] = 4;
 
-      //new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
-      delta_factor = 0.05; // scaling animation effects
-      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
-      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
+      data["invert_mask"] = false;
+      data["tinting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
 
-      chosen_effect_function = applyLoFiEffect;
+      data["delta_factor"] = 0.05; // scaling animation effects
+      data["chosen_effect_function"] = applyLoFiEffect;
 
       break;
 
@@ -285,14 +260,17 @@ function setEffectData(effects_stack_name) {
       break;
 
   }
+
+  // return data object containing all parameters
+  return data;
 }
 
 
 // apply effect stack "mono"
-function applyMonoEffect(img) {
+function applyMonoEffect(img, stack_data) {
 
-  setBrightness(img, new_brightness);
-  grayscale(img, contrast);
+  setBrightness(img, stack_data["new_brightness"]);
+  grayscale(img, stack_data["contrast"]);
 
   img_2 = img.get(); // copy image pixels
   img_3 = img.get(); // copy image pixels
@@ -300,25 +278,25 @@ function applyMonoEffect(img) {
   // 1. Full image
   blendMode(BLEND); // make sure to set blendMode back to default one just in case
   noTint();
-  img.resize(img.width / pix_scaling, 0);
-  makeDithered(img, nr_of_levels, dither_params_1);
-  img.resizeNN(img.width * pix_scaling, 0);
+  img.resize(img.width / stack_data["pix_scaling"], 0);
+  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
+  img.resizeNN(img.width * stack_data["pix_scaling"], 0);
   image(img, image_border[0] / 2, image_border[1] / 2);
 
   // 2. Bright part of the image
   blendMode(BLEND);
-  brightnessMask(img_2, mask_contrast, light_treshold, invert_mask);
-  makeDithered(img_2, nr_of_levels, dither_params_2);
-  image(img_2, image_border[0] / 2 + layer_shift, image_border[1] / 2 + layer_shift);
+  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
+  makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);
+  image(img_2, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
 
   // 3. Dark part of the image
   blendMode(ADD);
-  img_3.resize(img_3.width / pix_scaling_dark, 0);
-  brightnessMask(img_3, mask_contrast, dark_treshold, !invert_mask);
-  makeDithered(img_3, nr_of_levels, dither_params_3);
-  tint(tint_palette[0], tint_palette[1], tint_palette[2]);
-  img_3.resizeNN(img_3.width * pix_scaling_dark, 0);
-  image(img_3, image_border[0] / 2 + layer_shift, image_border[1] / 2 + layer_shift);
+  img_3.resize(img_3.width / stack_data["pix_scaling_dark"], 0);
+  brightnessMask(img_3, stack_data["mask_contrast"], stack_data["dark_treshold"], !stack_data["invert_mask"]);
+  makeDithered(img_3, stack_data["nr_of_levels"], stack_data["dither_params_3"]);
+  tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
+  img_3.resizeNN(img_3.width * stack_data["pix_scaling_dark"], 0);
+  image(img_3, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
 
   blendMode(BLEND);
   noTint();
@@ -326,29 +304,29 @@ function applyMonoEffect(img) {
 
 
 // apply effect stack "hi-fi"
-function applyHiFiEffect(img) {
+function applyHiFiEffect(img, stack_data) {
 
-  setBrightness(img, new_brightness);
+  setBrightness(img, stack_data["new_brightness"]);
   img_2 = img.get(); // copy image pixels
 
   // 1. Full image
   blendMode(BLEND);
-  setContrast(img, contrast);
-  img.resize(img.width / pix_scaling, 0);
-  makeDithered(img, nr_of_levels, dither_params_1);
-  tint(tint_palette[0], tint_palette[1], tint_palette[2]);
-  img.resizeNN(img.width * pix_scaling, 0);
+  setContrast(img, stack_data["contrast"]);
+  img.resize(img.width / stack_data["pix_scaling"], 0);
+  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
+  tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
+  img.resizeNN(img.width * stack_data["pix_scaling"], 0);
   image(img, image_border[0] / 2, image_border[1] / 2);
 
   // 2. Bright part of the image
   blendMode(ADD);
   noTint();
-  grayscale(img_2, contrast);
-  img_2.resize(img_2.width / (pix_scaling / 2), 0);
-  brightnessMask(img_2, mask_contrast, light_treshold, invert_mask);
-  makeDithered(img_2, nr_of_levels, dither_params_2);
-  img_2.resizeNN(img_2.width * pix_scaling / 2, 0);
-  image(img_2, image_border[0] / 2 + layer_shift, image_border[1] / 2 + layer_shift);
+  grayscale(img_2, stack_data["contrast"]);
+  img_2.resize(img_2.width / (stack_data["pix_scaling"] / 2), 0);
+  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
+  makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);
+  img_2.resizeNN(img_2.width * stack_data["pix_scaling"] / 2, 0);
+  image(img_2, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
 
   blendMode(BLEND);
   noTint();
@@ -356,43 +334,40 @@ function applyHiFiEffect(img) {
 
 
 // apply effect stack "hi-fi colored"
-function applyHiFiColoredEffect(img) {
+function applyHiFiColoredEffect(img, stack_data) {
 
-  setBrightness(img, new_brightness);
+  setBrightness(img, stack_data["new_brightness"]);
   img_2 = img.get(); // copy image pixels
   img_3 = img.get(); // copy image pixels
 
   // 1. Full image
   blendMode(BLEND);
-  setContrast(img, contrast);
-  img.resize(img.width / pix_scaling, 0);
-  makeDithered(img, nr_of_levels, dither_params_1);
-  tint(tint_palette_1[0], tint_palette_1[1], tint_palette_1[2]);
-  img.resizeNN(img.width * pix_scaling, 0);
+  setContrast(img, stack_data["contrast"]);
+  img.resize(img.width / stack_data["pix_scaling"], 0);
+  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
+  tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
+  img.resizeNN(img.width * stack_data["pix_scaling"], 0);
   image(img, image_border[0] / 2, image_border[1] / 2);
 
   // 2. Bright part of the image
   blendMode(ADD);
   noTint();
-  grayscale(img_2, contrast);
-  img_2.resize(img_2.width / (pix_scaling / 2), 0);
-  brightnessMask(img_2, mask_contrast, light_treshold, invert_mask);
-  makeDithered(img_2, nr_of_levels, dither_params_2);
-  img_2.resizeNN(img_2.width * pix_scaling / 2, 0);
-
-  //background(0, 255, 0); // green
-
-  image(img_2, image_border[0] / 2 + layer_shift, image_border[1] / 2 + layer_shift);
+  grayscale(img_2, stack_data["contrast"]);
+  img_2.resize(img_2.width / (stack_data["pix_scaling"] / 2), 0);
+  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
+  makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);
+  img_2.resizeNN(img_2.width * stack_data["pix_scaling"] / 2, 0);
+  image(img_2, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
 
   // 3. Dark part of the image
   blendMode(ADD);
-  grayscale(img_3, contrast);
-  img_3.resize(img_3.width / pix_scaling_dark, 0);
-  brightnessMask(img_3, mask_contrast, dark_treshold, !invert_mask);
-  makeDithered(img_3, nr_of_levels, dither_params_3);
-  tint(tint_palette_2[0], tint_palette_2[1], tint_palette_2[2]);
-  img_3.resizeNN(img_3.width * pix_scaling_dark, 0);
-  image(img_3, image_border[0] / 2 + layer_shift, image_border[1] / 2 + layer_shift);
+  grayscale(img_3, stack_data["contrast"]);
+  img_3.resize(img_3.width / stack_data["pix_scaling_dark"], 0);
+  brightnessMask(img_3, stack_data["mask_contrast"], stack_data["dark_treshold"], !stack_data["invert_mask"]);
+  makeDithered(img_3, stack_data["nr_of_levels"], stack_data["dither_params_3"]);
+  tint(stack_data["tint_palette_2"][0], stack_data["tint_palette_2"][1], stack_data["tint_palette_2"][2]);
+  img_3.resizeNN(img_3.width * stack_data["pix_scaling_dark"], 0);
+  image(img_3, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
 
   blendMode(BLEND);
   noTint();
@@ -400,65 +375,66 @@ function applyHiFiColoredEffect(img) {
 
 
 // apply effect stack "noisy"
-function applyNoisyEffect(img) {
-  setBrightness(img, new_brightness);
+function applyNoisyEffect(img, stack_data) {
+
+  setBrightness(img, stack_data["new_brightness"]);
   img_2 = img.get(); // copy image pixels
 
   // 1. Full image
   blendMode(BLEND);
-  setContrast(img, contrast);
-  img.resize(img.width / pix_scaling, 0);
-  makeDithered(img, nr_of_levels, dither_params_1);
+  setContrast(img, stack_data["contrast"]);
+  img.resize(img.width / stack_data["pix_scaling"], 0);
+  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
 
-  switch (sorting_order) {
+  switch (stack_data["sorting_order"]) {
     case 0:
-      pixelSortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+      pixelSortColumn(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     case 1:
-      pixelSortRow(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+      pixelSortRow(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     case 2:
-      pixelSortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
-      pixelSortRow(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+      pixelSortColumn(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortRow(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     case 3:
-      pixelSortRow(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
-      pixelSortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+      pixelSortRow(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortColumn(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     default:
       break;
   }
 
-  makeDithered(img, nr_of_levels, dither_params_1);
+  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
 
-  switch (tinting_mode) {
+  switch (stack_data["tinting_mode"]) {
     case 1:
-      tint_palette_key = 'magenta';
-      tint_palette = three_bit_palette[tint_palette_key];
-      tint(tint_palette[0], tint_palette[1], tint_palette[2]);
+      tint_palette_key_1 = 'magenta';
+      tint_palette_1 = three_bit_palette[tint_palette_key_1];
+      tint(tint_palette_1[0], tint_palette_1[1], tint_palette_1[2]);
       break;
     case 2:
-      tint_palette_key = 'cyan';
-      tint_palette = three_bit_palette[tint_palette_key];
-      tint(tint_palette[0], tint_palette[1], tint_palette[2]);
+      tint_palette_key_1 = 'cyan';
+      tint_palette_1 = three_bit_palette[tint_palette_key_1];
+      tint(tint_palette_1[0], tint_palette_1[1], tint_palette_1[2]);
       break;
     default:
       // no tinting
       break;
   }
 
-  img.resizeNN(img.width * pix_scaling, 0);
+  img.resizeNN(img.width * stack_data["pix_scaling"], 0);
   image(img, image_border[0] / 2, image_border[1] / 2);
 
   // 2. Bright part of the image
   blendMode(ADD);
   noTint();
-  grayscale(img_2, contrast);
-  img_2.resize(img_2.width / pix_scaling, 0);
-  brightnessMask(img_2, mask_contrast, light_treshold, invert_mask);
-  makeDithered(img_2, nr_of_levels, dither_params_2);
-  img_2.resizeNN(img_2.width * pix_scaling, 0);
-  image(img_2, image_border[0] / 2 + layer_shift, image_border[1] / 2 + layer_shift);
+  grayscale(img_2, stack_data["contrast"]);
+  img_2.resize(img_2.width / stack_data["pix_scaling"], 0);
+  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
+  makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);
+  img_2.resizeNN(img_2.width * stack_data["pix_scaling"], 0);
+  image(img_2, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
 
   blendMode(BLEND);
   noTint();
@@ -466,65 +442,65 @@ function applyNoisyEffect(img) {
 
 
 // apply effect stack "corrupted"
-function applyCorruptedEffect(img) {
+function applyCorruptedEffect(img, stack_data) {
 
-  setBrightness(img, new_brightness);
+  setBrightness(img, stack_data["new_brightness"]);
   img_2 = img.get(); // copy image pixels
 
   // 1. Full image
   blendMode(BLEND);
-  setContrast(img, contrast);
-  img.resize(img.width / pix_scaling, 0);
+  setContrast(img, stack_data["contrast"]);
+  img.resize(img.width / stack_data["pix_scaling"], 0);
 
-  switch (sorting_order) {
+  switch (stack_data["sorting_order"]) {
     case 0:
-      pixelSortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+      pixelSortColumn(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     case 1:
-      pixelSortRow(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+      pixelSortRow(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     case 2:
-      pixelSortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
-      pixelSortRow(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+      pixelSortColumn(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortRow(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     case 3:
-      pixelSortRow(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
-      pixelSortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+      pixelSortRow(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortColumn(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     default:
       break;
   }
 
-  makeDithered(img, nr_of_levels, dither_params_1);
+  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
 
-  switch (tinting_mode) {
+  switch (stack_data["tinting_mode"]) {
     case 1:
-      tint_palette_key = 'magenta';
-      tint_palette = three_bit_palette[tint_palette_key];
-      tint(tint_palette[0], tint_palette[1], tint_palette[2]);
+      tint_palette_key_1 = 'magenta';
+      tint_palette_1 = three_bit_palette[tint_palette_key_1];
+      tint(tint_palette_1[0], tint_palette_1[1], tint_palette_1[2]);
       break;
     case 2:
-      tint_palette_key = 'cyan';
-      tint_palette = three_bit_palette[tint_palette_key];
-      tint(tint_palette[0], tint_palette[1], tint_palette[2]);
+      tint_palette_key_1 = 'cyan';
+      tint_palette_1 = three_bit_palette[tint_palette_key_1];
+      tint(tint_palette_1[0], tint_palette_1[1], tint_palette_1[2]);
       break;
     default:
       // no tinting
       break;
   }
 
-  img.resizeNN(img.width * pix_scaling, 0);
+  img.resizeNN(img.width * stack_data["pix_scaling"], 0);
   image(img, image_border[0] / 2, image_border[1] / 2);
 
   // 2. Bright part of the image
   blendMode(ADD);
   noTint();
-  grayscale(img_2, contrast);
-  img_2.resize(img_2.width / pix_scaling, 0);
-  brightnessMask(img_2, mask_contrast, light_treshold, invert_mask);
-  makeDithered(img_2, nr_of_levels, dither_params_2);
-  img_2.resizeNN(img_2.width * pix_scaling, 0);
-  image(img_2, image_border[0] / 2 + layer_shift, image_border[1] / 2 + layer_shift);
+  grayscale(img_2, stack_data["contrast"]);
+  img_2.resize(img_2.width / stack_data["pix_scaling"], 0);
+  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
+  makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);
+  img_2.resizeNN(img_2.width * stack_data["pix_scaling"], 0);
+  image(img_2, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
 
   blendMode(BLEND);
   noTint();
@@ -532,35 +508,35 @@ function applyCorruptedEffect(img) {
 
 
 // apply effect stack "lo-fi"
-function applyLoFiEffect(img) {
+function applyLoFiEffect(img, stack_data) {
 
-  setBrightness(img, new_brightness);
+  setBrightness(img, stack_data["new_brightness"]);
 
   // 1. Full image
   blendMode(BLEND);
-  grayscale(img, contrast);
-  img.resize(img.width / pix_scaling, 0);
-  makeDithered(img, nr_of_levels, dither_params_1);
-  img.resizeNN(img.width * pix_scaling / 2.0, 0); // we resize back only half way
+  grayscale(img, stack_data["contrast"]);
+  img.resize(img.width / stack_data["pix_scaling"], 0);
+  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
+  img.resizeNN(img.width * stack_data["pix_scaling"] / 2.0, 0); // we resize back only half way
 
   // here we had to take out pixelSortRow option as it didn't produce nice results
-  switch (sorting_order) {
+  switch (stack_data["sorting_order"]) {
     case 0:
-      pixelSortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+      pixelSortColumn(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     case 1:
-      pixelSortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
-      pixelSortRow(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+      pixelSortColumn(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortRow(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     case 2:
-      pixelSortRow(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
-      pixelSortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+      pixelSortRow(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortColumn(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     default:
       break;
   }
 
-  makeDithered(img, nr_of_levels, dither_params_1);
+  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
   img.resizeNN(img.width * 2.0, 0); // we resize back double to get to the size of the original input image
   image(img, image_border[0] / 2, image_border[1] / 2);
 
@@ -571,7 +547,7 @@ function applyLoFiEffect(img) {
 
 // create 5 frame animation using one of the effect stacks
 // also triggers gif export when "g" is pressed by passing download = true
-function animateEffectStack(img, download = false) {
+function animateEffectStack(img, stack_data_main, stack_data_background, download = false) {
   // setup gif
   if (download == true) { setupGif(); }
 
@@ -593,42 +569,47 @@ function animateEffectStack(img, download = false) {
   buffer_height = input_img.height + image_border[1];
 
   // save original contrast and brightness so we can restore them later
-  let original_contrast = contrast;
-  let original_new_brightness = new_brightness;
+  let original_contrast = stack_data_main["contrast"];
+  let original_new_brightness = stack_data_main["new_brightness"];
 
   // apply effects to individual frames and add them to the gif animation
   for (let i = 0; i < nr_of_frames; i++) {
 
     // create an animated background which shows through the transparent squares
     let buffer_graphics = createGraphics(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
-    buffer_graphics.background(alpha_brightness * 2.55);
+    buffer_graphics.background(stack_data_background["alpha_brightness"] * 2.55);
     let buffer_image = createImage(buffer_graphics.width, buffer_graphics.height);
     buffer_image.copy(buffer_graphics, 0, 0, buffer_graphics.width, buffer_graphics.height, 0, 0, buffer_graphics.width, buffer_graphics.height);
 
     //setEffectData("corrupted");
 
-    applyCorruptedEffect(buffer_image);
+    //applyCorruptedEffect(buffer_image, stack_data_background);
+    chosen_effect_function_background = stack_data_background["chosen_effect_function"];
+    chosen_effect_function_background(buffer_image, stack_data_background)
 
     //setEffectData("mono");
 
     // apply effect stack to canvas
-    chosen_effect_function(frames[i]);
+    //stack_data_main["chosen_effect_function"](frames[i], stack_data_main);
+    chosen_effect_function = stack_data_main["chosen_effect_function"];
+    chosen_effect_function(frames[i], stack_data_main);
+
     // add frame to gif with canvas.elt which calls underlying HTML element
     if (download == true) { gif.addFrame(canvas.elt, { delay: frame_duration, copy: true }); }
     // copy canvas to buffer object so it can be used later for display in draw()
     buffer_frames[i].copy(canvas, 0, 0, input_img.width + image_border[0], input_img.height + image_border[1], 0, 0, buffer_width, buffer_height);
 
     // change contrast and brightness slightly to get a shimmering effect during animation
-    contrast += contrast_delta[0] * delta_factor;
-    new_brightness += brightness_delta[0] * delta_factor;
+    stack_data_main["contrast"] += stack_data_main["contrast_delta"][0] * stack_data_main["delta_factor"];
+    stack_data_main["new_brightness"] += stack_data_main["brightness_delta"][0] * stack_data_main["delta_factor"];
 
     //gene.reset(); // reset the seed for the randminter so we get the same values
     // same as $fx.randminter.reset();
   }
 
   // restoring values for contrast and brightness so they don't accumulate every time we save the gif animation
-  contrast = original_contrast;
-  new_brightness = original_new_brightness;
+  stack_data_main["contrast"] = original_contrast;
+  stack_data_main["new_brightness"] = original_new_brightness;
 
   // render gif when done
   if (download == true) { gif.render(); }
@@ -642,7 +623,7 @@ function animateEffectStack(img, download = false) {
 
 // ASDFPixelSort_Color - rewritten from Java to JavaScript by @lukapiskorec
 // from: https://github.com/shmam/ASDFPixelSort_Color
-function pixelSortColor(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000) {
+function pixelSortColor(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000, blackValue = 10, whiteValue = 70, brigthnessValue = 50) {
   // reset row and column for each image!
   row = 0;
   column = 0;
@@ -650,12 +631,12 @@ function pixelSortColor(img, sorting_mode, sorting_type, color_noise_density = 5
   img.loadPixels();
 
   while (column < img.width - 1) {
-    sortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+    sortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation, blackValue, whiteValue, brigthnessValue);
     column++;
   }
 
   while (row < img.height - 1) {
-    sortRow(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+    sortRow(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation, blackValue, whiteValue, brigthnessValue);
     row++;
   }
 
@@ -664,14 +645,14 @@ function pixelSortColor(img, sorting_mode, sorting_type, color_noise_density = 5
 
 
 // sort all columns in an image
-function pixelSortColumn(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000) {
+function pixelSortColumn(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000, blackValue = 10, whiteValue = 70, brigthnessValue = 50) {
   // reset column for each image!
   column = 0;
 
   img.loadPixels();
 
   while (column < img.width - 1) {
-    sortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+    sortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation, blackValue, whiteValue, brigthnessValue);
     column++;
   }
 
@@ -680,14 +661,14 @@ function pixelSortColumn(img, sorting_mode, sorting_type, color_noise_density = 
 
 
 // sort all rows in an image
-function pixelSortRow(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000) {
+function pixelSortRow(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000, blackValue = 10, whiteValue = 70, brigthnessValue = 50) {
   // reset row for each image!
   row = 0;
 
   img.loadPixels();
 
   while (row < img.height - 1) {
-    sortRow(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation);
+    sortRow(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation, blackValue, whiteValue, brigthnessValue);
     row++;
   }
 
@@ -696,7 +677,7 @@ function pixelSortRow(img, sorting_mode, sorting_type, color_noise_density = 5, 
 
 
 // sort a row of pixels
-function sortRow(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000) {
+function sortRow(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000, blackValue = 10, whiteValue = 70, brigthnessValue = 50) {
   let x = 0;
   let y = row;
   let xend = 0;
@@ -704,16 +685,16 @@ function sortRow(img, sorting_mode, sorting_type, color_noise_density = 5, color
   while (xend < img.width - 1) {
     switch (sorting_mode) {
       case 0:
-        x = getFirstNotBlackX(img, x, y);
-        xend = getNextBlackX(img, x, y);
+        x = getFirstNotBlackX(img, x, y, blackValue);
+        xend = getNextBlackX(img, x, y, blackValue);
         break;
       case 1:
-        x = getFirstBrightX(img, x, y);
-        xend = getNextDarkX(img, x, y);
+        x = getFirstBrightX(img, x, y, brigthnessValue);
+        xend = getNextDarkX(img, x, y, brigthnessValue);
         break;
       case 2:
-        x = getFirstNotWhiteX(img, x, y);
-        xend = getNextWhiteX(img, x, y);
+        x = getFirstNotWhiteX(img, x, y, whiteValue);
+        xend = getNextWhiteX(img, x, y, whiteValue);
         break;
       default:
         break;
@@ -777,7 +758,7 @@ function sortRow(img, sorting_mode, sorting_type, color_noise_density = 5, color
 
 
 // sort a column of pixels
-function sortColumn(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000) {
+function sortColumn(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000, blackValue = 10, whiteValue = 70, brigthnessValue = 50) {
   let x = column;
   let y = 0;
   let yend = 0;
@@ -785,16 +766,16 @@ function sortColumn(img, sorting_mode, sorting_type, color_noise_density = 5, co
   while (yend < img.height - 1) {
     switch (sorting_mode) {
       case 0:
-        y = getFirstNotBlackY(img, x, y);
-        yend = getNextBlackY(img, x, y);
+        y = getFirstNotBlackY(img, x, y, blackValue);
+        yend = getNextBlackY(img, x, y, blackValue);
         break;
       case 1:
-        y = getFirstBrightY(img, x, y);
-        yend = getNextDarkY(img, x, y);
+        y = getFirstBrightY(img, x, y, brigthnessValue);
+        yend = getNextDarkY(img, x, y, brigthnessValue);
         break;
       case 2:
-        y = getFirstNotWhiteY(img, x, y);
-        yend = getNextWhiteY(img, x, y);
+        y = getFirstNotWhiteY(img, x, y, whiteValue);
+        yend = getNextWhiteY(img, x, y, whiteValue);
         break;
       default:
         break;
@@ -858,7 +839,7 @@ function sortColumn(img, sorting_mode, sorting_type, color_noise_density = 5, co
 
 
 // used for pixel sorting - black x
-function getFirstNotBlackX(img, _x, _y) {
+function getFirstNotBlackX(img, _x, _y, blackValue) {
   let x = _x;
   let y = _y;
   while (brightness(getColorAtIndex(img, x, y)) < blackValue) {
@@ -870,7 +851,7 @@ function getFirstNotBlackX(img, _x, _y) {
 
 
 // used for pixel sorting - black x
-function getNextBlackX(img, _x, _y) {
+function getNextBlackX(img, _x, _y, blackValue) {
   let x = _x + 1;
   let y = _y;
   while (brightness(getColorAtIndex(img, x, y)) > blackValue) {
@@ -882,7 +863,7 @@ function getNextBlackX(img, _x, _y) {
 
 
 // used for pixel sorting - brightness x
-function getFirstBrightX(img, _x, _y) {
+function getFirstBrightX(img, _x, _y, brigthnessValue) {
   let x = _x;
   let y = _y;
   while (brightness(getColorAtIndex(img, x, y)) < brigthnessValue) {
@@ -894,7 +875,7 @@ function getFirstBrightX(img, _x, _y) {
 
 
 // used for pixel sorting - brightness x
-function getNextDarkX(img, _x, _y) {
+function getNextDarkX(img, _x, _y, brigthnessValue) {
   let x = _x + 1;
   let y = _y;
   while (brightness(getColorAtIndex(img, x, y)) > brigthnessValue) {
@@ -906,7 +887,7 @@ function getNextDarkX(img, _x, _y) {
 
 
 // used for pixel sorting - white x
-function getFirstNotWhiteX(img, _x, _y) {
+function getFirstNotWhiteX(img, _x, _y, whiteValue) {
   let x = _x;
   let y = _y;
   while (brightness(getColorAtIndex(img, x, y)) > whiteValue) {
@@ -918,7 +899,7 @@ function getFirstNotWhiteX(img, _x, _y) {
 
 
 // used for pixel sorting - white x
-function getNextWhiteX(img, _x, _y) {
+function getNextWhiteX(img, _x, _y, whiteValue) {
   let x = _x + 1;
   let y = _y;
   while (brightness(getColorAtIndex(img, x, y)) < whiteValue) {
@@ -930,7 +911,7 @@ function getNextWhiteX(img, _x, _y) {
 
 
 // used for pixel sorting - black y
-function getFirstNotBlackY(img, _x, _y) {
+function getFirstNotBlackY(img, _x, _y, blackValue) {
   let x = _x;
   let y = _y;
   if (y < img.height) {
@@ -944,7 +925,7 @@ function getFirstNotBlackY(img, _x, _y) {
 
 
 // used for pixel sorting - black y
-function getNextBlackY(img, _x, _y) {
+function getNextBlackY(img, _x, _y, blackValue) {
   let x = _x;
   let y = _y + 1;
   if (y < img.height) {
@@ -958,7 +939,7 @@ function getNextBlackY(img, _x, _y) {
 
 
 // used for pixel sorting - brightness y
-function getFirstBrightY(img, _x, _y) {
+function getFirstBrightY(img, _x, _y, brigthnessValue) {
   let x = _x;
   let y = _y;
   if (y < img.height) {
@@ -972,7 +953,7 @@ function getFirstBrightY(img, _x, _y) {
 
 
 // used for pixel sorting - brightness y
-function getNextDarkY(img, _x, _y) {
+function getNextDarkY(img, _x, _y, brigthnessValue) {
   let x = _x;
   let y = _y + 1;
   if (y < img.height) {
@@ -986,7 +967,7 @@ function getNextDarkY(img, _x, _y) {
 
 
 // used for pixel sorting - white y
-function getFirstNotWhiteY(img, _x, _y) {
+function getFirstNotWhiteY(img, _x, _y, whiteValue) {
   let x = _x;
   let y = _y;
   if (y < img.height) {
@@ -1000,7 +981,7 @@ function getFirstNotWhiteY(img, _x, _y) {
 
 
 // used for pixel sorting - white y
-function getNextWhiteY(img, _x, _y) {
+function getNextWhiteY(img, _x, _y, whiteValue) {
   let x = _x;
   let y = _y + 1;
   if (y < img.height) {
@@ -2385,12 +2366,12 @@ function keyPressed() {
 
   } else if (keyCode === 71) { // "g" - save gif
 
-    animateEffectStack(input_img, true);
+    animateEffectStack(input_img, stack_data_main, stack_data_background, true);
 
   } else if (keyCode === 83) { // "s" - save png
 
     const saveid = parseInt(Math.random() * 10000000);
-    saveCanvas(canvas, `retro_digitizer_${effects_stack_name}_still_${saveid}`, "png");
+    saveCanvas(canvas, `retro_digitizer_${effects_main_name}_still_${saveid}`, "png");
   }
 
 

@@ -1,4 +1,5 @@
 ////// UTILS //////
+// by @LukaPiskorec, 2023
 
 
 // FXHASH random function for specific implimentation

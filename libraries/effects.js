@@ -44,9 +44,8 @@ function setEffectData(effects_stack_name) {
   contrast = $fx.getParam("contrast");
   mask_contrast = $fx.getParam("mask_contrast");
   light_treshold = $fx.getParam("light_treshold");
+  alpha_brightness = $fx.getParam("alpha_brightness");
   
-
-
 
   // settings defined under effect stacks are defined here
   switch(effects_stack_name) {
@@ -106,6 +105,58 @@ function setEffectData(effects_stack_name) {
       brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
       chosen_effect_function = applyHiFiEffect;
+
+      break;
+
+    case "hi-fi colored":
+
+      blackValue = 10;
+      brigthnessValue = 50;
+      whiteValue = 70;
+
+      sorting_mode = gene_rand_int(0, 3); // 0, 1, 2
+      sorting_type = gene_rand_int(0, 2); // 0, 1
+      sorting_order = gene_rand_int(0, 4); // 0, 1, 2, 3
+      color_noise_density = 50; //5
+      rand_color_bias_key = gene_pick_key(color_bias_palette);
+      color_noise_bias = color_bias_palette[rand_color_bias_key];
+      color_noise_variation = 10000; //10000
+
+      tinting_mode = gene_rand_int(0, 3); // 0, 1, 2
+
+      ///////////////////////////////////////////////////////////////
+
+      nr_of_levels = 1;
+      //contrast = 0.25;
+      rand_dither_key_1 = gene_pick_key(dither_params_json);
+      rand_dither_key_2 = gene_pick_key(dither_params_json);
+      rand_dither_key_3 = gene_pick_key(dither_params_json);
+
+      dither_params_1 = dither_params_json[rand_dither_key_1];
+      dither_params_2 = dither_params_json[rand_dither_key_2];
+      dither_params_3 = dither_params_json[rand_dither_key_3];
+
+      pix_scaling = 2.0;
+      layer_shift = 4;
+      //mask_contrast = 0.25;
+      //light_treshold = 50;
+      dark_treshold = 30;
+      invert_mask = false;
+
+      //tint_palette_key = gene_pick_key(three_bit_palette);
+      //tint_palette = three_bit_palette[tint_palette_key];
+      tint_palette_1 = three_bit_palette['red'];
+      tint_palette_2 = three_bit_palette['blue'];
+      //tint_palette_3 = three_bit_palette['red'];
+
+      pix_scaling_dark = 1.0;
+
+      //new_brightness = 1.0; // brightness needs to increase at 50% rate of the contrast
+      delta_factor = 0.5; // scaling animation effects
+      contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
+      brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
+
+      chosen_effect_function = applyHiFiColoredEffect;
 
       break;
 
@@ -304,6 +355,50 @@ function applyHiFiEffect(img) {
 }
 
 
+// apply effect stack "hi-fi colored"
+function applyHiFiColoredEffect(img) {
+
+  setBrightness(img, new_brightness);
+  img_2 = img.get(); // copy image pixels
+  img_3 = img.get(); // copy image pixels
+
+  // 1. Full image
+  blendMode(BLEND);
+  setContrast(img, contrast);
+  img.resize(img.width / pix_scaling, 0);
+  makeDithered(img, nr_of_levels, dither_params_1);
+  tint(tint_palette_1[0], tint_palette_1[1], tint_palette_1[2]);
+  img.resizeNN(img.width * pix_scaling, 0);
+  image(img, image_border[0] / 2, image_border[1] / 2);
+
+  // 2. Bright part of the image
+  blendMode(ADD);
+  noTint();
+  grayscale(img_2, contrast);
+  img_2.resize(img_2.width / (pix_scaling / 2), 0);
+  brightnessMask(img_2, mask_contrast, light_treshold, invert_mask);
+  makeDithered(img_2, nr_of_levels, dither_params_2);
+  img_2.resizeNN(img_2.width * pix_scaling / 2, 0);
+
+  //background(0, 255, 0); // green
+
+  image(img_2, image_border[0] / 2 + layer_shift, image_border[1] / 2 + layer_shift);
+
+  // 3. Dark part of the image
+  blendMode(ADD);
+  grayscale(img_3, contrast);
+  img_3.resize(img_3.width / pix_scaling_dark, 0);
+  brightnessMask(img_3, mask_contrast, dark_treshold, !invert_mask);
+  makeDithered(img_3, nr_of_levels, dither_params_3);
+  tint(tint_palette_2[0], tint_palette_2[1], tint_palette_2[2]);
+  img_3.resizeNN(img_3.width * pix_scaling_dark, 0);
+  image(img_3, image_border[0] / 2 + layer_shift, image_border[1] / 2 + layer_shift);
+
+  blendMode(BLEND);
+  noTint();
+}
+
+
 // apply effect stack "noisy"
 function applyNoisyEffect(img) {
   setBrightness(img, new_brightness);
@@ -482,14 +577,14 @@ function animateEffectStack(img, download = false) {
 
   // make source image copies
   frames = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < nr_of_frames; i++) {
     let frame = img.get();
     frames.push(frame);
   }
 
   // make graphic buffers to store canvas copies for each frame
   buffer_frames = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < nr_of_frames; i++) {
     let buffer_frame = createGraphics(input_img.width + image_border[0], input_img.height + image_border[1]);
     buffer_frames.push(buffer_frame);
   }
@@ -502,8 +597,20 @@ function animateEffectStack(img, download = false) {
   let original_new_brightness = new_brightness;
 
   // apply effects to individual frames and add them to the gif animation
-  for (let i = 0; i < 5; i++) {
-    background(0);
+  for (let i = 0; i < nr_of_frames; i++) {
+
+    // create an animated background which shows through the transparent squares
+    let buffer_graphics = createGraphics(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
+    buffer_graphics.background(alpha_brightness * 2.55);
+    let buffer_image = createImage(buffer_graphics.width, buffer_graphics.height);
+    buffer_image.copy(buffer_graphics, 0, 0, buffer_graphics.width, buffer_graphics.height, 0, 0, buffer_graphics.width, buffer_graphics.height);
+
+    //setEffectData("corrupted");
+
+    applyCorruptedEffect(buffer_image);
+
+    //setEffectData("mono");
+
     // apply effect stack to canvas
     chosen_effect_function(frames[i]);
     // add frame to gif with canvas.elt which calls underlying HTML element
@@ -514,6 +621,9 @@ function animateEffectStack(img, download = false) {
     // change contrast and brightness slightly to get a shimmering effect during animation
     contrast += contrast_delta[0] * delta_factor;
     new_brightness += brightness_delta[0] * delta_factor;
+
+    //gene.reset(); // reset the seed for the randminter so we get the same values
+    // same as $fx.randminter.reset();
   }
 
   // restoring values for contrast and brightness so they don't accumulate every time we save the gif animation
@@ -1977,7 +2087,7 @@ function deserializeSignal(signal) {
 function deserializeSignalToImage(signal) {
 
   let buffer_frame = createGraphics(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
-  buffer_frame.background(0);
+  //buffer_frame.background(0);
 
   buffer_width = canvas_dim[0] + image_border[0];
   buffer_height = canvas_dim[1] + image_border[1];

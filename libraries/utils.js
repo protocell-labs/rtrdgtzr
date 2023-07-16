@@ -2,23 +2,24 @@
 
 
 // FXHASH random function for specific implimentation
-gene = fxrand;
+//gene = fxrand;
+const gene = fxrandminter;
 
 // rand functions for random generator
 // assumes generator producing float point between 0 and 1
 
 // return random integer number between min and max
-function gene_rand_int(min, max){
+function gene_rand_int(min, max) {
   return Math.floor((gene() * (max - min)) + min);
 }
 
 // return random number between min and max
-function gene_range(min, max){
+function gene_range(min, max) {
   return (gene() * (max - min)) + min;
 }
 
 // return n random numbers in a list
-function gene_pick_n(min, max, n){
+function gene_pick_n(min, max, n) {
   var unique_list = [];
   for (var i = 0; i < n; i++) {
     unique_list.push(Math.floor((gene() * (max-min)) + min));
@@ -28,7 +29,7 @@ function gene_pick_n(min, max, n){
 
 // return random element from a list with set weights in form:
 // data = [ ["a", 50], ["b", 25], ["c", 25] ]; numbers are not strict probabilities so don't have to add up to 100
-function gene_weighted_choice(data){
+function gene_weighted_choice(data) {
   let total = 0;
   for (let i = 0; i < data.length; ++i) {
       total += data[i][1];

@@ -45,6 +45,7 @@ let image_border; // Width of the border in pixels, [76, 76]
 let frame_duration; // In mms
 let frame_rate; // Number of frames per second, calculated as 1000/frame_duration
 let frame_counter; // Counts the frames for display in the browser
+let nr_of_frames = 5; // number of frames in a gif animation
 
 let blackValue; // Pixels darker than this will not be sorted, max is 100
 let brigthnessValue; // Value for sorting pixels according to brightness
@@ -71,14 +72,15 @@ let rand_dither_key, rand_dither_key_2; // JSON key for dither error distributio
 let dither_params, dither_params_1, dither_params_2, dither_params_3; // Read error distribution parameters from a JSON file
 let pix_scaling, pix_scaling_dark; // Scales the size of pixels when applying effects
 let layer_shift; // Shift in x and y direction for every consecutive layer
-let tint_palette_key; // JSON key for tint palette colors
-let tint_palette; // RGB array with values for tinting, example three_bit_palette['magenta']
+let tint_palette_key, tint_palette_key_1, tint_palette_key_2, tint_palette_key_3; // JSON key for tint palette colors
+let tint_palette, tint_palette_1, tint_palette_2, tint_palette_3; // RGB array with values for tinting, example three_bit_palette['magenta']
 let tinting_mode; // Type of tinting selected, 0 is always no tinting
 
 let mask_contrast; // Contrast value for the image when taking brightnessMask
 let light_treshold; // Brightness treshold for the image when taking brightnessMask
 let dark_treshold; // Brightness treshold for the image when taking brightnessMask
 let invert_mask; // Invert brightnessMask
+let alpha_brightness; // brightness of the background under transparent squares - 0-100
 
 
 
@@ -193,8 +195,6 @@ function setup() {
 
   image_border = [0, 0]; // width of the border in pixels
   canvas = createCanvas(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
-
-  background(0); // set black background for all images
 
   // change id of the canvas
   select('canvas').id('retrodigitizer');
@@ -311,14 +311,15 @@ function draw() {
 
   // EDITING EFFECTS (AFTER REFRESH) - execute if the signal is not empty but the thumbnail is not defined (we lost it after the refresh)
   if ((signal.length != 0) && (thumbnail == undefined)) {
-
-    background(0);
-
+    
     // decide which frame to draw - we will loop through all 5 frames repeatedly to imitate the gif animation
-    frame_to_draw = buffer_frames[frame_counter % 5];
+    frame_to_draw = buffer_frames[frame_counter % nr_of_frames];
   
     // draw appropriate frame
     copy(frame_to_draw, 0, 0, frame_to_draw.width, frame_to_draw.height, 0, 0, input_img.width + image_border[0], input_img.height + image_border[1])
+    
+    //background(0, 255, 0);
+    //copy(input_img, 0, 0, input_img.width, input_img.height, 0, 0, input_img.width + image_border[0], input_img.height + image_border[1])
   }
 
 

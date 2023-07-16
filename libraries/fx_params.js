@@ -51,10 +51,10 @@ $fx.params([
     id: "effect_name",
     name: "Effect stack",
     type: "select",
-    default: "corrupted",
+    default: "hi-fi colored",
     update: "page-reload",
     options: {
-      options: ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"],
+      options: ["mono", "hi-fi", "hi-fi colored", "noisy", "corrupted", "lo-fi"],
     }
   },
   {
@@ -96,6 +96,18 @@ $fx.params([
   {
     id: "light_treshold",
     name: "Light treshold",
+    type: "number",
+    default: "50",
+    update: "page-reload",
+    options: {
+      min: 0,
+      max: 100,
+      step: 5,
+    },
+  },
+  {
+    id: "alpha_brightness",
+    name: "Alpha brightness",
     type: "number",
     default: "50",
     update: "page-reload",

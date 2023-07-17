@@ -45,22 +45,13 @@ function preload() {
 function setup() {
 
   pixelDensity(1.0); // need to fix this so the gif.js exports the correct size
+  frameRate(frame_rate); // frame rate for the main animation
 
-  image_border = [0, 0]; // width of the border in pixels
   canvas = createCanvas(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
+  select('canvas').id('retrodigitizer'); // change id of the canvas
+  select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2); // move canvas to the middle of the browser window
 
-  // change id of the canvas
-  select('canvas').id('retrodigitizer');
-  // move canvas to the middle of the browser window
-  select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2);
-
-  frame_duration = 100; // in mms
-  frame_rate = 1000/frame_duration;
-  frameRate(frame_rate); 
-
-  frame_counter = 0; // this will increment inside draw()
-  frame_counter_after_drop = 0; // this will increment inside draw()
-
+  
   // DESERIALIZE AN INPUT IMAGE - if signal param is not empty, which means it was stored already before
   if ($fx.getParam("signal").length != 0) {
 
@@ -81,28 +72,7 @@ function setup() {
     // create 5 frame animation using one of the effect stacks
     animateEffectStack(input_img, stack_data_main, stack_data_background, false);
 
-
-    /*
-
-    // print some info to the console
-
-    print('Effect stack: ', effects_stack_name);
-
-    print('Dither error distribution 1: ', rand_dither_key_1);
-    print('Dither error distribution 2: ', rand_dither_key_2);
-    print('Source image path: ', image_path);
-
-    print('Sorting mode: ', sorting_mode);
-    print('Sorting type: ', sorting_type);
-    print('Sorting order: ', sorting_order);
-
-    print('Tint palette: ', tint_palette_key);
-    print('Color noise bias: ', rand_color_bias_key);
-
-    */
-
   }
-
 }
 
 

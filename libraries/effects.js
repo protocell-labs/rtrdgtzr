@@ -44,7 +44,7 @@ function setEffectData(effects_stack_name) {
   // settings taken from params are defined here
   data["new_brightness"] = $fx.getParam("brightness");
   data["contrast"] = $fx.getParam("contrast");
-  data["mask_contrast"] = $fx.getParam("mask_contrast");
+  data["mask_contrast"] = $fx.getParam("contrast"); // same as above
   data["light_treshold"] = $fx.getParam("light_treshold");
   data["alpha_brightness"] = $fx.getParam("alpha_brightness");
   
@@ -552,21 +552,21 @@ function animateEffectStack(img, stack_data_main, stack_data_background, downloa
   if (download == true) { setupGif(); }
 
   // make source image copies
-  frames = [];
+  let frames = [];
   for (let i = 0; i < nr_of_frames; i++) {
     let frame = img.get();
     frames.push(frame);
   }
 
+  let buffer_width = img.width + image_border[0];
+  let buffer_height = img.height + image_border[1];
+
   // make graphic buffers to store canvas copies for each frame
   buffer_frames = [];
   for (let i = 0; i < nr_of_frames; i++) {
-    let buffer_frame = createGraphics(input_img.width + image_border[0], input_img.height + image_border[1]);
+    let buffer_frame = createGraphics(buffer_width, buffer_height);
     buffer_frames.push(buffer_frame);
   }
-
-  buffer_width = input_img.width + image_border[0];
-  buffer_height = input_img.height + image_border[1];
 
   // save original contrast and brightness so we can restore them later
   let original_contrast = stack_data_main["contrast"];
@@ -584,20 +584,20 @@ function animateEffectStack(img, stack_data_main, stack_data_background, downloa
     //setEffectData("corrupted");
 
     //applyCorruptedEffect(buffer_image, stack_data_background);
-    chosen_effect_function_background = stack_data_background["chosen_effect_function"];
+    let chosen_effect_function_background = stack_data_background["chosen_effect_function"];
     chosen_effect_function_background(buffer_image, stack_data_background)
 
     //setEffectData("mono");
 
     // apply effect stack to canvas
     //stack_data_main["chosen_effect_function"](frames[i], stack_data_main);
-    chosen_effect_function = stack_data_main["chosen_effect_function"];
+    let chosen_effect_function = stack_data_main["chosen_effect_function"];
     chosen_effect_function(frames[i], stack_data_main);
 
     // add frame to gif with canvas.elt which calls underlying HTML element
     if (download == true) { gif.addFrame(canvas.elt, { delay: frame_duration, copy: true }); }
     // copy canvas to buffer object so it can be used later for display in draw()
-    buffer_frames[i].copy(canvas, 0, 0, input_img.width + image_border[0], input_img.height + image_border[1], 0, 0, buffer_width, buffer_height);
+    buffer_frames[i].copy(canvas, 0, 0, buffer_width, buffer_height, 0, 0, buffer_width, buffer_height);
 
     // change contrast and brightness slightly to get a shimmering effect during animation
     stack_data_main["contrast"] += stack_data_main["contrast_delta"][0] * stack_data_main["delta_factor"];
@@ -625,18 +625,18 @@ function animateEffectStack(img, stack_data_main, stack_data_background, downloa
 // from: https://github.com/shmam/ASDFPixelSort_Color
 function pixelSortColor(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000, blackValue = 10, whiteValue = 70, brigthnessValue = 50) {
   // reset row and column for each image!
-  row = 0;
-  column = 0;
+  let row = 0;
+  let column = 0;
 
   img.loadPixels();
 
   while (column < img.width - 1) {
-    sortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation, blackValue, whiteValue, brigthnessValue);
+    sortColumn(img, column, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation, blackValue, whiteValue, brigthnessValue);
     column++;
   }
 
   while (row < img.height - 1) {
-    sortRow(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation, blackValue, whiteValue, brigthnessValue);
+    sortRow(img, row, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation, blackValue, whiteValue, brigthnessValue);
     row++;
   }
 
@@ -647,12 +647,12 @@ function pixelSortColor(img, sorting_mode, sorting_type, color_noise_density = 5
 // sort all columns in an image
 function pixelSortColumn(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000, blackValue = 10, whiteValue = 70, brigthnessValue = 50) {
   // reset column for each image!
-  column = 0;
+  let column = 0;
 
   img.loadPixels();
 
   while (column < img.width - 1) {
-    sortColumn(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation, blackValue, whiteValue, brigthnessValue);
+    sortColumn(img, column, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation, blackValue, whiteValue, brigthnessValue);
     column++;
   }
 
@@ -663,12 +663,12 @@ function pixelSortColumn(img, sorting_mode, sorting_type, color_noise_density = 
 // sort all rows in an image
 function pixelSortRow(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000, blackValue = 10, whiteValue = 70, brigthnessValue = 50) {
   // reset row for each image!
-  row = 0;
+  let row = 0;
 
   img.loadPixels();
 
   while (row < img.height - 1) {
-    sortRow(img, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation, blackValue, whiteValue, brigthnessValue);
+    sortRow(img, row, sorting_mode, sorting_type, color_noise_density, color_noise_bias, color_noise_variation, blackValue, whiteValue, brigthnessValue);
     row++;
   }
 
@@ -677,10 +677,12 @@ function pixelSortRow(img, sorting_mode, sorting_type, color_noise_density = 5, 
 
 
 // sort a row of pixels
-function sortRow(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000, blackValue = 10, whiteValue = 70, brigthnessValue = 50) {
+function sortRow(img, row, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000, blackValue = 10, whiteValue = 70, brigthnessValue = 50) {
   let x = 0;
   let y = row;
   let xend = 0;
+
+  let mixPercentage, pixelColor, colorHex;
 
   while (xend < img.width - 1) {
     switch (sorting_mode) {
@@ -704,12 +706,12 @@ function sortRow(img, sorting_mode, sorting_type, color_noise_density = 5, color
       break;
     }
 
-    sortLength = xend - x;
-    unsorted = [];
-    sorted = [];
+    let sortLength = xend - x;
+    let unsorted = [];
+    let sorted = [];
 
-    randomColor = color(gene_rand_int(0, 255) * color_noise_bias[0], gene_rand_int(0, 255) * color_noise_bias[1], gene_rand_int(0, 255) * color_noise_bias[2], 255);
-    d = 0;
+    let randomColor = color(gene_rand_int(0, 255) * color_noise_bias[0], gene_rand_int(0, 255) * color_noise_bias[1], gene_rand_int(0, 255) * color_noise_bias[2], 255);
+    let d = 0;
 
     if (gene_rand_int(0, 100) < color_noise_density) {
       d = gene_rand_int(0, color_noise_variation);
@@ -758,10 +760,12 @@ function sortRow(img, sorting_mode, sorting_type, color_noise_density = 5, color
 
 
 // sort a column of pixels
-function sortColumn(img, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000, blackValue = 10, whiteValue = 70, brigthnessValue = 50) {
+function sortColumn(img, column, sorting_mode, sorting_type, color_noise_density = 5, color_noise_bias = [1, 1, 1], color_noise_variation = 1000, blackValue = 10, whiteValue = 70, brigthnessValue = 50) {
   let x = column;
   let y = 0;
   let yend = 0;
+
+  let mixPercentage, pixelColor, colorHex;
 
   while (yend < img.height - 1) {
     switch (sorting_mode) {
@@ -785,12 +789,12 @@ function sortColumn(img, sorting_mode, sorting_type, color_noise_density = 5, co
       break;
     }
 
-    sortLength = yend - y;
-    unsorted = [];
-    sorted = [];
+    let sortLength = yend - y;
+    let unsorted = [];
+    let sorted = [];
 
-    randomColor = color(gene_rand_int(0, 255) * color_noise_bias[0], gene_rand_int(0, 255) * color_noise_bias[1], gene_rand_int(0, 255) * color_noise_bias[2], 255);
-    d = 0;
+    let randomColor = color(gene_rand_int(0, 255) * color_noise_bias[0], gene_rand_int(0, 255) * color_noise_bias[1], gene_rand_int(0, 255) * color_noise_bias[2], 255);
+    let d = 0;
 
     if (gene_rand_int(0, 100) < color_noise_density) {
       d = gene_rand_int(0, color_noise_variation);
@@ -2038,6 +2042,8 @@ function compressSignal(signal, repeatingBufferChars, repeatingAlphaChars) {
 
 // deserializes and draws the image from the signal string param
 function deserializeSignal(signal) {
+  let coefficients, pixelvalues, alpha_on;
+
   // serialized signal will be compressed and needs to be decompressed before deserialization
   signal = decompressSignal(signal, repeatingBufferChars, repeatingAlphaChars);
 
@@ -2066,6 +2072,7 @@ function deserializeSignal(signal) {
 
 // deserializes and draws the image from the signal string param
 function deserializeSignalToImage(signal) {
+  let coefficients, pixelvalues, alpha_on;
 
   let buffer_frame = createGraphics(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
   //buffer_frame.background(0);
@@ -2091,8 +2098,6 @@ function deserializeSignalToImage(signal) {
         coefficients = dequantizeCoefficients(coefficients, jpeg_lum_quant_table, quant_f);
         pixelvalues = dcTransformInverse(coefficients);
 
-        // function draw_data(pixelvalues, pixel_dim, offset_x, offset_y, offset_rgb)
-
         buffer_frame.noStroke();
         buffer_frame.rectMode(CORNER);
       
@@ -2107,6 +2112,7 @@ function deserializeSignalToImage(signal) {
           }
         }
 
+        // for reference, function that draws the square of pixels
         //draw_data(pixelvalues, thumbnail_scale, i * 8 * thumbnail_scale, j * 8 * thumbnail_scale, offset_rgb); // pixels, pixel dim, offset x, offset y, offset_rgb
       }
 
@@ -2120,13 +2126,15 @@ function deserializeSignalToImage(signal) {
 
 // serializes the image and returns the signal string param, updates all params
 function serializeSignal(thumbnail) {
+  let coefficients, pixelvalues;
+
   // characters for the image coefficients will be stored here
   signal = "";
 
   for (let i = 0; i < squares_nr[0]; i++) {
     for (let j = 0; j < squares_nr[1]; j++) {
 
-      thumbnail_square = createImage(8, 8);
+      let thumbnail_square = createImage(8, 8);
       thumbnail_square.copy(thumbnail, i * 8, j * 8, thumbnail.width, thumbnail.height, 0, 0, thumbnail.width, thumbnail.height);
 
       coefficients = dcTransform(thumbnail_square);
@@ -2373,7 +2381,6 @@ function keyPressed() {
     const saveid = parseInt(Math.random() * 10000000);
     saveCanvas(canvas, `retro_digitizer_${effects_main_name}_still_${saveid}`, "png");
   }
-
 
 }
 

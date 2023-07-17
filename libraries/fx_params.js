@@ -92,18 +92,6 @@ $fx.params([
     },
   },
   {
-    id: "mask_contrast",
-    name: "Mask contrast",
-    type: "number",
-    default: "0.25",
-    update: "page-reload",
-    options: {
-      min: 0,
-      max: 1,
-      step: 0.05,
-    },
-  },
-  {
     id: "light_treshold",
     name: "Light treshold",
     type: "number",

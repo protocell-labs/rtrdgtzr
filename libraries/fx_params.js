@@ -51,21 +51,38 @@ $fx.params([
     id: "effect_main",
     name: "Effect main",
     type: "select",
-    default: "hi-fi colored",
+    default: "hi-fi",
     update: "page-reload",
     options: {
-      options: ["mono", "hi-fi", "hi-fi colored", "noisy", "corrupted", "lo-fi"],
+      options: ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"],
     }
   },
   {
     id: "effect_background",
     name: "Effect background",
     type: "select",
-    default: "corrupted",
+    default: "lo-fi",
     update: "page-reload",
     options: {
-      options: ["mono", "hi-fi", "hi-fi colored", "noisy", "corrupted", "lo-fi"],
+      options: ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"],
     }
+  },
+  {
+    id: "effect_era",
+    name: "Era",
+    type: "select",
+    default: "80-ties",
+    update: "page-reload",
+    options: {
+      options: ["'80s", "'90s"],
+    }
+  },
+  {
+    id: "invert_input",
+    name: "Invert",
+    type: "boolean",
+    default: false,
+    update: "page-reload",
   },
   {
     id: "brightness",
@@ -83,7 +100,7 @@ $fx.params([
     id: "contrast",
     name: "Contrast",
     type: "number",
-    default: "0.25",
+    default: "0.50",
     update: "page-reload",
     options: {
       min: 0,
@@ -96,6 +113,18 @@ $fx.params([
     name: "Light treshold",
     type: "number",
     default: "50",
+    update: "page-reload",
+    options: {
+      min: 0,
+      max: 100,
+      step: 5,
+    },
+  },
+  {
+    id: "dark_treshold",
+    name: "Dark treshold",
+    type: "number",
+    default: "30",
     update: "page-reload",
     options: {
       min: 0,

@@ -65,6 +65,8 @@ function setup() {
     // deserialize signal data into an input image - this is the starting point for all effect stacks
     input_img = deserializeSignalToImage(signal);
 
+    if (invert_input) {input_img.filter(INVERT);} // inverts the colors of the input image
+
     // sets global data for the effect stack
     stack_data_main = setEffectData(effects_main_name);
     stack_data_background = setEffectData(effects_background_name);

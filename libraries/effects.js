@@ -44,10 +44,12 @@ function setEffectData(effects_stack_name) {
   // settings taken from params are defined here
   data["new_brightness"] = $fx.getParam("brightness");
   data["contrast"] = $fx.getParam("contrast");
-  data["mask_contrast"] = $fx.getParam("contrast"); // same as above
+  data["mask_contrast"] = clamp(data["contrast"] * 1.2, 0, 1); // 20% larger than contrast, clamped between 0 and 1
   data["light_treshold"] = $fx.getParam("light_treshold");
+  data["dark_treshold"] = $fx.getParam("dark_treshold");
   data["alpha_brightness"] = $fx.getParam("alpha_brightness");
-  
+  data["effect_era"] = $fx.getParam("effect_era");
+
   data["contrast_delta"] = animation_params["contrast t1"]; // values from this list will be added to the contrast for each frame
   data["brightness_delta"] = animation_params["brightness t1"]; // values from this list will be added to the brightness for each frame
 
@@ -87,67 +89,44 @@ function setEffectData(effects_stack_name) {
 
       data["nr_of_levels"] = 1;
 
-      data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
-      data["rand_dither_key_2"] = gene_pick_key(dither_params_json);
+      if (gene() < 0.25) {
+        data["rand_dither_key_1"] = gene_pick_key(extreme_dither_params_json);
+        data["dither_params_1"] = extreme_dither_params_json[ data["rand_dither_key_1"] ];
+      } else {
+        data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
+        data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"] ];
+      }
 
-      data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"] ];
-      data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"] ];
+      if (gene() < 0.25) {
+        data["rand_dither_key_2"] = gene_pick_key(extreme_dither_params_json);
+        data["dither_params_2"] = extreme_dither_params_json[ data["rand_dither_key_2"] ];
+      } else {
+        data["rand_dither_key_2"] = gene_pick_key(dither_params_json);
+        data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"] ];
+      }
 
-      data["pix_scaling"] = 2.0;
-      data["layer_shift"] = 4;
-      data["invert_mask"] = false;
-
-      data["tint_palette_key_1"] = gene_pick_key(three_bit_palette);
-      data["tint_palette_1"] = three_bit_palette[ data["tint_palette_key_1"] ];
-
-      data["delta_factor"] = 0.5; // scaling animation effects
-      data["chosen_effect_function"] = applyHiFiEffect;
-
-      break;
-
-    case "hi-fi colored":
-
-      data["blackValue"] = 10;
-      data["brigthnessValue"] = 50;
-      data["whiteValue"] = 70;
-
-      data["sorting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
-      data["sorting_type"] = gene_rand_int(0, 2); // 0, 1
-      data["sorting_order"] = gene_rand_int(0, 4); // 0, 1, 2, 3
-      data["color_noise_density"] = 50; //5
-      data["rand_color_bias_key"] = gene_pick_key(color_bias_palette);
-      data["color_noise_bias"] = color_bias_palette[ data["rand_color_bias_key"] ];
-      data["color_noise_variation"] = 10000; //10000
-
-      data["tinting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
-
-      ///////////////////////////////////////////////////////////////
-
-      data["nr_of_levels"] = 1;
-
-      data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
-      data["rand_dither_key_2"] = gene_pick_key(dither_params_json);
-      data["rand_dither_key_3"] = gene_pick_key(dither_params_json);
-
-      data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"] ];
-      data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"] ];
-      data["dither_params_3"] = dither_params_json[ data["rand_dither_key_3"] ];
+      if (gene() < 0.25) {
+        data["rand_dither_key_3"] = gene_pick_key(extreme_dither_params_json);
+        data["dither_params_3"] = extreme_dither_params_json[ data["rand_dither_key_3"] ];
+      } else {
+        data["rand_dither_key_3"] = gene_pick_key(dither_params_json);
+        data["dither_params_3"] = dither_params_json[ data["rand_dither_key_3"] ];
+      }
 
       data["pix_scaling"] = 2.0;
+      data["pix_scaling_dark"] = 2.0;
       data["layer_shift"] = 4;
-
-      data["dark_treshold"] = 30;
       data["invert_mask"] = false;
 
       data["tint_palette_key_1"] = gene_pick_key(three_bit_palette);
       data["tint_palette_key_2"] = gene_pick_key(three_bit_palette);
+      data["tint_palette_key_3"] = gene_pick_key(three_bit_palette);
       data["tint_palette_1"] = three_bit_palette[ data["tint_palette_key_1"] ];
       data["tint_palette_2"] = three_bit_palette[ data["tint_palette_key_2"] ];
-
-      data["pix_scaling_dark"] = 1.0;
+      data["tint_palette_3"] = three_bit_palette[ data["tint_palette_key_3"] ];
 
       data["delta_factor"] = 0.5; // scaling animation effects
-      data["chosen_effect_function"] = applyHiFiColoredEffect;
+      data["chosen_effect_function"] = applyHiFiEffect;
 
       break;
 
@@ -160,7 +139,7 @@ function setEffectData(effects_stack_name) {
       data["sorting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
       data["sorting_type"] = gene_rand_int(0, 2); // 0, 1
       data["sorting_order"] = gene_rand_int(0, 4); // 0, 1, 2, 3
-      data["color_noise_density"] = 5;
+      data["color_noise_density"] = gene() < 0.35 ? 50 : 5;
       data["rand_color_bias_key"] = gene_pick_key(color_bias_palette);
       data["color_noise_bias"] = color_bias_palette[ data["rand_color_bias_key"] ];
       data["color_noise_variation"] = 10000;
@@ -173,9 +152,12 @@ function setEffectData(effects_stack_name) {
       data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"] ];
       data["pix_scaling"] = 2.0;
       data["layer_shift"] = 4;
-
       data["invert_mask"] = false;
-      data["tinting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
+
+      data["tint_palette_key_1"] = gene_pick_key(three_bit_palette);
+      data["tint_palette_key_2"] = gene_pick_key(three_bit_palette);
+      data["tint_palette_1"] = three_bit_palette[ data["tint_palette_key_1"] ];
+      data["tint_palette_2"] = three_bit_palette[ data["tint_palette_key_2"] ];
 
       data["delta_factor"] = 0.5; // scaling animation effects
       data["chosen_effect_function"] = applyNoisyEffect;
@@ -184,14 +166,20 @@ function setEffectData(effects_stack_name) {
 
     case "corrupted":
 
-      data["blackValue"] = 10;
+      data["blackValue"] = 10; // 10
       data["brigthnessValue"] = 50;
-      data["whiteValue"] = 70;
+      data["whiteValue"] = 70; // 70
 
-      data["sorting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
-      data["sorting_type"] = gene_rand_int(0, 2); // 0, 1
-      data["sorting_order"] = gene_rand_int(0, 4); // 0, 1, 2, 3
-      data["color_noise_density"] = 5;
+      data["sorting_mode_1"] = gene_rand_int(0, 3); // 0, 1, 2
+      data["sorting_type_1"] = gene_rand_int(0, 2); // 0, 1
+      data["sorting_order_1"] = gene_rand_int(0, 4); // 0, 1, 2, 3
+
+      data["second_sorting"] = gene() < 0.35 ? true : false;
+      data["sorting_mode_2"] = gene_rand_int(0, 3); // 0, 1, 2
+      data["sorting_type_2"] = gene_rand_int(0, 2); // 0, 1
+      data["sorting_order_2"] = gene_rand_int(0, 4); // 0, 1, 2, 3
+
+      data["color_noise_density"] = gene() < 0.35 ? 50 : 5;
       data["rand_color_bias_key"] = gene_pick_key(color_bias_palette);
       data["color_noise_bias"] = color_bias_palette[ data["rand_color_bias_key"]];
       data["color_noise_variation"] = 10000; //10000
@@ -204,9 +192,12 @@ function setEffectData(effects_stack_name) {
       data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"]];
       data["pix_scaling"] = 2.0;
       data["layer_shift"] = 4;
-
       data["invert_mask"] = false;
-      data["tinting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
+
+      data["tint_palette_key_1"] = gene_pick_key(three_bit_palette);
+      data["tint_palette_key_2"] = gene_pick_key(three_bit_palette);
+      data["tint_palette_1"] = three_bit_palette[ data["tint_palette_key_1"] ];
+      data["tint_palette_2"] = three_bit_palette[ data["tint_palette_key_2"] ];
 
       data["delta_factor"] = 0.5; // scaling animation effects
       data["chosen_effect_function"] = applyCorruptedEffect;
@@ -229,7 +220,7 @@ function setEffectData(effects_stack_name) {
 
       data["nr_of_levels"] = 1;
 
-      data["dither_group_weights"] = [ [0, 75], [1, 25] ]; // these represent probabilities for choosing a dither group number [element, probability]
+      data["dither_group_weights"] = [ [0, 65], [1, 35] ]; // these represent probabilities for choosing a dither group number [element, probability]
       data["dither_group"] = gene_weighted_choice( data["dither_group_weights"] ); // type of effects workflow to be used as a number, 0-4
 
       switch( data["dither_group"]) {
@@ -308,43 +299,13 @@ function applyHiFiEffect(img, stack_data) {
 
   setBrightness(img, stack_data["new_brightness"]);
   img_2 = img.get(); // copy image pixels
-
-  // 1. Full image
-  blendMode(BLEND);
-  setContrast(img, stack_data["contrast"]);
-  img.resize(img.width / stack_data["pix_scaling"], 0);
-  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
-  tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
-  img.resizeNN(img.width * stack_data["pix_scaling"], 0);
-  image(img, image_border[0] / 2, image_border[1] / 2);
-
-  // 2. Bright part of the image
-  blendMode(ADD);
-  noTint();
-  grayscale(img_2, stack_data["contrast"]);
-  img_2.resize(img_2.width / (stack_data["pix_scaling"] / 2), 0);
-  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
-  makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);
-  img_2.resizeNN(img_2.width * stack_data["pix_scaling"] / 2, 0);
-  image(img_2, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
-
-  blendMode(BLEND);
-  noTint();
-}
-
-
-// apply effect stack "hi-fi colored"
-function applyHiFiColoredEffect(img, stack_data) {
-
-  setBrightness(img, stack_data["new_brightness"]);
-  img_2 = img.get(); // copy image pixels
   img_3 = img.get(); // copy image pixels
 
   // 1. Full image
   blendMode(BLEND);
   setContrast(img, stack_data["contrast"]);
   img.resize(img.width / stack_data["pix_scaling"], 0);
-  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);}
   tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
   img.resizeNN(img.width * stack_data["pix_scaling"], 0);
   image(img, image_border[0] / 2, image_border[1] / 2);
@@ -353,22 +314,24 @@ function applyHiFiColoredEffect(img, stack_data) {
   blendMode(ADD);
   noTint();
   grayscale(img_2, stack_data["contrast"]);
-  img_2.resize(img_2.width / (stack_data["pix_scaling"] / 2), 0);
+  img_2.resize(img_2.width / stack_data["pix_scaling"], 0);
   brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
-  makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);
-  img_2.resizeNN(img_2.width * stack_data["pix_scaling"] / 2, 0);
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);}
+  tint(stack_data["tint_palette_2"][0], stack_data["tint_palette_2"][1], stack_data["tint_palette_2"][2]);
+  img_2.resizeNN(img_2.width * stack_data["pix_scaling"], 0);
   image(img_2, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
 
   // 3. Dark part of the image
-  blendMode(ADD);
+  blendMode(DIFFERENCE);
+  noTint();
   grayscale(img_3, stack_data["contrast"]);
   img_3.resize(img_3.width / stack_data["pix_scaling_dark"], 0);
   brightnessMask(img_3, stack_data["mask_contrast"], stack_data["dark_treshold"], !stack_data["invert_mask"]);
-  makeDithered(img_3, stack_data["nr_of_levels"], stack_data["dither_params_3"]);
-  tint(stack_data["tint_palette_2"][0], stack_data["tint_palette_2"][1], stack_data["tint_palette_2"][2]);
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img_3, stack_data["nr_of_levels"], stack_data["dither_params_3"]);}
+  tint(stack_data["tint_palette_3"][0], stack_data["tint_palette_3"][1], stack_data["tint_palette_3"][2]);
   img_3.resizeNN(img_3.width * stack_data["pix_scaling_dark"], 0);
   image(img_3, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
-
+  
   blendMode(BLEND);
   noTint();
 }
@@ -384,7 +347,7 @@ function applyNoisyEffect(img, stack_data) {
   blendMode(BLEND);
   setContrast(img, stack_data["contrast"]);
   img.resize(img.width / stack_data["pix_scaling"], 0);
-  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);}
 
   switch (stack_data["sorting_order"]) {
     case 0:
@@ -405,23 +368,8 @@ function applyNoisyEffect(img, stack_data) {
       break;
   }
 
-  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
-
-  switch (stack_data["tinting_mode"]) {
-    case 1:
-      tint_palette_key_1 = 'magenta';
-      tint_palette_1 = three_bit_palette[tint_palette_key_1];
-      tint(tint_palette_1[0], tint_palette_1[1], tint_palette_1[2]);
-      break;
-    case 2:
-      tint_palette_key_1 = 'cyan';
-      tint_palette_1 = three_bit_palette[tint_palette_key_1];
-      tint(tint_palette_1[0], tint_palette_1[1], tint_palette_1[2]);
-      break;
-    default:
-      // no tinting
-      break;
-  }
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);}
+  tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
 
   img.resizeNN(img.width * stack_data["pix_scaling"], 0);
   image(img, image_border[0] / 2, image_border[1] / 2);
@@ -432,7 +380,8 @@ function applyNoisyEffect(img, stack_data) {
   grayscale(img_2, stack_data["contrast"]);
   img_2.resize(img_2.width / stack_data["pix_scaling"], 0);
   brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
-  makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);}
+  tint(stack_data["tint_palette_2"][0], stack_data["tint_palette_2"][1], stack_data["tint_palette_2"][2]);
   img_2.resizeNN(img_2.width * stack_data["pix_scaling"], 0);
   image(img_2, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
 
@@ -452,43 +401,27 @@ function applyCorruptedEffect(img, stack_data) {
   setContrast(img, stack_data["contrast"]);
   img.resize(img.width / stack_data["pix_scaling"], 0);
 
-  switch (stack_data["sorting_order"]) {
+  switch (stack_data["sorting_order_1"]) {
     case 0:
-      pixelSortColumn(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortColumn(img, stack_data["sorting_mode_1"], stack_data["sorting_type_1"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     case 1:
-      pixelSortRow(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortRow(img, stack_data["sorting_mode_1"], stack_data["sorting_type_1"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     case 2:
-      pixelSortColumn(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
-      pixelSortRow(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortColumn(img, stack_data["sorting_mode_1"], stack_data["sorting_type_1"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortRow(img, stack_data["sorting_mode_1"], stack_data["sorting_type_1"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     case 3:
-      pixelSortRow(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
-      pixelSortColumn(img, stack_data["sorting_mode"], stack_data["sorting_type"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortRow(img, stack_data["sorting_mode_1"], stack_data["sorting_type_1"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortColumn(img, stack_data["sorting_mode_1"], stack_data["sorting_type_1"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
       break;
     default:
       break;
   }
 
-  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
-
-  switch (stack_data["tinting_mode"]) {
-    case 1:
-      tint_palette_key_1 = 'magenta';
-      tint_palette_1 = three_bit_palette[tint_palette_key_1];
-      tint(tint_palette_1[0], tint_palette_1[1], tint_palette_1[2]);
-      break;
-    case 2:
-      tint_palette_key_1 = 'cyan';
-      tint_palette_1 = three_bit_palette[tint_palette_key_1];
-      tint(tint_palette_1[0], tint_palette_1[1], tint_palette_1[2]);
-      break;
-    default:
-      // no tinting
-      break;
-  }
-
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);}
+  tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
   img.resizeNN(img.width * stack_data["pix_scaling"], 0);
   image(img, image_border[0] / 2, image_border[1] / 2);
 
@@ -498,7 +431,30 @@ function applyCorruptedEffect(img, stack_data) {
   grayscale(img_2, stack_data["contrast"]);
   img_2.resize(img_2.width / stack_data["pix_scaling"], 0);
   brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
-  makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);
+  
+  if (stack_data["second_sorting"]) {
+    switch (stack_data["sorting_order_2"]) {
+      case 0:
+        pixelSortColumn(img_2, stack_data["sorting_mode_2"], stack_data["sorting_type_2"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+        break;
+      case 1:
+        pixelSortRow(img_2, stack_data["sorting_mode_2"], stack_data["sorting_type_2"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+        break;
+      case 2:
+        pixelSortColumn(img_2, stack_data["sorting_mode_2"], stack_data["sorting_type_2"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+        pixelSortRow(img_2, stack_data["sorting_mode_2"], stack_data["sorting_type_2"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+        break;
+      case 3:
+        pixelSortRow(img_2, stack_data["sorting_mode_2"], stack_data["sorting_type_2"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+        pixelSortColumn(img_2, stack_data["sorting_mode_2"], stack_data["sorting_type_2"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+        break;
+      default:
+        break;
+    }
+  }
+  
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);}
+  tint(stack_data["tint_palette_2"][0], stack_data["tint_palette_2"][1], stack_data["tint_palette_2"][2]);
   img_2.resizeNN(img_2.width * stack_data["pix_scaling"], 0);
   image(img_2, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
 
@@ -571,6 +527,7 @@ function animateEffectStack(img, stack_data_main, stack_data_background, downloa
   // save original contrast and brightness so we can restore them later
   let original_contrast = stack_data_main["contrast"];
   let original_new_brightness = stack_data_main["new_brightness"];
+  let original_alpha_brightness = stack_data_background["alpha_brightness"];
 
   // apply effects to individual frames and add them to the gif animation
   for (let i = 0; i < nr_of_frames; i++) {
@@ -580,19 +537,15 @@ function animateEffectStack(img, stack_data_main, stack_data_background, downloa
     buffer_graphics.background(stack_data_background["alpha_brightness"] * 2.55);
     let buffer_image = createImage(buffer_graphics.width, buffer_graphics.height);
     buffer_image.copy(buffer_graphics, 0, 0, buffer_graphics.width, buffer_graphics.height, 0, 0, buffer_graphics.width, buffer_graphics.height);
-
-    //setEffectData("corrupted");
-
-    //applyCorruptedEffect(buffer_image, stack_data_background);
     let chosen_effect_function_background = stack_data_background["chosen_effect_function"];
     chosen_effect_function_background(buffer_image, stack_data_background)
 
-    //setEffectData("mono");
-
     // apply effect stack to canvas
-    //stack_data_main["chosen_effect_function"](frames[i], stack_data_main);
     let chosen_effect_function = stack_data_main["chosen_effect_function"];
     chosen_effect_function(frames[i], stack_data_main);
+
+    // inverts the colors of the canvas
+    if (invert_input) {filter(INVERT);}
 
     // add frame to gif with canvas.elt which calls underlying HTML element
     if (download == true) { gif.addFrame(canvas.elt, { delay: frame_duration, copy: true }); }
@@ -602,14 +555,14 @@ function animateEffectStack(img, stack_data_main, stack_data_background, downloa
     // change contrast and brightness slightly to get a shimmering effect during animation
     stack_data_main["contrast"] += stack_data_main["contrast_delta"][0] * stack_data_main["delta_factor"];
     stack_data_main["new_brightness"] += stack_data_main["brightness_delta"][0] * stack_data_main["delta_factor"];
+    stack_data_background["alpha_brightness"] += stack_data_background["brightness_delta"][0] * stack_data_background["delta_factor"];
 
-    //gene.reset(); // reset the seed for the randminter so we get the same values
-    // same as $fx.randminter.reset();
   }
 
   // restoring values for contrast and brightness so they don't accumulate every time we save the gif animation
   stack_data_main["contrast"] = original_contrast;
   stack_data_main["new_brightness"] = original_new_brightness;
+  stack_data_background["alpha_brightness"] = original_alpha_brightness;
 
   // render gif when done
   if (download == true) { gif.render(); }

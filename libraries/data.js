@@ -23,6 +23,7 @@ let effects_background_name = $fx.getParam("effect_background"); // type of effe
 let format = $fx.getParam("format"); // get format string from params
 let quality = $fx.getParam("quality"); // corresponds to the number of coefficients being selected, higher is better, 1-10
 let quant_f = $fx.getParam("quant_f"); // additional factor which modifies quantization levels, higher means stronger compression, needs to be >= 1
+let invert_input = $fx.getParam("invert_input"); // inverts both the input image and the effects applied to it after
 
 if (format == "portrait") { squares_nr = [16, 25]; } // portrait proportion
 else if (format == "landscape") { squares_nr = [25, 16]; } // landscape proportion
@@ -133,6 +134,8 @@ const three_bit_palette = {
   'blue' : [0, 0, 255],
   'magenta' : [255, 0, 255],
   'cyan' : [0, 255, 255],
+  'yellow' : [255, 255, 0],
+  'white' : [255, 255, 255],
 };
 
 

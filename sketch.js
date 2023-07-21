@@ -51,7 +51,11 @@ function setup() {
   select('canvas').id('retrodigitizer'); // change id of the canvas
   select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2); // move canvas to the middle of the browser window
 
-  
+  // check this:
+  // https://stackoverflow.com/questions/75489567/how-to-set-canvas-attributes-from-p5-js
+  console.log(drawingContext.getContextAttributes());
+
+
   // DESERIALIZE AN INPUT IMAGE - if signal param is not empty, which means it was stored already before
   if ($fx.getParam("signal").length != 0) {
 

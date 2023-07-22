@@ -2293,6 +2293,9 @@ function resizeThumbnailAndSerialize(thumbnail) {
   // additional flag for when thumbnail is ready for use
   thumbnail_ready = true;
 
+  // reset the frame counter for every image drop
+  frame_counter_after_drop = 0;
+
   // serializes and draws the image
   serializeSignal(thumbnail);
 

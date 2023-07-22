@@ -53,7 +53,7 @@ function setup() {
 
   // check this:
   // https://stackoverflow.com/questions/75489567/how-to-set-canvas-attributes-from-p5-js
-  console.log(drawingContext.getContextAttributes());
+  //console.log(drawingContext.getContextAttributes());
 
 
   // DESERIALIZE AN INPUT IMAGE - if signal param is not empty, which means it was stored already before
@@ -96,6 +96,14 @@ function draw() {
   }
 
 
+  // ERA SCREEN - will disappear when era is selected by clicking
+  if (era_screen) {
+
+    era_zone = getEra(); // get the currently selected era (mouse hover)
+    showEraScreen();
+  }
+
+
   // DROP SCREEN - will disappear when the image is dropped onto the canvas
   if (drop_screen) {
 
@@ -106,6 +114,7 @@ function draw() {
     canvas.dragOver(highlightDrop); // triggered when we drag a file over the canvas to drop it
     canvas.dragLeave(unhighlightDrop); // triggered when we finish dragging the file over the canvas to drop it
   }
+
 
   // EDITING SIGNAL - if signal is not empty and thumbnail is loaded, draw the image on the screen
   if ((signal.length != 0) && (thumbnail)) {

@@ -15,11 +15,13 @@ let frame_counter_after_drop = 0; // this will increment inside draw()
 let nr_of_frames = 2; // number of frames in a gif animation
 let thumbnail_scale = 5; // scaling factor for the input image
 let drop_zone = 0; // 0, 1, 2, 3 - none, square, portrait, landscape
+let era_zone = 0; // 0, 1, 2 - none, '80s, '90s
 let offset_rgb = [-25, -25, 25]; // rgb offset applied to the droped image - just for preview purposes during editing, the actual pixel values are not changes
 let signal = ""; // initialize the signal, this is where the image data will be stored
 
 let effects_main_name = $fx.getParam("effect_main"); // type of effects workflow to be used on the main image
 let effects_background_name = $fx.getParam("effect_background"); // type of effects workflow to be used on the background
+let effect_era = $fx.getParam("effect_era"); // era of the effects
 let format = $fx.getParam("format"); // get format string from params
 let quality = $fx.getParam("quality"); // corresponds to the number of coefficients being selected, higher is better, 1-10
 let quant_f = $fx.getParam("quant_f"); // additional factor which modifies quantization levels, higher means stronger compression, needs to be >= 1
@@ -35,7 +37,8 @@ let canvas_dim = [target_dim[0] * thumbnail_scale, target_dim[1] * thumbnail_sca
 let decompressed_signal_size = squares_nr[0] * squares_nr[1] * quality;
 
 let start_screen = true; // this will show the start screen at the beginning and be switched off after any key is pressed
-let drop_screen = false; // drop screen will come after start screen and be switched off after the image is dropped
+let era_screen = false; // era screen will come after start screen and be switched off when era is selected by clicking
+let drop_screen = false; // drop screen will come after era screen and be switched off after the image is dropped
 let file_over_canvas = false; // trigger to check if the file is dragged over the canvas or not
 let thumbnail_ready = false; // additional flag for when thumbnail is ready for use
 let display_signal = false; // display signal characters at key press

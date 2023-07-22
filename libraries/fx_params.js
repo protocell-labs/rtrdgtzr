@@ -72,7 +72,7 @@ $fx.params([
     name: "Era",
     type: "select",
     default: "80-ties",
-    update: "page-reload",
+    update: "code-driven",
     options: {
       options: ["'80s", "'90s"],
     }

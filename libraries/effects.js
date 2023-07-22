@@ -1333,6 +1333,72 @@ function showStartScreen() {
 }
 
 
+// show screen for choosing the era
+function showEraScreen() {
+  let txt_shift, offset_y, txt, txt_size;
+  let color_a, color_b, color_c;
+
+  let animation_state = frame_counter % 10 < 6;
+
+  // switch pink and cyan depending on the frame
+  if (animation_state) { color_a = color(255, 0, 255); color_b = color(0, 255, 255); }
+  else { color_a = color(0, 255, 255); color_b = color(255, 0, 255); }
+  color_c = color(255, 255, 255);
+
+  background(0);
+
+  textFont(manaspace);
+  textAlign(CENTER, CENTER);
+  noStroke();
+
+  offset_y = 0;
+  txt_size = 80;
+  txt_shift = 5;
+  txt = "+            +\n\n\n\n\n\n\n+            +";
+
+  showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
+
+  offset_y = -180;
+  txt_size = 40;
+  txt_shift = 2;
+  txt = "take me back\nto the ...";
+
+  showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
+
+
+  // '80s selected
+  if (era_zone == 1) {
+
+    txt = frame_counter % 20 < 17 ? "`\n'80s" : "\n'80s";
+    showText(txt, width / 3, height / 2, 80, 5, 0, color_a, color_b, color_c);
+    showText("'90s", 2 * width / 3, height / 2, 40, 2, 0, color_a, color_b, color_c);
+    
+    // '90s selected
+  } else if (era_zone == 2) {
+
+    txt = frame_counter % 20 < 17 ? "`\n'90s" : "\n'90s";
+    showText("'80s", width / 3, height / 2, 40, 2, 0, color_a, color_b, color_c);
+    showText(txt, 2 * width / 3, height / 2, 80, 5, 0, color_a, color_b, color_c);
+    
+    // nothing selected
+  } else {
+
+    showText("'80s", width / 3, height / 2, 40, 2, 0, color_a, color_b, color_c);
+    showText("'90s", 2 * width / 3, height / 2, 40, 2, 0, color_a, color_b, color_c);
+    
+  }
+
+}
+
+
+// return the indicator for the era
+function getEra() {
+  if ((mouseX > width) || (mouseY > height) || (mouseX < 0) || (mouseY < 0)) { return 0; } // early termination - return 0 is outside the canvas
+  else if (mouseX < width / 2) { return 1; } // '80s selected
+  else if (mouseX > width / 2) { return 2; } // '90s selected
+}
+
+
 // show screen for dropping the image
 function showDropScreen() {
   let txt_shift, offset_y, txt, txt_size;
@@ -1396,24 +1462,34 @@ function showDropScreen() {
   // reset dash values
   drawingContext.setLineDash([]);
 
+  textFont(manaspace);
+  textAlign(CENTER, CENTER);
+  noStroke();
+
+  offset_y = 0;
   txt_size = 80;
   txt_shift = 5;
-  offset_y = 0;
-
+  
   // text proportion for square format
   if (drop_zone == 0) { txt = frame_counter % 20 < 17 ? "+            +\n\n`\ndrop\nimg\n^\n\n+            +" : "+            +\n\n\ndrop\nimg\n\n\n+            +"; }
   else { txt = "+            +\n\n\n\n\n\n\n+            +"; }
 
-  textFont(manaspace);
-  textAlign(CENTER, CENTER);
-  noStroke();
-  textSize(txt_size);
-
   showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
+
+  offset_y = 280;
+  txt_size = 20;
+  txt_shift = 1;
+  textAlign(LEFT, CENTER);
+
+  // text proportion for square format
+  txt = "DISCLAIMER: ensure you own the rights to the image, or that it is in the public domain";
+  
+  showTextBox(txt, width / 2 + 20, height / 2, txt_size, txt_shift, offset_y, width / 1.8, 100, color_a, color_b, color_c);
 
   offset_y = -220;
   txt_size = 30;
   txt_shift = 2;
+  textAlign(CENTER, CENTER);
 
   // square selected
   if (drop_zone == 1) {
@@ -1437,6 +1513,8 @@ function showDropScreen() {
 
 // shows signal info as text on the canvas
 function showSignalInfo() {
+  let txt_shift, txt_size, signal_info_txt;
+  let signal_info_txt_1, signal_info_txt_2, signal_info_txt_3, signal_info_txt_4, signal_info_txt_5, signal_info_txt_6;
   let color_a, color_b, color_c;
 
   let animation_state = frame_counter % 10 < 6;
@@ -1447,35 +1525,72 @@ function showSignalInfo() {
   color_c = color(255, 255, 255);
 
   decompressed_signal_size = squares_nr[0] * squares_nr[1] * quality;
-  let signal_info_txt_1 = "decompressed chars > " + decompressed_signal_size.toString() + "\n";
+  signal_info_txt_1 = "decompressed chars > " + decompressed_signal_size.toString() + "\n";
 
   compressed_signal_size = signal.length;
   compression_ratio = compressed_signal_size / decompressed_signal_size;
-  let signal_info_txt_2 = "compressed chars > " + compressed_signal_size + "\n";
+  signal_info_txt_2 = "compressed chars > " + compressed_signal_size + "\n";
 
-  let signal_info_txt_3 = "";
+  signal_info_txt_3 = "";
   if (compressed_signal_size > 1900) { signal_info_txt_3 = "chars over limit > " + (compressed_signal_size - 1900).toString() + "\n"; }
   else { signal_info_txt_3 = "chars fit into params\n"; }
 
-  let signal_info_txt_4 = "compression ratio > " + Math.round(compression_ratio * 100).toString() + "%\n";
+  signal_info_txt_4 = "compression ratio > " + Math.round(compression_ratio * 100).toString() + "%\n";
 
-  let signal_info_txt_5 = "quality > " + quality.toString() + "\n";
-  let signal_info_txt_6 = "quantization > " + quant_f.toString();
+  signal_info_txt_5 = "quality > " + quality.toString() + "\n";
+  signal_info_txt_6 = "quantization > " + quant_f.toString();
 
   textFont(manaspace);
   textAlign(RIGHT, BOTTOM);
   noStroke();
 
-  let txt_size = 20;
-  let txt_shift = 1;
-  let signal_info_txt = signal_info_txt_1 + signal_info_txt_2 + signal_info_txt_3 + signal_info_txt_4 + signal_info_txt_5 + signal_info_txt_6;
+  txt_size = 20;
+  txt_shift = 1;
+  signal_info_txt = signal_info_txt_1 + signal_info_txt_2 + signal_info_txt_3 + signal_info_txt_4 + signal_info_txt_5 + signal_info_txt_6;
 
   showText(signal_info_txt, width - 20, height - 20, txt_size, txt_shift, 0, color_a, color_b, color_c)
+
+
+  // in case the image is re-dropped
+  textFont(manaspace);
+  textAlign(CENTER, CENTER);
+  noStroke();
+
+  offset_y = 0;
+  txt_size = 30;
+  txt_shift = 2;
+
+  // square selected
+  if (drop_zone == 1) {
+    txt = "   `                         \nsquare < portrait > landscape\n   ^                         ";
+    showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
+
+    // portrait selected
+  } else if (drop_zone == 2) {
+    txt = "             `                \nsquare < portrait > landscape\n             ^                ";
+    showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
+
+    // landscape selected
+  } else if (drop_zone == 3) {
+    txt = "                        `    \nsquare < portrait > landscape\n                        ^    ";
+    showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
+  }
+
+  // any of the formats selected
+  if (drop_zone > 0) {
+    offset_y = -120;
+    txt_size = 60;
+    txt_shift = 3;
+    txt = "redrop img";
+    showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
+  }
+  
 }
 
 
 // show signal characters as text on the canvas
 function showSignalOnScreen() {
+  let txt_shift, offset_y, txt_size, txt_box_width, txt_box_height;
   let color_a, color_b, color_c;
 
   let animation_state = frame_counter % 10 < 6;
@@ -1491,17 +1606,19 @@ function showSignalOnScreen() {
   rectMode(CENTER);
   noStroke();
 
-  let txt_size = 15;
-  let txt_shift = 1;
-  let txt_box_width = width - 40;
-  let txt_box_height = height - 40;
+  txt_size = 15;
+  txt_shift = 1;
+  offset_y = 0;
+  txt_box_width = width - 40;
+  txt_box_height = height - 40;
 
-  showTextBox(signal, width / 2, height / 2, txt_size, txt_shift, txt_box_width, txt_box_height, color_a, color_b, color_c);
+  showTextBox(signal, width / 2, height / 2, txt_size, txt_shift, offset_y, txt_box_width, txt_box_height, color_a, color_b, color_c);
 }
 
 
 // shows controls info as text on the canvas
 function showControlInfo() {
+  let txt_size, txt_shift, controls_info_txt;
   let color_a, color_b, color_c;
 
   let animation_state = frame_counter % 10 < 6;
@@ -1515,16 +1632,19 @@ function showControlInfo() {
   textAlign(LEFT, BOTTOM);
   noStroke();
 
-  let txt_size = 20;
-  let txt_shift = 1;
-  let controls_info_txt = "CONTROLS\n<> : -+ quality\n`^ : -+ quantization\nclick : -+ square\nc : show/hide signal\nrefresh : fix image\n";
+  txt_size = 20;
+  txt_shift = 1;
 
+  if (frame_counter % 20 < 13) {controls_info_txt = "CONTROLS\n<> : -+ quality\n`^ : -+ quantization\nclick : -+ square\nc : show/hide signal\nredrop : new image\nrefresh : fix image";}
+  else {controls_info_txt = "CONTROLS\n<> : -+ quality\n`^ : -+ quantization\nclick : -+ square\nc : show/hide signal\nredrop : new image\n";}
+  
   showText(controls_info_txt, 20, height - 20, txt_size, txt_shift, 0, color_a, color_b, color_c)
 }
 
 
 // shows load info as text on the canvas
 function showAfterImageLoad() {
+  let txt_size, txt_shift, loading_txt;
   let color_a, color_b, color_c;
 
   let animation_state = frame_counter % 10 < 6;
@@ -1534,14 +1654,13 @@ function showAfterImageLoad() {
   else { color_a = color(0, 255, 255); color_b = color(255, 0, 255); }
   color_c = color(255, 255, 255);
 
-
   textFont(manaspace);
   textAlign(CENTER, CENTER);
   noStroke();
 
-  let txt_size = 30;
-  let txt_shift = 2;
-  let loading_txt = "image loaded!\n\ncropped + resized + centered\n\n" + target_dim[0].toString() + " x " + target_dim[1].toString() + " pix";
+  txt_size = 30;
+  txt_shift = 2;
+  loading_txt = "image loaded!\n\ncropped + resized + centered\n\n" + target_dim[0].toString() + " x " + target_dim[1].toString() + " pix";
 
   showText(loading_txt, width / 2, height / 2, txt_size, txt_shift, 0, color_a, color_b, color_c)
 }
@@ -1560,14 +1679,14 @@ function showText(txt, x, y, txt_size, txt_shift, offset_y, color_a, color_b, co
 
 
 // show stylized text on the canvas with a bounding box
-function showTextBox(txt, x, y, txt_size, txt_shift, txt_box_width, txt_box_height, color_a, color_b, color_c) {
+function showTextBox(txt, x, y, txt_size, txt_shift, offset_y, txt_box_width, txt_box_height, color_a, color_b, color_c) {
   textSize(txt_size);
   fill(color_a);
-  text(txt, x + txt_shift * 2, y + txt_shift * 2, txt_box_width, txt_box_height);
+  text(txt, x + txt_shift * 2, y + txt_shift * 2 + offset_y, txt_box_width, txt_box_height);
   fill(color_b);
-  text(txt, x + txt_shift, y + txt_shift, txt_box_width, txt_box_height);
+  text(txt, x + txt_shift, y + txt_shift + offset_y, txt_box_width, txt_box_height);
   fill(color_c);
-  text(txt, x, y, txt_box_width, txt_box_height);
+  text(txt, x, y + offset_y, txt_box_width, txt_box_height);
 }
 
 
@@ -1586,17 +1705,20 @@ function gotFile(file) {
 
 // triggered when we drag a file over the canvas to drop it
 function highlightDrop() {
-  file_over_canvas = true;
+  //file_over_canvas = true;
   drop_zone_x = Math.floor(mouseX / (width / 3)) + 1;
-  drop_zone_y = Math.floor(mouseY / (height / 3));
+  drop_zone_y = Math.floor(mouseY / (height / 4));
   // drop_zone equals drop_zone_x if drop_zone_y is "middle" of the screen, otherwise it's zero
-  drop_zone = drop_zone_y == 1 ? drop_zone_x : 0;
+  drop_zone = ((drop_zone_y == 1) || (drop_zone_y == 2)) ? drop_zone_x : 0;
+
+  // if the mouse is close to the edge of the canvas, drop_zone is 0
+  if ((mouseX > width - 50) || (mouseX < 50)) { drop_zone = 0; }
 }
 
 
 // triggered when we finish dragging the file over the canvas to drop it
 function unhighlightDrop() {
-  file_over_canvas = false;
+  //file_over_canvas = false;
 }
 
 
@@ -2145,6 +2267,9 @@ function resizeThumbnailAndSerialize(thumbnail) {
     squares_nr = [25, 16];
   }
 
+  // reset drop_zone so we can re-drop an image later
+  drop_zone = 0;
+
   // recalculate dimensions
   w_h_ratio = squares_nr[0] / squares_nr[1];
   target_dim = [squares_nr[0] * 8, squares_nr[1] * 8];
@@ -2181,8 +2306,22 @@ function resizeThumbnailAndSerialize(thumbnail) {
 
 // called once every time a mouse button is clicked
 function mouseClicked() {
+
   // early termination - exit function if the click is outside the canvas
   if ((mouseX > width) || (mouseY > height) || (mouseX < 0) || (mouseY < 0)) { return false; }
+
+  // clicking on the era screen
+  if (era_screen) {
+    era_screen = false; // turning off era screen
+    drop_screen = true; // turning on drop screen
+
+    era_zone = getEra(); // get the currently selected era (mouse hover)
+    effect_era = era_zone == 1 ? "'80s" : "'90s";
+
+    $fx.emit("params:update", {
+      effect_era: effect_era,
+    });
+  }
 
   // selecting transparent squares on the image
   // works only if the thumbnail was already loaded (during editing phase)
@@ -2267,9 +2406,9 @@ function mouseClicked() {
 // called once every time a key is pressed
 function keyPressed() {
 
-  // press any key to switch from start to drop screen
+  // press any key to switch from start to era screen
   if (start_screen) {
-    drop_screen = true;
+    era_screen = true;
     start_screen = false; // this will never become true again
   }
 

@@ -61,24 +61,43 @@ function setEffectData(effects_stack_name) {
 
       data["nr_of_levels"] = 1;
 
-      data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
-      data["rand_dither_key_2"] = gene_pick_key(extreme_dither_params_json);
-      data["rand_dither_key_3"] = gene_pick_key(dither_params_json);
+      if (gene() < 0.25) {
+        data["rand_dither_key_1"] = gene_pick_key(extreme_dither_params_json);
+        data["dither_params_1"] = extreme_dither_params_json[ data["rand_dither_key_1"] ];
+      } else {
+        data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
+        data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"] ];
+      }
 
-      data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"] ];
-      data["dither_params_2"] = extreme_dither_params_json[ data["rand_dither_key_2"] ];
-      data["dither_params_3"] = dither_params_json[ data["rand_dither_key_3"] ];
+      if (gene() < 0.25) {
+        data["rand_dither_key_2"] = gene_pick_key(extreme_dither_params_json);
+        data["dither_params_2"] = extreme_dither_params_json[ data["rand_dither_key_2"] ];
+      } else {
+        data["rand_dither_key_2"] = gene_pick_key(dither_params_json);
+        data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"] ];
+      }
+
+      if (gene() < 0.25) {
+        data["rand_dither_key_3"] = gene_pick_key(extreme_dither_params_json);
+        data["dither_params_3"] = extreme_dither_params_json[ data["rand_dither_key_3"] ];
+      } else {
+        data["rand_dither_key_3"] = gene_pick_key(dither_params_json);
+        data["dither_params_3"] = dither_params_json[ data["rand_dither_key_3"] ];
+      }
 
       data["pix_scaling"] = 2.0;
+      data["pix_scaling_dark"] = 2.0;
       data["layer_shift"] = 4;
       data["dark_treshold"] = 20;
       data["invert_mask"] = false;
 
-      data["tint_palette_key_1"] = gene_pick_key(three_bit_palette_reduced);
-      data["tint_palette_1"] = three_bit_palette_reduced[ data["tint_palette_key_1"] ];
-
-      // if tint color is white or green (these are very bright) then the size of dither pixels in darkest regions is smallest possible
-      data["pix_scaling_dark"] = (data["tint_palette_key_1"] == 'white') || (data["tint_palette_key_1"] == 'green') ? 1.0 : data["pix_scaling"] * 2;
+      if (gene() < 0.25) {
+        data["tint_palette_key_1"] = "white";
+        data["tint_palette_1"] = three_bit_palette[ data["tint_palette_key_1"] ];
+      } else {
+        data["tint_palette_key_1"] = gene_pick_key(three_bit_palette);
+        data["tint_palette_1"] = three_bit_palette[ data["tint_palette_key_1"] ];
+      }
 
       data["delta_factor"] = 0.5; // scaling animation effects
       data["chosen_effect_function"] = applyMonoEffect;
@@ -146,10 +165,22 @@ function setEffectData(effects_stack_name) {
 
       data["nr_of_levels"] = 1;
 
-      data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
-      data["rand_dither_key_2"] = gene_pick_key(dither_params_json);
-      data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"] ];
-      data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"] ];
+      if (gene() < 0.25) {
+        data["rand_dither_key_1"] = gene_pick_key(extreme_dither_params_json);
+        data["dither_params_1"] = extreme_dither_params_json[ data["rand_dither_key_1"] ];
+      } else {
+        data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
+        data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"] ];
+      }
+
+      if (gene() < 0.25) {
+        data["rand_dither_key_2"] = gene_pick_key(extreme_dither_params_json);
+        data["dither_params_2"] = extreme_dither_params_json[ data["rand_dither_key_2"] ];
+      } else {
+        data["rand_dither_key_2"] = gene_pick_key(dither_params_json);
+        data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"] ];
+      }
+
       data["pix_scaling"] = 2.0;
       data["layer_shift"] = 4;
       data["invert_mask"] = false;
@@ -186,10 +217,22 @@ function setEffectData(effects_stack_name) {
 
       data["nr_of_levels"] = 1;
 
-      data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
-      data["rand_dither_key_2"] = gene_pick_key(dither_params_json);
-      data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"]];
-      data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"]];
+      if (gene() < 0.25) {
+        data["rand_dither_key_1"] = gene_pick_key(extreme_dither_params_json);
+        data["dither_params_1"] = extreme_dither_params_json[ data["rand_dither_key_1"] ];
+      } else {
+        data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
+        data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"] ];
+      }
+
+      if (gene() < 0.25) {
+        data["rand_dither_key_2"] = gene_pick_key(extreme_dither_params_json);
+        data["dither_params_2"] = extreme_dither_params_json[ data["rand_dither_key_2"] ];
+      } else {
+        data["rand_dither_key_2"] = gene_pick_key(dither_params_json);
+        data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"] ];
+      }
+
       data["pix_scaling"] = 2.0;
       data["layer_shift"] = 4;
       data["invert_mask"] = false;
@@ -213,7 +256,7 @@ function setEffectData(effects_stack_name) {
       data["sorting_mode"] = 2; // this mode works best for this workflow
       data["sorting_type"] = gene_rand_int(0, 2); // 0, 1
       data["sorting_order"] = gene_rand_int(0, 3); // 0, 1, 2
-      data["color_noise_density"] = 5;
+      data["color_noise_density"] = gene() < 0.35 ? 50 : 5;
       data["rand_color_bias_key"] = gene_pick_key(color_bias_palette);
       data["color_noise_bias"] = color_bias_palette[ data["rand_color_bias_key"] ];
       data["color_noise_variation"] = 10000;
@@ -240,7 +283,6 @@ function setEffectData(effects_stack_name) {
       data["layer_shift"] = 4;
 
       data["invert_mask"] = false;
-      data["tinting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
 
       data["delta_factor"] = 0.05; // scaling animation effects
       data["chosen_effect_function"] = applyLoFiEffect;
@@ -270,21 +312,23 @@ function applyMonoEffect(img, stack_data) {
   blendMode(BLEND); // make sure to set blendMode back to default one just in case
   noTint();
   img.resize(img.width / stack_data["pix_scaling"], 0);
-  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);}
+  tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
   img.resizeNN(img.width * stack_data["pix_scaling"], 0);
   image(img, image_border[0] / 2, image_border[1] / 2);
 
   // 2. Bright part of the image
   blendMode(BLEND);
   brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
-  makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);}
+  tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
   image(img_2, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
 
   // 3. Dark part of the image
   blendMode(ADD);
   img_3.resize(img_3.width / stack_data["pix_scaling_dark"], 0);
   brightnessMask(img_3, stack_data["mask_contrast"], stack_data["dark_treshold"], !stack_data["invert_mask"]);
-  makeDithered(img_3, stack_data["nr_of_levels"], stack_data["dither_params_3"]);
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img_3, stack_data["nr_of_levels"], stack_data["dither_params_3"]);}
   tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
   img_3.resizeNN(img_3.width * stack_data["pix_scaling_dark"], 0);
   image(img_3, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
@@ -472,7 +516,7 @@ function applyLoFiEffect(img, stack_data) {
   blendMode(BLEND);
   grayscale(img, stack_data["contrast"]);
   img.resize(img.width / stack_data["pix_scaling"], 0);
-  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);}
   img.resizeNN(img.width * stack_data["pix_scaling"] / 2.0, 0); // we resize back only half way
 
   // here we had to take out pixelSortRow option as it didn't produce nice results
@@ -492,7 +536,7 @@ function applyLoFiEffect(img, stack_data) {
       break;
   }
 
-  makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);}
   img.resizeNN(img.width * 2.0, 0); // we resize back double to get to the size of the original input image
   image(img, image_border[0] / 2, image_border[1] / 2);
 

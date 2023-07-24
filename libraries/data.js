@@ -2,14 +2,35 @@
 // by @LukaPiskorec, 2023
 
 
-let input_img, frame_to_draw, buffer_frames, squares_nr, gif, canvas;
+let banner_txt = "";
+banner_txt += "\n ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::";
+banner_txt += "\n ::::::::::::::'########::'########:'########:'########:::'#######:::::::::::::::";
+banner_txt += "\n :::::::::::::: ##.... ##: ##.....::... ##..:: ##.... ##:'##.... ##::::::::::::::";
+banner_txt += "\n :::::::::::::: ##:::: ##: ##:::::::::: ##:::: ##:::: ##: ##:::: ##::::::::::::::";
+banner_txt += "\n :::::::::::::: ########:: ######:::::: ##:::: ########:: ##:::: ##::::::::::::::";
+banner_txt += "\n :::::::::::::: ##.. ##::: ##...::::::: ##:::: ##.. ##::: ##:::: ##::::::::::::::";
+banner_txt += "\n :::::::::::::: ##::. ##:: ##:::::::::: ##:::: ##::. ##:: ##:::: ##::::::::::::::";
+banner_txt += "\n :::::::::::::: ##:::. ##: ########:::: ##:::: ##:::. ##:. #######:::::::::::::::";
+banner_txt += "\n ::::::::::::::..:::::..::........:::::..:::::..:::::..:::.......::::::::::::::::";
+banner_txt += "\n'########::'####::'######:::'####:'########:'####:'########:'########:'########::";
+banner_txt += "\n ##.... ##:. ##::'##... ##::. ##::... ##..::. ##::..... ##:: ##.....:: ##.... ##:";
+banner_txt += "\n ##:::: ##:: ##:: ##:::..:::: ##::::: ##::::: ##:::::: ##::: ##::::::: ##:::: ##:";
+banner_txt += "\n ##:::: ##:: ##:: ##::'####:: ##::::: ##::::: ##::::: ##:::: ######::: ########::";
+banner_txt += "\n ##:::: ##:: ##:: ##::: ##::: ##::::: ##::::: ##:::: ##::::: ##...:::: ##.. ##:::";
+banner_txt += "\n ##:::: ##:: ##:: ##::: ##::: ##::::: ##::::: ##::: ##:::::: ##::::::: ##::. ##::";
+banner_txt += "\n ########::'####:. ######:::'####:::: ##::::'####: ########: ########: ##:::. ##:";
+banner_txt += "\n........:::....:::......::::....:::::..:::::....::........::........::..:::::..::";
+banner_txt += "\n:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::";
+banner_txt += "\n";
+banner_txt += "\n  r e t r o  d i g i t i z e r  |  { p r o t o c e l l : l a b s }  |  2 0 2 3   \n\n";
+
+let input_img, frame_to_draw, buffer_frames, squares_nr, gif, canvas, image_border;
 let thumbnail, dropped_image, dropped_file, drop_zone_x, drop_zone_y, manaspace;
 let stack_data_main, stack_data_background;
 let compressed_signal_size, compression_ratio;
 
-let image_border = [0, 0]; // width of the border in pixels
 let frame_duration = 100; // in mms
-let frame_rate = 1000/frame_duration;
+let frame_rate = 1000/frame_duration; // animation frame rate
 let frame_counter = 0; // this will increment inside draw()
 let frame_counter_after_drop = 0; // this will increment inside draw()
 let nr_of_frames = 2; // number of frames in a gif animation
@@ -23,9 +44,14 @@ let effects_main_name = $fx.getParam("effect_main"); // type of effects workflow
 let effects_background_name = $fx.getParam("effect_background"); // type of effects workflow to be used on the background
 let effect_era = $fx.getParam("effect_era"); // era of the effects
 let format = $fx.getParam("format"); // get format string from params
+let border_type = $fx.getParam("border_type"); // type of border - "none", "thin", "thick"
 let quality = $fx.getParam("quality"); // corresponds to the number of coefficients being selected, higher is better, 1-10
 let quant_f = $fx.getParam("quant_f"); // additional factor which modifies quantization levels, higher means stronger compression, needs to be >= 1
 let invert_input = $fx.getParam("invert_input"); // inverts both the input image and the effects applied to it after
+
+if (border_type == "none") {image_border = [0, 0];}  // no border
+else if (border_type == "thin") {image_border = [50, 50];} // thin border
+else {image_border = [100, 100];} // thick border
 
 if (format == "portrait") { squares_nr = [16, 25]; } // portrait proportion
 else if (format == "landscape") { squares_nr = [25, 16]; } // landscape proportion

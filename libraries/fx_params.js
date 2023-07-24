@@ -78,6 +78,16 @@ $fx.params([
     }
   },
   {
+    id: "border_type",
+    name: "Border",
+    type: "select",
+    default: "thin",
+    update: "code-driven",
+    options: {
+      options: ["none", "thin", "thick"],
+    }
+  },
+  {
     id: "invert_input",
     name: "Invert",
     type: "boolean",

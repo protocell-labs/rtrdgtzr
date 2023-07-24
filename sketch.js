@@ -44,6 +44,9 @@ function preload() {
 
 function setup() {
 
+  // write info to the console
+  infoToConsole();
+
   pixelDensity(1.0); // need to fix this so the gif.js exports the correct size
   frameRate(frame_rate); // frame rate for the main animation
 
@@ -121,8 +124,14 @@ function draw() {
 
     // deserializes the signal and draws the image every 5th frame
     if (frame_counter % 5 == 0) {
-      // standard background so we see transparent squares
-      background(0, 0, 255);
+      //black background
+      background(0, 0, 0);
+
+      // blue shape under the loaded image to show transparent squares
+      fill(0, 0, 255);
+      rect(image_border[0]/2, image_border[1]/2, canvas_dim[0], canvas_dim[1]);
+
+      // deserialize signal and draw the image
       deserializeSignal(signal);
     }
 
@@ -154,8 +163,11 @@ function draw() {
     // decide which frame to draw - we will loop through all 5 frames repeatedly to imitate the gif animation
     frame_to_draw = buffer_frames[frame_counter % nr_of_frames];
   
+    //black background when showing the final image with effects
+    background(0, 0, 0);
+
     // draw appropriate frame
-    copy(frame_to_draw, 0, 0, frame_to_draw.width, frame_to_draw.height, 0, 0, input_img.width + image_border[0], input_img.height + image_border[1])
+    copy(frame_to_draw, 0, 0, frame_to_draw.width, frame_to_draw.height, 0, 0, frame_to_draw.width, frame_to_draw.height)
   }
 
 

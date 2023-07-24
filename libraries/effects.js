@@ -4,6 +4,18 @@
 
 
 
+////// INFO //////
+
+
+// print banner and other info to console at the beginning
+function infoToConsole() {
+
+  console.log(banner_txt);
+}
+
+
+
+
 ////// CAPTURE //////
 
 
@@ -14,8 +26,8 @@ function setupGif() {
     workers: 2,
     quality: 10, // pixel sample interval, lower is better
     workerScript: 'libraries/gif.worker.js',
-    width: input_img.width + image_border[0],
-    height: input_img.height + image_border[1]
+    width: input_img.width,
+    height: input_img.height
   });
 
   const uuid = parseInt(Math.random() * 10000000);
@@ -576,8 +588,11 @@ function animateEffectStack(img, stack_data_main, stack_data_background, downloa
   // apply effects to individual frames and add them to the gif animation
   for (let i = 0; i < nr_of_frames; i++) {
 
+    //black background for all frames
+    background(0, 0, 0);
+
     // create an animated background which shows through the transparent squares
-    let buffer_graphics = createGraphics(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
+    let buffer_graphics = createGraphics(canvas_dim[0], canvas_dim[1]);
     buffer_graphics.background(stack_data_background["alpha_brightness"] * 2.55);
     let buffer_image = createImage(buffer_graphics.width, buffer_graphics.height);
     buffer_image.copy(buffer_graphics, 0, 0, buffer_graphics.width, buffer_graphics.height, 0, 0, buffer_graphics.width, buffer_graphics.height);
@@ -1402,7 +1417,7 @@ function showEraScreen() {
 
   showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
 
-  offset_y = -180;
+  offset_y = -120;
   txt_size = 40;
   txt_shift = 2;
   txt = "take me back\nto the ...";
@@ -1414,21 +1429,21 @@ function showEraScreen() {
   if (era_zone == 1) {
 
     txt = frame_counter % 20 < 17 ? "`\n'80s" : "\n'80s";
-    showText(txt, width / 3, height / 2, 80, 5, 0, color_a, color_b, color_c);
-    showText("'90s", 2 * width / 3, height / 2, 40, 2, 0, color_a, color_b, color_c);
+    showText(txt, width / 3, height / 2, 80, 5, 80, color_a, color_b, color_c);
+    showText("'90s", 2 * width / 3, height / 2, 40, 2, 80, color_a, color_b, color_c);
     
     // '90s selected
   } else if (era_zone == 2) {
 
     txt = frame_counter % 20 < 17 ? "`\n'90s" : "\n'90s";
-    showText("'80s", width / 3, height / 2, 40, 2, 0, color_a, color_b, color_c);
-    showText(txt, 2 * width / 3, height / 2, 80, 5, 0, color_a, color_b, color_c);
+    showText("'80s", width / 3, height / 2, 40, 2, 80, color_a, color_b, color_c);
+    showText(txt, 2 * width / 3, height / 2, 80, 5, 80, color_a, color_b, color_c);
     
     // nothing selected
   } else {
 
-    showText("'80s", width / 3, height / 2, 40, 2, 0, color_a, color_b, color_c);
-    showText("'90s", 2 * width / 3, height / 2, 40, 2, 0, color_a, color_b, color_c);
+    showText("'80s", width / 3, height / 2, 40, 2, 80, color_a, color_b, color_c);
+    showText("'90s", 2 * width / 3, height / 2, 40, 2, 80, color_a, color_b, color_c);
     
   }
 
@@ -1657,6 +1672,9 @@ function showSignalOnScreen() {
   txt_box_height = height - 40;
 
   showTextBox(signal, width / 2, height / 2, txt_size, txt_shift, offset_y, txt_box_width, txt_box_height, color_a, color_b, color_c);
+
+  // reset rectMode
+  rectMode(CORNER);
 }
 
 
@@ -1679,8 +1697,8 @@ function showControlInfo() {
   txt_size = 20;
   txt_shift = 1;
 
-  if (frame_counter % 20 < 13) {controls_info_txt = "CONTROLS\n<> : -+ quality\n`^ : -+ quantization\nclick : -+ square\nc : show/hide signal\nredrop : new image\nrefresh : fix image";}
-  else {controls_info_txt = "CONTROLS\n<> : -+ quality\n`^ : -+ quantization\nclick : -+ square\nc : show/hide signal\nredrop : new image\n";}
+  if (frame_counter % 20 < 13) {controls_info_txt = "CONTROLS\n<> : -+ quality\n`^ : -+ quantization\nclick : -+ square\nb : cycle border\nc : show/hide signal\nredrop : new image\nrefresh : fix image";}
+  else {controls_info_txt = "CONTROLS\n<> : -+ quality\n`^ : -+ quantization\nclick : -+ square\nb : cycle border\nc : show/hide signal\nredrop : new image\n";}
   
   showText(controls_info_txt, 20, height - 20, txt_size, txt_shift, 0, color_a, color_b, color_c)
 }
@@ -1734,7 +1752,7 @@ function showTextBox(txt, x, y, txt_size, txt_shift, offset_y, txt_box_width, tx
 }
 
 
-// callback to recieve the loaded file
+// callback to receive the loaded file
 function gotFile(file) {
   // save file reference to a global variable so it can be accessed elsewhere
   dropped_file = file;
@@ -1742,8 +1760,10 @@ function gotFile(file) {
   // need to use a callback here to wait until the image is properly loaded before we use it
   // from: https://github.com/processing/p5.js/issues/3117
   thumbnail = loadImage(dropped_file.data, resizeThumbnailAndSerialize);
-
   // more data to display: dropped_file.name, dropped_file.size
+
+  // reset the frame counter for every image drop
+  frame_counter_after_drop = 0;
 }
 
 
@@ -2180,7 +2200,7 @@ function deserializeSignal(signal) {
       if (!alpha_on) {
         coefficients = dequantizeCoefficients(coefficients, jpeg_lum_quant_table, quant_f);
         pixelvalues = dcTransformInverse(coefficients);
-        draw_data(pixelvalues, thumbnail_scale, i * 8 * thumbnail_scale, j * 8 * thumbnail_scale, offset_rgb); // pixels, pixel dim, offset x, offset y, offset_rgb
+        draw_data(pixelvalues, thumbnail_scale, i * 8 * thumbnail_scale + image_border[0]/2, j * 8 * thumbnail_scale + image_border[1]/2, offset_rgb); // pixels, pixel dim, offset x, offset y, offset_rgb
       }
 
       square_counter++
@@ -2247,6 +2267,9 @@ function deserializeSignalToImage(signal) {
 function serializeSignal(thumbnail) {
   let coefficients, pixelvalues;
 
+  // black background here to avoid the canvas glitching while we change compression parameters with keys during editing phase
+  background(0, 0, 0);
+
   // characters for the image coefficients will be stored here
   signal = "";
 
@@ -2257,24 +2280,17 @@ function serializeSignal(thumbnail) {
       thumbnail_square.copy(thumbnail, i * 8, j * 8, thumbnail.width, thumbnail.height, 0, 0, thumbnail.width, thumbnail.height);
 
       coefficients = dcTransform(thumbnail_square);
-
       coefficients = select_coefficients(coefficients, quality); // quality corresponds to the number of coefficients chosen, the higher the better
-
-      //plot_data(coefficients);
-
       coefficients = quantizeCoefficients(coefficients, jpeg_lum_quant_table, quant_f);
 
       // serialized coefficients will be compressed and need to be decompressed after before deserialization
       signal += serializeCoefficients(coefficients, coeffToCharMap, quality, repeatingBufferChars);
 
-      //let signal_part = serializeCoefficients(coefficients, coeffToCharMap, quality, repeatingBufferChars);
-      //console.log(signal_part);
-      //signal += signal_part;
-
       coefficients = dequantizeCoefficients(coefficients, jpeg_lum_quant_table, quant_f);
-
       pixelvalues = dcTransformInverse(coefficients);
-      draw_data(pixelvalues, thumbnail_scale, i * 8 * thumbnail_scale, j * 8 * thumbnail_scale, offset_rgb); // pixels, pixel dim, offsetx, offset y, offset_rgb
+
+      // we only draw the image here to avoid the canvas going black / glitching while we change compression parameters with keys during editing phase
+      draw_data(pixelvalues, thumbnail_scale, i * 8 * thumbnail_scale + image_border[0]/2, j * 8 * thumbnail_scale + image_border[1]/2, offset_rgb); // pixels, pixel dim, offsetx, offset y, offset_rgb
     }
   }
 
@@ -2320,7 +2336,7 @@ function resizeThumbnailAndSerialize(thumbnail) {
   canvas_dim = [target_dim[0] * thumbnail_scale, target_dim[1] * thumbnail_scale];
 
   // resize canvas to fit the new format
-  resizeCanvas(canvas_dim[0], canvas_dim[1]);
+  resizeCanvas(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
   // move canvas to the middle of the browser window
   select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2);
 
@@ -2336,9 +2352,6 @@ function resizeThumbnailAndSerialize(thumbnail) {
 
   // additional flag for when thumbnail is ready for use
   thumbnail_ready = true;
-
-  // reset the frame counter for every image drop
-  frame_counter_after_drop = 0;
 
   // serializes and draws the image
   serializeSignal(thumbnail);
@@ -2377,8 +2390,8 @@ function mouseClicked() {
     signal = decompressSignal(signal, repeatingBufferChars, repeatingAlphaChars);
 
     // detect which square was clicked on
-    let square_x_nr = Math.floor(mouseX / (8 * thumbnail_scale));
-    let square_y_nr = Math.floor(mouseY / (8 * thumbnail_scale));
+    let square_x_nr = Math.floor((mouseX - image_border[0]/2) / (8 * thumbnail_scale));
+    let square_y_nr = Math.floor((mouseY - image_border[1]/2) / (8 * thumbnail_scale));
 
     // flash an X on the location of the square
     let txt_shift = 2;
@@ -2387,11 +2400,11 @@ function mouseClicked() {
     noStroke();
     textSize(50);
     fill(255, 0, 255);
-    text("x", square_x_nr * 8 * thumbnail_scale + 4 * thumbnail_scale + txt_shift * 2, square_y_nr * 8 * thumbnail_scale + 3 * thumbnail_scale + txt_shift * 2);
+    text("x", image_border[0]/2 + square_x_nr * 8 * thumbnail_scale + 4 * thumbnail_scale + txt_shift * 2, image_border[1]/2 + square_y_nr * 8 * thumbnail_scale + 3 * thumbnail_scale + txt_shift * 2);
     fill(0, 255, 255);
-    text("x", square_x_nr * 8 * thumbnail_scale + 4 * thumbnail_scale + txt_shift, square_y_nr * 8 * thumbnail_scale + 3 * thumbnail_scale + txt_shift);
+    text("x", image_border[0]/2 + square_x_nr * 8 * thumbnail_scale + 4 * thumbnail_scale + txt_shift, image_border[1]/2 + square_y_nr * 8 * thumbnail_scale + 3 * thumbnail_scale + txt_shift);
     fill(255, 255, 255);
-    text("x", square_x_nr * 8 * thumbnail_scale + 4 * thumbnail_scale, square_y_nr * 8 * thumbnail_scale + 3 * thumbnail_scale);
+    text("x", image_border[0]/2 + square_x_nr * 8 * thumbnail_scale + 4 * thumbnail_scale, image_border[1]/2 + square_y_nr * 8 * thumbnail_scale + 3 * thumbnail_scale);
 
     // find the place in the signal where the coefficients for this square are
     let start_idx = square_x_nr * quality * squares_nr[1] + square_y_nr * quality;
@@ -2402,8 +2415,6 @@ function mouseClicked() {
     let signal_before = signal.slice(0, start_idx);
     let signal_after = signal.slice(end_idx);
     let signal_clicked = signal.slice(start_idx, end_idx);
-    //console.log("square signal ->", signal_clicked);
-
 
     // clicked on the already transparent square
     if (signal_clicked == alphaChar.repeat(quality)) {
@@ -2420,11 +2431,8 @@ function mouseClicked() {
       signal = signal_before + alphaChar.repeat(quality) + signal_after;
     }
 
-
     // show some data in the console
     decompressed_signal_size = signal.length;
-    //console.log("decompressed chars ->", decompressed_signal_size);
-    //console.log(signal);
 
     // compress signal again before storing in the param
     signal = compressSignal(signal, repeatingBufferChars, repeatingAlphaChars);
@@ -2432,10 +2440,6 @@ function mouseClicked() {
     // show some data in the console
     compressed_signal_size = signal.length;
     compression_ratio = compressed_signal_size / decompressed_signal_size;
-    //console.log("compressed chars ->", compressed_signal_size);
-    //if (compressed_signal_size > 1900) {console.log("✘ chars over limit ->", compressed_signal_size - 1900);}
-    //else {console.log("✔ chars fit into params");}
-    //console.log("compression ratio ->", Math.round(compression_ratio * 100), "%");
     console.log(signal);
 
     // update the signal parameter value
@@ -2502,6 +2506,36 @@ function keyPressed() {
 
       // serializes and draws the image
       resizeThumbnailAndSerialize(thumbnail);
+    }
+
+  } else if (keyCode === 66) { // "b" - cycle image border type
+
+    // if the thumbnail was already loaded (during editing phase)
+    if (thumbnail != undefined) {
+      
+      // cycle border type
+      if (border_type == "none") {
+        border_type = "thin"
+        image_border = [50, 50];
+
+      } else if (border_type == "thin") {
+        border_type = "thick"
+        image_border = [100, 100];
+
+      } else {
+        border_type = "none"
+        image_border = [0, 0];
+      }
+
+      // update the parameter values
+      $fx.emit("params:update", {
+        border_type: border_type
+      });
+
+      // resize canvas with the new image border
+      resizeCanvas(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
+      // move canvas to the middle of the browser window
+      select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2);
     }
 
   } else if (keyCode === 67) { // "c" - toggle signal characters as text on the canvas

@@ -2267,8 +2267,8 @@ function deserializeSignalToImage(signal) {
 function serializeSignal(thumbnail) {
   let coefficients, pixelvalues;
 
-  // black background here to avoid the canvas glitching while we change compression parameters with keys during editing phase
-  background(0, 0, 0);
+  // magenta background here to avoid the canvas glitching while we change compression parameters with keys during editing phase
+  background(255, 0, 255);
 
   // characters for the image coefficients will be stored here
   signal = "";

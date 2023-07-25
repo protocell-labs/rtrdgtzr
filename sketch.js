@@ -124,8 +124,8 @@ function draw() {
 
     // deserializes the signal and draws the image every 5th frame
     if (frame_counter % 5 == 0) {
-      //black background
-      background(0, 0, 0);
+      // magenta background so the border is easier to see during editing
+      background(255, 0, 255);
 
       // blue shape under the loaded image to show transparent squares
       fill(0, 0, 255);

@@ -50,7 +50,13 @@ function setup() {
   pixelDensity(1.0); // need to fix this so the gif.js exports the correct size
   frameRate(frame_rate); // frame rate for the main animation
 
-  canvas = createCanvas(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
+  // create canvas so it fits into the browser window
+  if (windowWidth / windowHeight < w_h_ratio) {
+    canvas = createCanvas(windowWidth, windowWidth / w_h_ratio);
+  } else {
+    canvas = createCanvas(windowHeight * w_h_ratio, windowHeight);
+  }
+
   select('canvas').id('retrodigitizer'); // change id of the canvas
   select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2); // move canvas to the middle of the browser window
 
@@ -58,9 +64,11 @@ function setup() {
   // https://stackoverflow.com/questions/75489567/how-to-set-canvas-attributes-from-p5-js
   //console.log(drawingContext.getContextAttributes());
 
-
   // DESERIALIZE AN INPUT IMAGE - if signal param is not empty, which means it was stored already before
   if ($fx.getParam("signal").length != 0) {
+
+    resizeCanvas(output_dim[0] + output_border[0], output_dim[1] + output_border[1]);
+    select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2); // move canvas to the middle of the browser window
 
     // turn off showing the start and drop screens
     start_screen = false;
@@ -72,7 +80,8 @@ function setup() {
     // deserialize signal data into an input image - this is the starting point for all effect stacks
     input_img = deserializeSignalToImage(signal);
 
-    if (invert_input) {input_img.filter(INVERT);} // inverts the colors of the input image
+    // inverts the colors of the input image
+    if (invert_input) {input_img.filter(INVERT);}
 
     // sets global data for the effect stack
     stack_data_main = setEffectData(effects_main_name);
@@ -129,8 +138,8 @@ function draw() {
 
       // blue shape under the loaded image to show transparent squares
       fill(0, 0, 255);
-      rect(image_border[0]/2, image_border[1]/2, canvas_dim[0], canvas_dim[1]);
-
+      rect((canvas_dim[0] * image_border[0])/2, (canvas_dim[1] * image_border[1])/2, canvas_dim[0], canvas_dim[1]);
+      
       // deserialize signal and draw the image
       deserializeSignal(signal);
     }
@@ -163,7 +172,7 @@ function draw() {
     // decide which frame to draw - we will loop through all 5 frames repeatedly to imitate the gif animation
     frame_to_draw = buffer_frames[frame_counter % nr_of_frames];
   
-    //black background when showing the final image with effects
+    // black background when showing the final image with effects
     background(0, 0, 0);
 
     // draw appropriate frame

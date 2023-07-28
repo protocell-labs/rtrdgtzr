@@ -26,8 +26,8 @@ function setupGif() {
     workers: 2,
     quality: 10, // pixel sample interval, lower is better
     workerScript: 'libraries/gif.worker.js',
-    width: input_img.width,
-    height: input_img.height
+    width: input_img.width + output_border[0],
+    height: input_img.height + output_border[1]
   });
 
   const uuid = parseInt(Math.random() * 10000000);
@@ -327,14 +327,14 @@ function applyMonoEffect(img, stack_data) {
   if (stack_data["effect_era"] == "'80s") {makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);}
   tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
   img.resizeNN(img.width * stack_data["pix_scaling"], 0);
-  image(img, image_border[0] / 2, image_border[1] / 2);
+  image(img, output_border[0]/2, output_border[1]/2);
 
   // 2. Bright part of the image
   blendMode(BLEND);
   brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
   if (stack_data["effect_era"] == "'80s") {makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);}
   tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
-  image(img_2, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
+  image(img_2, output_border[0]/2 + stack_data["layer_shift"], output_border[1]/2 + stack_data["layer_shift"]);
 
   // 3. Dark part of the image
   blendMode(ADD);
@@ -343,7 +343,7 @@ function applyMonoEffect(img, stack_data) {
   if (stack_data["effect_era"] == "'80s") {makeDithered(img_3, stack_data["nr_of_levels"], stack_data["dither_params_3"]);}
   tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
   img_3.resizeNN(img_3.width * stack_data["pix_scaling_dark"], 0);
-  image(img_3, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
+  image(img_3, output_border[0]/2 - stack_data["layer_shift"], output_border[1]/2 - stack_data["layer_shift"]);
 
   blendMode(BLEND);
   noTint();
@@ -364,7 +364,7 @@ function applyHiFiEffect(img, stack_data) {
   if (stack_data["effect_era"] == "'80s") {makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);}
   tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
   img.resizeNN(img.width * stack_data["pix_scaling"], 0);
-  image(img, image_border[0] / 2, image_border[1] / 2);
+  image(img, output_border[0]/2, output_border[1]/2);
 
   // 2. Bright part of the image
   blendMode(ADD);
@@ -375,7 +375,7 @@ function applyHiFiEffect(img, stack_data) {
   if (stack_data["effect_era"] == "'80s") {makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);}
   tint(stack_data["tint_palette_2"][0], stack_data["tint_palette_2"][1], stack_data["tint_palette_2"][2]);
   img_2.resizeNN(img_2.width * stack_data["pix_scaling"], 0);
-  image(img_2, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
+  image(img_2, output_border[0]/2 + stack_data["layer_shift"], output_border[1]/2 + stack_data["layer_shift"]);
 
   // 3. Dark part of the image
   blendMode(DIFFERENCE);
@@ -386,7 +386,7 @@ function applyHiFiEffect(img, stack_data) {
   if (stack_data["effect_era"] == "'80s") {makeDithered(img_3, stack_data["nr_of_levels"], stack_data["dither_params_3"]);}
   tint(stack_data["tint_palette_3"][0], stack_data["tint_palette_3"][1], stack_data["tint_palette_3"][2]);
   img_3.resizeNN(img_3.width * stack_data["pix_scaling_dark"], 0);
-  image(img_3, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
+  image(img_3, output_border[0]/2 - stack_data["layer_shift"], output_border[1]/2 - stack_data["layer_shift"]);
   
   blendMode(BLEND);
   noTint();
@@ -428,7 +428,7 @@ function applyNoisyEffect(img, stack_data) {
   tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
 
   img.resizeNN(img.width * stack_data["pix_scaling"], 0);
-  image(img, image_border[0] / 2, image_border[1] / 2);
+  image(img, output_border[0]/2, output_border[1]/2);
 
   // 2. Bright part of the image
   blendMode(ADD);
@@ -439,7 +439,7 @@ function applyNoisyEffect(img, stack_data) {
   if (stack_data["effect_era"] == "'80s") {makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);}
   tint(stack_data["tint_palette_2"][0], stack_data["tint_palette_2"][1], stack_data["tint_palette_2"][2]);
   img_2.resizeNN(img_2.width * stack_data["pix_scaling"], 0);
-  image(img_2, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
+  image(img_2, output_border[0]/2 + stack_data["layer_shift"], output_border[1]/2 + stack_data["layer_shift"]);
 
   blendMode(BLEND);
   noTint();
@@ -479,7 +479,7 @@ function applyCorruptedEffect(img, stack_data) {
   if (stack_data["effect_era"] == "'80s") {makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);}
   tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
   img.resizeNN(img.width * stack_data["pix_scaling"], 0);
-  image(img, image_border[0] / 2, image_border[1] / 2);
+  image(img, output_border[0]/2, output_border[1]/2);
 
   // 2. Bright part of the image
   blendMode(ADD);
@@ -512,7 +512,7 @@ function applyCorruptedEffect(img, stack_data) {
   if (stack_data["effect_era"] == "'80s") {makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);}
   tint(stack_data["tint_palette_2"][0], stack_data["tint_palette_2"][1], stack_data["tint_palette_2"][2]);
   img_2.resizeNN(img_2.width * stack_data["pix_scaling"], 0);
-  image(img_2, image_border[0] / 2 + stack_data["layer_shift"], image_border[1] / 2 + stack_data["layer_shift"]);
+  image(img_2, output_border[0]/2 + stack_data["layer_shift"], output_border[1]/2 + stack_data["layer_shift"]);
 
   blendMode(BLEND);
   noTint();
@@ -550,7 +550,7 @@ function applyLoFiEffect(img, stack_data) {
 
   if (stack_data["effect_era"] == "'80s") {makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);}
   img.resizeNN(img.width * 2.0, 0); // we resize back double to get to the size of the original input image
-  image(img, image_border[0] / 2, image_border[1] / 2);
+  image(img, output_border[0]/2, output_border[1]/2);
 
   blendMode(BLEND);
   noTint();
@@ -570,8 +570,8 @@ function animateEffectStack(img, stack_data_main, stack_data_background, downloa
     frames.push(frame);
   }
 
-  let buffer_width = img.width + image_border[0];
-  let buffer_height = img.height + image_border[1];
+  let buffer_width = img.width + output_border[0];
+  let buffer_height = img.height + output_border[1];
 
   // make graphic buffers to store canvas copies for each frame
   buffer_frames = [];
@@ -592,7 +592,7 @@ function animateEffectStack(img, stack_data_main, stack_data_background, downloa
     background(0, 0, 0);
 
     // create an animated background which shows through the transparent squares
-    let buffer_graphics = createGraphics(canvas_dim[0], canvas_dim[1]);
+    let buffer_graphics = createGraphics(output_dim[0], output_dim[1]);
     buffer_graphics.background(stack_data_background["alpha_brightness"] * 2.55);
     let buffer_image = createImage(buffer_graphics.width, buffer_graphics.height);
     buffer_image.copy(buffer_graphics, 0, 0, buffer_graphics.width, buffer_graphics.height, 0, 0, buffer_graphics.width, buffer_graphics.height);
@@ -2200,7 +2200,7 @@ function deserializeSignal(signal) {
       if (!alpha_on) {
         coefficients = dequantizeCoefficients(coefficients, jpeg_lum_quant_table, quant_f);
         pixelvalues = dcTransformInverse(coefficients);
-        draw_data(pixelvalues, thumbnail_scale, i * 8 * thumbnail_scale + image_border[0]/2, j * 8 * thumbnail_scale + image_border[1]/2, offset_rgb); // pixels, pixel dim, offset x, offset y, offset_rgb
+        draw_data(pixelvalues, thumbnail_scale, i * 8 * thumbnail_scale + (canvas_dim[0] * image_border[0])/2, j * 8 * thumbnail_scale + (canvas_dim[1] * image_border[1])/2, offset_rgb); // pixels, pixel dim, offset x, offset y, offset_rgb
       }
 
       square_counter++
@@ -2209,15 +2209,11 @@ function deserializeSignal(signal) {
 }
 
 
-// deserializes and draws the image from the signal string param
+// deserializes and outputs the image from the signal string param
 function deserializeSignalToImage(signal) {
   let coefficients, pixelvalues, alpha_on;
 
-  let buffer_frame = createGraphics(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
-  //buffer_frame.background(0);
-
-  buffer_width = canvas_dim[0] + image_border[0];
-  buffer_height = canvas_dim[1] + image_border[1];
+  let buffer_frame = createGraphics(output_dim[0], output_dim[1]);
 
   // serialized signal will be compressed and needs to be decompressed before deserialization
   signal = decompressSignal(signal, repeatingBufferChars, repeatingAlphaChars);
@@ -2240,9 +2236,9 @@ function deserializeSignalToImage(signal) {
         buffer_frame.noStroke();
         buffer_frame.rectMode(CORNER);
       
-        let pixel_dim = thumbnail_scale;
-        let offset_x = i * 8 * thumbnail_scale;
-        let offset_y = j * 8 * thumbnail_scale;
+        let pixel_dim = output_scale;
+        let offset_x = i * 8 * output_scale;
+        let offset_y = j * 8 * output_scale;
 
         for (let n = 0; n < pixelvalues.length; n++) {
           for (let m = 0; m < pixelvalues[0].length; m++) {
@@ -2290,7 +2286,7 @@ function serializeSignal(thumbnail) {
       pixelvalues = dcTransformInverse(coefficients);
 
       // we only draw the image here to avoid the canvas going black / glitching while we change compression parameters with keys during editing phase
-      draw_data(pixelvalues, thumbnail_scale, i * 8 * thumbnail_scale + image_border[0]/2, j * 8 * thumbnail_scale + image_border[1]/2, offset_rgb); // pixels, pixel dim, offsetx, offset y, offset_rgb
+      draw_data(pixelvalues, thumbnail_scale, i * 8 * thumbnail_scale + (canvas_dim[0] * image_border[0])/2, j * 8 * thumbnail_scale + (canvas_dim[1] * image_border[1])/2, offset_rgb); // pixels, pixel dim, offset x, offset y, offset_rgb
     }
   }
 
@@ -2333,10 +2329,22 @@ function resizeThumbnailAndSerialize(thumbnail) {
   // recalculate dimensions
   w_h_ratio = squares_nr[0] / squares_nr[1];
   target_dim = [squares_nr[0] * 8, squares_nr[1] * 8];
+
+  if (windowWidth / windowHeight < w_h_ratio) {
+    thumbnail_scale = windowWidth / (target_dim[0] + target_dim[0] * image_border[0]);
+  } else {
+    thumbnail_scale = windowHeight / (target_dim[1] + target_dim[1] * image_border[1]);
+  }
+
   canvas_dim = [target_dim[0] * thumbnail_scale, target_dim[1] * thumbnail_scale];
 
-  // resize canvas to fit the new format
-  resizeCanvas(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
+  // resize canvas so it fits into the browser window
+  if (windowWidth / windowHeight < w_h_ratio) {
+    resizeCanvas(windowWidth, windowWidth / w_h_ratio);
+  } else {
+    resizeCanvas(windowHeight * w_h_ratio, windowHeight);
+  }
+
   // move canvas to the middle of the browser window
   select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2);
 
@@ -2370,6 +2378,9 @@ function mouseClicked() {
   // early termination - exit function if the click is outside the canvas
   if ((mouseX > width) || (mouseY > height) || (mouseX < 0) || (mouseY < 0)) { return false; }
 
+  // early termination - exit function if the click is inside the image border
+  if ((mouseX > width - (canvas_dim[0] * image_border[0])/2) || (mouseY > height - (canvas_dim[1] * image_border[1])/2) || (mouseX < (canvas_dim[0] * image_border[0])/2) || (mouseY < (canvas_dim[1] * image_border[1])/2)) { return false; }
+
   // clicking on the era screen
   if (era_screen) {
     era_screen = false; // turning off era screen
@@ -2390,8 +2401,8 @@ function mouseClicked() {
     signal = decompressSignal(signal, repeatingBufferChars, repeatingAlphaChars);
 
     // detect which square was clicked on
-    let square_x_nr = Math.floor((mouseX - image_border[0]/2) / (8 * thumbnail_scale));
-    let square_y_nr = Math.floor((mouseY - image_border[1]/2) / (8 * thumbnail_scale));
+    let square_x_nr = Math.floor((mouseX - (canvas_dim[0] * image_border[0])/2) / (8 * thumbnail_scale));
+    let square_y_nr = Math.floor((mouseY - (canvas_dim[1] * image_border[1])/2) / (8 * thumbnail_scale));
 
     // flash an X on the location of the square
     let txt_shift = 2;
@@ -2400,11 +2411,11 @@ function mouseClicked() {
     noStroke();
     textSize(50);
     fill(255, 0, 255);
-    text("x", image_border[0]/2 + square_x_nr * 8 * thumbnail_scale + 4 * thumbnail_scale + txt_shift * 2, image_border[1]/2 + square_y_nr * 8 * thumbnail_scale + 3 * thumbnail_scale + txt_shift * 2);
+    text("x", (canvas_dim[0] * image_border[0])/2 + square_x_nr * 8 * thumbnail_scale + 4 * thumbnail_scale + txt_shift * 2, (canvas_dim[1] * image_border[1])/2 + square_y_nr * 8 * thumbnail_scale + 3 * thumbnail_scale + txt_shift * 2);
     fill(0, 255, 255);
-    text("x", image_border[0]/2 + square_x_nr * 8 * thumbnail_scale + 4 * thumbnail_scale + txt_shift, image_border[1]/2 + square_y_nr * 8 * thumbnail_scale + 3 * thumbnail_scale + txt_shift);
+    text("x", (canvas_dim[0] * image_border[0])/2 + square_x_nr * 8 * thumbnail_scale + 4 * thumbnail_scale + txt_shift, (canvas_dim[1] * image_border[1])/2 + square_y_nr * 8 * thumbnail_scale + 3 * thumbnail_scale + txt_shift);
     fill(255, 255, 255);
-    text("x", image_border[0]/2 + square_x_nr * 8 * thumbnail_scale + 4 * thumbnail_scale, image_border[1]/2 + square_y_nr * 8 * thumbnail_scale + 3 * thumbnail_scale);
+    text("x", (canvas_dim[0] * image_border[0])/2 + square_x_nr * 8 * thumbnail_scale + 4 * thumbnail_scale, (canvas_dim[1] * image_border[1])/2 + square_y_nr * 8 * thumbnail_scale + 3 * thumbnail_scale);
 
     // find the place in the signal where the coefficients for this square are
     let start_idx = square_x_nr * quality * squares_nr[1] + square_y_nr * quality;
@@ -2475,6 +2486,31 @@ function keyPressed() {
       resizeThumbnailAndSerialize(thumbnail);
     }
 
+    // works only if effects are applied, not during image editing
+    if ((signal.length != 0) && (thumbnail == undefined)) {
+      output_scale--
+      output_scale = clamp(output_scale, 1, 10);
+      output_dim = [target_dim[0] * output_scale, target_dim[1] * output_scale];
+
+      console.log("output scale -> " + output_scale.toString());
+
+      if (border_type == "none") { output_border = [0, 0]; }  // no border
+      else if (border_type == "thin") { output_border = [10 * output_scale, 10 * output_scale]; } // thin border
+      else { output_border = [20 * output_scale, 20 * output_scale]; } // thick border
+
+      resizeCanvas(output_dim[0] + output_border[0], output_dim[1] + output_border[1]);
+      select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2); // move canvas to the middle of the browser window
+  
+      // deserialize signal data into an input image - this is the starting point for all effect stacks
+      input_img = deserializeSignalToImage(signal);
+
+      // inverts the colors of the input image
+      if (invert_input) {input_img.filter(INVERT);}
+
+      // create 5 frame animation using one of the effect stacks
+      animateEffectStack(input_img, stack_data_main, stack_data_background, false);
+    }
+
   } else if (keyCode === RIGHT_ARROW) {
 
     // if the thumbnail was already loaded (during editing phase)
@@ -2484,6 +2520,31 @@ function keyPressed() {
 
       // serializes and draws the image
       resizeThumbnailAndSerialize(thumbnail);
+    }
+
+    // works only if effects are applied, not during image editing
+    if ((signal.length != 0) && (thumbnail == undefined)) {
+      output_scale++
+      output_scale = clamp(output_scale, 1, 10);
+      output_dim = [target_dim[0] * output_scale, target_dim[1] * output_scale];
+
+      console.log("output scale -> " + output_scale.toString());
+
+      if (border_type == "none") { output_border = [0, 0]; }  // no border
+      else if (border_type == "thin") { output_border = [10 * output_scale, 10 * output_scale]; } // thin border
+      else { output_border = [20 * output_scale, 20 * output_scale]; } // thick border
+
+      resizeCanvas(output_dim[0] + output_border[0], output_dim[1] + output_border[1]);
+      select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2); // move canvas to the middle of the browser window
+  
+      // deserialize signal data into an input image - this is the starting point for all effect stacks
+      input_img = deserializeSignalToImage(signal);
+
+      // inverts the colors of the input image
+      if (invert_input) {input_img.filter(INVERT);}
+
+      // create 5 frame animation using one of the effect stacks
+      animateEffectStack(input_img, stack_data_main, stack_data_background, false);
     }
 
   } else if (keyCode === UP_ARROW) {
@@ -2516,24 +2577,37 @@ function keyPressed() {
       // cycle border type
       if (border_type == "none") {
         border_type = "thin"
-        image_border = [50, 50];
+        image_border = image_border_thin;
 
       } else if (border_type == "thin") {
         border_type = "thick"
-        image_border = [100, 100];
+        image_border = image_border_thick;
 
       } else {
         border_type = "none"
-        image_border = [0, 0];
+        image_border = image_border_none;
       }
+      
+      if (windowWidth / windowHeight < w_h_ratio) {
+        thumbnail_scale = windowWidth / (target_dim[0] + target_dim[0] * image_border[0]);
+      } else {
+        thumbnail_scale = windowHeight / (target_dim[1] + target_dim[1] * image_border[1]);
+      }
+
+      canvas_dim = [target_dim[0] * thumbnail_scale, target_dim[1] * thumbnail_scale];
 
       // update the parameter values
       $fx.emit("params:update", {
         border_type: border_type
       });
 
-      // resize canvas with the new image border
-      resizeCanvas(canvas_dim[0] + image_border[0], canvas_dim[1] + image_border[1]);
+      // resize canvas so it fits into the browser window
+      if (windowWidth / windowHeight < w_h_ratio) {
+        resizeCanvas(windowWidth, windowWidth / w_h_ratio);
+      } else {
+        resizeCanvas(windowHeight * w_h_ratio, windowHeight);
+      }
+
       // move canvas to the middle of the browser window
       select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2);
     }
@@ -2547,12 +2621,18 @@ function keyPressed() {
 
   } else if (keyCode === 71) { // "g" - save gif
 
-    animateEffectStack(input_img, stack_data_main, stack_data_background, true);
+    // works only if effects are applied, not during image editing
+    if ((signal.length != 0) && (thumbnail == undefined)) {
+      animateEffectStack(input_img, stack_data_main, stack_data_background, true);
+    }
 
   } else if (keyCode === 83) { // "s" - save png
 
-    const saveid = parseInt(Math.random() * 10000000);
-    saveCanvas(canvas, `retro_digitizer_${effects_main_name}_still_${saveid}`, "png");
+    // works only if effects are applied, not during image editing
+    if ((signal.length != 0) && (thumbnail == undefined)) {
+      const saveid = parseInt(Math.random() * 10000000);
+      saveCanvas(canvas, `retro_digitizer_${effects_main_name}_still_${saveid}`, "png");
+    }
   }
 
 }
@@ -2560,6 +2640,32 @@ function keyPressed() {
 
 // called once every time the browser window is resized
 function windowResized() {
+
+  // canvas resize in case we are in the selection screens or image editing
+  if (start_screen || era_screen || drop_screen || (thumbnail != undefined)) {
+
+    if (windowWidth / windowHeight < w_h_ratio) {
+      thumbnail_scale = windowWidth / (target_dim[0] + target_dim[0] * image_border[0]);
+    } else {
+      thumbnail_scale = windowHeight / (target_dim[1] + target_dim[1] * image_border[1]);
+    }
+
+    canvas_dim = [target_dim[0] * thumbnail_scale, target_dim[1] * thumbnail_scale];
+
+    // resize canvas so it fits into the browser window
+    if (windowWidth / windowHeight < w_h_ratio) {
+      resizeCanvas(windowWidth, windowWidth / w_h_ratio);
+    } else {
+      resizeCanvas(windowHeight * w_h_ratio, windowHeight);
+    }
+  }
+
+  // canvas resize in case effects are displayed
+  if ((signal.length != 0) && (thumbnail == undefined)) {
+    
+  }
+
   // move canvas to the middle of the browser window
   select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2);
+
 }

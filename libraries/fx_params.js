@@ -81,7 +81,7 @@ $fx.params([
     id: "border_type",
     name: "Border",
     type: "select",
-    default: "thin",
+    default: "none",
     update: "code-driven",
     options: {
       options: ["none", "thin", "thick"],

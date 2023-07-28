@@ -6,6 +6,7 @@
 body {
 	font-family: monospace;
 	background-color: rgb(0, 0, 0);
+	overflow: hidden; /* hide scrollbars */
 }
 
 /* styling of the p5 loading menu - text and background */

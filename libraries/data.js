@@ -24,8 +24,8 @@ banner_txt += "\n:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 banner_txt += "\n";
 banner_txt += "\n  r e t r o  d i g i t i z e r  |  { p r o t o c e l l : l a b s }  |  2 0 2 3   \n\n";
 
-let input_img, frame_to_draw, buffer_frames, squares_nr, gif, canvas, image_border;
-let thumbnail, dropped_image, dropped_file, drop_zone_x, drop_zone_y, manaspace;
+let input_img, frame_to_draw, buffer_frames, squares_nr, gif, canvas, image_border, output_border;
+let thumbnail, thumbnail_scale, output_scale, dropped_image, dropped_file, drop_zone_x, drop_zone_y, manaspace;
 let stack_data_main, stack_data_background;
 let compressed_signal_size, compression_ratio;
 
@@ -34,7 +34,6 @@ let frame_rate = 1000/frame_duration; // animation frame rate
 let frame_counter = 0; // this will increment inside draw()
 let frame_counter_after_drop = 0; // this will increment inside draw()
 let nr_of_frames = 2; // number of frames in a gif animation
-let thumbnail_scale = 5; // scaling factor for the input image
 let drop_zone = 0; // 0, 1, 2, 3 - none, square, portrait, landscape
 let era_zone = 0; // 0, 1, 2 - none, '80s, '90s
 let offset_rgb = [-25, -25, 25]; // rgb offset applied to the droped image - just for preview purposes during editing, the actual pixel values are not changes
@@ -49,9 +48,13 @@ let quality = $fx.getParam("quality"); // corresponds to the number of coefficie
 let quant_f = $fx.getParam("quant_f"); // additional factor which modifies quantization levels, higher means stronger compression, needs to be >= 1
 let invert_input = $fx.getParam("invert_input"); // inverts both the input image and the effects applied to it after
 
-if (border_type == "none") {image_border = [0, 0];}  // no border
-else if (border_type == "thin") {image_border = [50, 50];} // thin border
-else {image_border = [100, 100];} // thick border
+let image_border_none = [0, 0]; // in precentage of the image dimensions
+let image_border_thin = [0.05, 0.05]; // in precentage of the image dimensions
+let image_border_thick = [0.15, 0.15]; // in precentage of the image dimensions
+
+if (border_type == "none") { image_border = image_border_none; }  // no border
+else if (border_type == "thin") { image_border = image_border_thin; } // thin border
+else { image_border = image_border_thick; } // thick border
 
 if (format == "portrait") { squares_nr = [16, 25]; } // portrait proportion
 else if (format == "landscape") { squares_nr = [25, 16]; } // landscape proportion
@@ -59,8 +62,41 @@ else { squares_nr = [20, 20]; } // square proportion
 
 let w_h_ratio = squares_nr[0] / squares_nr[1];
 let target_dim = [squares_nr[0] * 8, squares_nr[1] * 8]; // target dimensions for the source image in pixels
+
+if (window.innerWidth / window.innerHeight < w_h_ratio) {
+  thumbnail_scale = window.innerWidth / (target_dim[0] + target_dim[0] * image_border[0]); // scaling factor for the input image
+} else {
+  thumbnail_scale = window.innerHeight / (target_dim[1] + target_dim[1] * image_border[1]); // scaling factor for the input image
+}
+
 let canvas_dim = [target_dim[0] * thumbnail_scale, target_dim[1] * thumbnail_scale]; // canvas dimensions are enlarged to show the input image scaled up
 let decompressed_signal_size = squares_nr[0] * squares_nr[1] * quality;
+
+if (window.innerWidth / window.innerHeight < w_h_ratio) {
+  output_scale = Math.floor(window.innerWidth / target_dim[0]); // scaling factor for the output image
+} else {
+  output_scale = Math.floor(window.innerHeight / target_dim[1]); // scaling factor for the output image
+}
+
+console.log("output scale -> " + output_scale.toString());
+
+let output_dim = [target_dim[0] * output_scale, target_dim[1] * output_scale];
+
+if (border_type == "none") { output_border = [0, 0]; }  // no border
+else if (border_type == "thin") { output_border = [10 * output_scale, 10 * output_scale]; } // thin border
+else { output_border = [20 * output_scale, 20 * output_scale]; } // thick border
+
+
+
+
+
+
+
+/*
+if (border_type == "none") {image_border = [0, 0];}  // no border
+else if (border_type == "thin") {image_border = [thumbnail_scale * 8, thumbnail_scale * 8];} // thin border
+else {image_border = [thumbnail_scale * 16, thumbnail_scale * 16];} // thick border
+*/
 
 let start_screen = true; // this will show the start screen at the beginning and be switched off after any key is pressed
 let era_screen = false; // era screen will come after start screen and be switched off when era is selected by clicking

@@ -1368,16 +1368,16 @@ function showStartScreen() {
   else if (format == "landscape") { txt = "+                +\n\nR E T R O\ndigitizer\n\n+                +"; } // landscape proportion
   else { txt = "+            +\n\n\nR E T R O\ndigitizer\n\n\n+            +"; } // square proportion
 
-  txt_size = 80;
-  txt_shift = 5;
+  txt_size = 16; // 5x - 80
+  txt_shift = 1; // 5x - 5
   offset_y = 0;
 
   showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
 
   txt = "press any key\nto start";
-  txt_size = 30;
-  txt_shift = 2;
-  offset_y = 220;
+  txt_size = 6; // 5x - 30
+  txt_shift = 0.4; // 5x - 2
+  offset_y = height / 4; // 220
 
   // make text blink
   if (frame_counter % 20 < 13) { showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c); }
@@ -1386,7 +1386,7 @@ function showStartScreen() {
   if (frame_counter % 35 < 22) { txt = "{protocell:labs}"; }
   else { txt = "presents"; }
 
-  offset_y = -220;
+  offset_y = -height / 4; // -220
 
   showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
 }
@@ -1410,16 +1410,16 @@ function showEraScreen() {
   textAlign(CENTER, CENTER);
   noStroke();
 
+  txt_size = 16;
+  txt_shift = 1;
   offset_y = 0;
-  txt_size = 80;
-  txt_shift = 5;
   txt = "+            +\n\n\n\n\n\n\n+            +";
 
   showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
 
-  offset_y = -120;
-  txt_size = 40;
-  txt_shift = 2;
+  txt_size = 8;
+  txt_shift = 0.4;
+  offset_y = -height / 5;
   txt = "take me back\nto the ...";
 
   showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
@@ -1429,21 +1429,21 @@ function showEraScreen() {
   if (era_zone == 1) {
 
     txt = frame_counter % 20 < 17 ? "`\n'80s" : "\n'80s";
-    showText(txt, width / 3, height / 2, 80, 5, 80, color_a, color_b, color_c);
-    showText("'90s", 2 * width / 3, height / 2, 40, 2, 80, color_a, color_b, color_c);
+    showText(txt, width / 3, height / 2, 16, 1, height / 12, color_a, color_b, color_c);
+    showText("'90s", 2 * width / 3, height / 2, 8, 0.4, height / 12, color_a, color_b, color_c);
     
     // '90s selected
   } else if (era_zone == 2) {
 
     txt = frame_counter % 20 < 17 ? "`\n'90s" : "\n'90s";
-    showText("'80s", width / 3, height / 2, 40, 2, 80, color_a, color_b, color_c);
-    showText(txt, 2 * width / 3, height / 2, 80, 5, 80, color_a, color_b, color_c);
+    showText("'80s", width / 3, height / 2, 8, 0.4, height / 12, color_a, color_b, color_c);
+    showText(txt, 2 * width / 3, height / 2, 16, 1, height / 12, color_a, color_b, color_c);
     
     // nothing selected
   } else {
 
-    showText("'80s", width / 3, height / 2, 40, 2, 80, color_a, color_b, color_c);
-    showText("'90s", 2 * width / 3, height / 2, 40, 2, 80, color_a, color_b, color_c);
+    showText("'80s", width / 3, height / 2, 8, 0.4, height / 12, color_a, color_b, color_c);
+    showText("'90s", 2 * width / 3, height / 2, 8, 0.4, height / 12, color_a, color_b, color_c);
     
   }
 
@@ -1460,7 +1460,7 @@ function getEra() {
 
 // show screen for dropping the image
 function showDropScreen() {
-  let txt_shift, offset_y, txt, txt_size;
+  let txt_shift, offset_y, txt, txt_size, dash_pattern;
   let color_a, color_b, color_c;
   let side_a, side_b, side_c;
 
@@ -1476,16 +1476,17 @@ function showDropScreen() {
   textFont(manaspace);
   textAlign(CENTER, CENTER);
   rectMode(CENTER);
-  strokeWeight(5);
+  strokeWeight(Math.floor(thumbnail_scale));
   noFill();
-  side_a = 200;
-  side_b = 160;
-  side_c = 250;
-  txt_shift = 5;
+  side_a = 40 * Math.floor(thumbnail_scale); // 200
+  side_b = 32 * Math.floor(thumbnail_scale); // 160
+  side_c = 50 * Math.floor(thumbnail_scale); // 250
+  txt_shift = 0.4 * Math.floor(thumbnail_scale); // 2
+  dash_pattern = [Math.floor(thumbnail_scale) - 1, 2 * Math.floor(thumbnail_scale)]; // [4, 10]
 
   // square selected
   if (drop_zone == 1) {
-    drawingContext.setLineDash([4, 10]);
+    drawingContext.setLineDash(dash_pattern);
     stroke(color_a);
     rect(width / 2 + txt_shift * 2, height / 2 + txt_shift * 2, side_a, side_a);
     stroke(color_b);
@@ -1496,7 +1497,7 @@ function showDropScreen() {
 
     // portrait selected
   } else if (drop_zone == 2) {
-    drawingContext.setLineDash([4, 10]);
+    drawingContext.setLineDash(dash_pattern);
     stroke(color_a);
     rect(width / 2 + txt_shift * 2, height / 2 + txt_shift * 2, side_b, side_c);
     stroke(color_b);
@@ -1507,7 +1508,7 @@ function showDropScreen() {
 
     // landscape selected
   } else if (drop_zone == 3) {
-    drawingContext.setLineDash([4, 10]);
+    drawingContext.setLineDash(dash_pattern);
     stroke(color_a);
     rect(width / 2 + txt_shift * 2, height / 2 + txt_shift * 2, side_c, side_b);
     stroke(color_b);
@@ -1525,9 +1526,9 @@ function showDropScreen() {
   textAlign(CENTER, CENTER);
   noStroke();
 
+  txt_size = 16;
+  txt_shift = 1;
   offset_y = 0;
-  txt_size = 80;
-  txt_shift = 5;
   
   // text proportion for square format
   if (drop_zone == 0) { txt = frame_counter % 20 < 17 ? "+            +\n\n`\ndrop\nimg\n^\n\n+            +" : "+            +\n\n\ndrop\nimg\n\n\n+            +"; }
@@ -1535,19 +1536,19 @@ function showDropScreen() {
 
   showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
 
-  offset_y = 280;
-  txt_size = 20;
-  txt_shift = 1;
+  txt_size = 4;
+  txt_shift = 0.2;
+  offset_y = height / 3;
   textAlign(LEFT, CENTER);
 
   // text proportion for square format
   txt = "DISCLAIMER: ensure you own the rights to the image, or that it is in the public domain";
   
-  showTextBox(txt, width / 2 + 20, height / 2, txt_size, txt_shift, offset_y, width / 1.8, 100, color_a, color_b, color_c);
+  showTextBox(txt, width / 1.85, height / 2, txt_size, txt_shift, offset_y, width / 1.8, height / 8, color_a, color_b, color_c);
 
-  offset_y = -220;
-  txt_size = 30;
-  txt_shift = 2;
+  txt_size = 6;
+  txt_shift = 0.4;
+  offset_y = -height / 4;
   textAlign(CENTER, CENTER);
 
   // square selected
@@ -1603,11 +1604,11 @@ function showSignalInfo() {
   textAlign(RIGHT, BOTTOM);
   noStroke();
 
-  txt_size = 20;
-  txt_shift = 1;
+  txt_size = 4;
+  txt_shift = 0.2;
   signal_info_txt = signal_info_txt_1 + signal_info_txt_2 + signal_info_txt_3 + signal_info_txt_4 + signal_info_txt_5 + signal_info_txt_6;
 
-  showText(signal_info_txt, width - 20, height - 20, txt_size, txt_shift, 0, color_a, color_b, color_c)
+  showText(signal_info_txt, width - width / 30, height - width / 30, txt_size, txt_shift, 0, color_a, color_b, color_c)
 
 
   // in case the image is re-dropped
@@ -1615,9 +1616,9 @@ function showSignalInfo() {
   textAlign(CENTER, CENTER);
   noStroke();
 
+  txt_size = 6;
+  txt_shift = 0.4;
   offset_y = 0;
-  txt_size = 30;
-  txt_shift = 2;
 
   // square selected
   if (drop_zone == 1) {
@@ -1637,9 +1638,9 @@ function showSignalInfo() {
 
   // any of the formats selected
   if (drop_zone > 0) {
-    offset_y = -120;
-    txt_size = 60;
-    txt_shift = 3;
+    txt_size = 12;
+    txt_shift = 0.6;
+    offset_y = -height / 5;
     txt = "redrop img";
     showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
   }
@@ -1665,11 +1666,11 @@ function showSignalOnScreen() {
   rectMode(CENTER);
   noStroke();
 
-  txt_size = 15;
-  txt_shift = 1;
+  txt_size = 3;
+  txt_shift = 0.2;
   offset_y = 0;
-  txt_box_width = width - 40;
-  txt_box_height = height - 40;
+  txt_box_width = width - width / 15;
+  txt_box_height = height - width / 15;
 
   showTextBox(signal, width / 2, height / 2, txt_size, txt_shift, offset_y, txt_box_width, txt_box_height, color_a, color_b, color_c);
 
@@ -1694,13 +1695,13 @@ function showControlInfo() {
   textAlign(LEFT, BOTTOM);
   noStroke();
 
-  txt_size = 20;
-  txt_shift = 1;
+  txt_size = 4;
+  txt_shift = 0.2;
 
   if (frame_counter % 20 < 13) {controls_info_txt = "CONTROLS\n<> : -+ quality\n`^ : -+ quantization\nclick : -+ square\nb : cycle border\nc : show/hide signal\nredrop : new image\nrefresh : fix image";}
   else {controls_info_txt = "CONTROLS\n<> : -+ quality\n`^ : -+ quantization\nclick : -+ square\nb : cycle border\nc : show/hide signal\nredrop : new image\n";}
   
-  showText(controls_info_txt, 20, height - 20, txt_size, txt_shift, 0, color_a, color_b, color_c)
+  showText(controls_info_txt, width / 30, height - width / 30, txt_size, txt_shift, 0, color_a, color_b, color_c)
 }
 
 
@@ -1720,8 +1721,8 @@ function showAfterImageLoad() {
   textAlign(CENTER, CENTER);
   noStroke();
 
-  txt_size = 30;
-  txt_shift = 2;
+  txt_size = 6;
+  txt_shift = 0.4;
   loading_txt = "image loaded!\n\ncropped + resized + centered\n\n" + target_dim[0].toString() + " x " + target_dim[1].toString() + " pix";
 
   showText(loading_txt, width / 2, height / 2, txt_size, txt_shift, 0, color_a, color_b, color_c)
@@ -1730,11 +1731,14 @@ function showAfterImageLoad() {
 
 // show stylized text on the canvas
 function showText(txt, x, y, txt_size, txt_shift, offset_y, color_a, color_b, color_c) {
-  textSize(txt_size);
+  let text_size_adjusted = txt_size * Math.floor(thumbnail_scale);
+  let txt_shift_adjusted = txt_shift * Math.floor(thumbnail_scale);
+
+  textSize(text_size_adjusted);
   fill(color_a);
-  text(txt, x + txt_shift * 2, y + txt_shift * 2 + offset_y);
+  text(txt, x + txt_shift_adjusted * 2, y + txt_shift_adjusted * 2 + offset_y);
   fill(color_b);
-  text(txt, x + txt_shift, y + txt_shift + offset_y);
+  text(txt, x + txt_shift_adjusted, y + txt_shift_adjusted + offset_y);
   fill(color_c);
   text(txt, x, y + offset_y);
 }
@@ -1742,11 +1746,14 @@ function showText(txt, x, y, txt_size, txt_shift, offset_y, color_a, color_b, co
 
 // show stylized text on the canvas with a bounding box
 function showTextBox(txt, x, y, txt_size, txt_shift, offset_y, txt_box_width, txt_box_height, color_a, color_b, color_c) {
-  textSize(txt_size);
+  let text_size_adjusted = txt_size * Math.floor(thumbnail_scale);
+  let txt_shift_adjusted = txt_shift * Math.floor(thumbnail_scale);
+
+  textSize(text_size_adjusted);
   fill(color_a);
-  text(txt, x + txt_shift * 2, y + txt_shift * 2 + offset_y, txt_box_width, txt_box_height);
+  text(txt, x + txt_shift_adjusted * 2, y + txt_shift_adjusted * 2 + offset_y, txt_box_width, txt_box_height);
   fill(color_b);
-  text(txt, x + txt_shift, y + txt_shift + offset_y, txt_box_width, txt_box_height);
+  text(txt, x + txt_shift_adjusted, y + txt_shift_adjusted + offset_y, txt_box_width, txt_box_height);
   fill(color_c);
   text(txt, x, y + offset_y, txt_box_width, txt_box_height);
 }
@@ -1769,7 +1776,6 @@ function gotFile(file) {
 
 // triggered when we drag a file over the canvas to drop it
 function highlightDrop() {
-  //file_over_canvas = true;
   drop_zone_x = Math.floor(mouseX / (width / 3)) + 1;
   drop_zone_y = Math.floor(mouseY / (height / 4));
   // drop_zone equals drop_zone_x if drop_zone_y is "middle" of the screen, otherwise it's zero
@@ -1782,7 +1788,6 @@ function highlightDrop() {
 
 // triggered when we finish dragging the file over the canvas to drop it
 function unhighlightDrop() {
-  //file_over_canvas = false;
 }
 
 
@@ -1806,8 +1811,8 @@ function dropped() {
   textAlign(CENTER, CENTER);
   noStroke();
 
-  let txt_size = 30;
-  let txt_shift = 2;
+  let txt_size = 6;
+  let txt_shift = 0.4;
   let loading_txt = "compressing image ...";
 
   showText(loading_txt, width / 2, height / 2, txt_size, txt_shift, 0, color_a, color_b, color_c)
@@ -2405,11 +2410,13 @@ function mouseClicked() {
     let square_y_nr = Math.floor((mouseY - (canvas_dim[1] * image_border[1])/2) / (8 * thumbnail_scale));
 
     // flash an X on the location of the square
-    let txt_shift = 2;
+    let txt_shift = 0.4 * Math.floor(thumbnail_scale);
+    let txt_size = 10 * Math.floor(thumbnail_scale)
     textFont(manaspace);
     textAlign(CENTER, CENTER);
     noStroke();
-    textSize(50);
+    textSize(txt_size);
+    
     fill(255, 0, 255);
     text("x", (canvas_dim[0] * image_border[0])/2 + square_x_nr * 8 * thumbnail_scale + 4 * thumbnail_scale + txt_shift * 2, (canvas_dim[1] * image_border[1])/2 + square_y_nr * 8 * thumbnail_scale + 3 * thumbnail_scale + txt_shift * 2);
     fill(0, 255, 255);

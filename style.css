@@ -5,7 +5,7 @@
 
 body {
 	font-family: monospace;
-	background-color: rgb(0, 0, 0);
+	background-color: rgb(155, 155, 155);
 	overflow: hidden; /* hide scrollbars */
 }
 
@@ -14,6 +14,7 @@ body {
 	background-color: blue;
 	color: white;
 	font-family: monospace;
+	font-size: 1.5vmin;
 	text-align: center;
 	box-sizing: border-box;
 	display: flex;
@@ -31,6 +32,7 @@ body {
 #booting_text {
 	color: white;
 	font-family: monospace;
+	font-size: 1.5vmin;
 	text-align: center;
 	box-sizing: border-box;
 	display: flex;
@@ -41,7 +43,7 @@ body {
 	height: 100%;
 	top: 50%;
 	left: 50%;
-	transform: translate(-50%, -35%);
+	transform: translate(-50%, -50%);
 }
 
 /* defining animation parameters for the "booting" text */

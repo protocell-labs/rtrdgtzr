@@ -156,7 +156,7 @@ function draw() {
 
 
   // EDITING SIGNAL (TEXT AFTER IMAGE DROP) - execute only if the dropped_image is loaded, will disappear after a short time
-  if ((thumbnail) && (thumbnail_ready) && (frame_counter_after_drop < 50)) {
+  if ((thumbnail) && (thumbnail_ready) && (drop_zone == 0) && (frame_counter_after_drop < 50)) {
 
     // shows load info as text on the canvas
     showAfterImageLoad();

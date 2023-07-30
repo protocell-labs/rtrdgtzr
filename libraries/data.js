@@ -101,7 +101,6 @@ else {image_border = [thumbnail_scale * 16, thumbnail_scale * 16];} // thick bor
 let start_screen = true; // this will show the start screen at the beginning and be switched off after any key is pressed
 let era_screen = false; // era screen will come after start screen and be switched off when era is selected by clicking
 let drop_screen = false; // drop screen will come after era screen and be switched off after the image is dropped
-let file_over_canvas = false; // trigger to check if the file is dragged over the canvas or not
 let thumbnail_ready = false; // additional flag for when thumbnail is ready for use
 let display_signal = false; // display signal characters at key press
 

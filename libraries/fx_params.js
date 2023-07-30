@@ -51,20 +51,20 @@ $fx.params([
     id: "effect_main",
     name: "Effect main",
     type: "select",
-    default: "hi-fi",
+    default: "lo-fi",
     update: "page-reload",
     options: {
-      options: ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"],
+      options: ["mono", "hi-fi", "noisy", "corrupted", "abstract", "lo-fi"],
     }
   },
   {
     id: "effect_background",
     name: "Effect background",
     type: "select",
-    default: "lo-fi",
+    default: "mono",
     update: "page-reload",
     options: {
-      options: ["mono", "hi-fi", "noisy", "corrupted", "lo-fi"],
+      options: ["mono", "hi-fi", "noisy", "corrupted", "abstract", "lo-fi"],
     }
   },
   {

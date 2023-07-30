@@ -259,7 +259,7 @@ function setEffectData(effects_stack_name) {
 
       break;
 
-    case "lo-fi": 
+    case "abstract": 
 
       data["blackValue"] = 10;
       data["brigthnessValue"] = 50;
@@ -295,6 +295,66 @@ function setEffectData(effects_stack_name) {
       data["layer_shift"] = 4;
 
       data["invert_mask"] = false;
+
+      data["delta_factor"] = 0.05; // scaling animation effects
+      data["chosen_effect_function"] = applyAbstractEffect;
+
+      break;
+
+    case "lo-fi": 
+
+      data["blackValue"] = 10;
+      data["brigthnessValue"] = 50;
+      data["whiteValue"] = 70;
+
+      //data["sorting_mode"] = 2; // this mode works best for this workflow
+      data["sorting_mode_1"] = gene_rand_int(0, 3); // 0, 1, 2
+      data["sorting_type_1"] = gene_rand_int(0, 2); // 0, 1
+      data["sorting_order_1"] = gene_rand_int(0, 3); // 0, 1, 2
+
+      data["sorting_mode_2"] = gene_rand_int(0, 3); // 0, 1, 2
+      data["sorting_type_2"] = gene_rand_int(0, 2); // 0, 1
+      data["sorting_order_2"] = gene_rand_int(0, 3); // 0, 1, 2
+
+      if (gene() < 0.50) {
+        data["sorting_mode_2"] = data["sorting_mode_1"];
+        data["sorting_type_2"] = data["sorting_type_1"];
+        data["sorting_order_2"] = data["sorting_order_1"]
+      }
+
+      data["color_noise_density"] = gene() < 0.35 ? 50 : 5;
+      data["rand_color_bias_key"] = gene_pick_key(color_bias_palette);
+      data["color_noise_bias"] = color_bias_palette[ data["rand_color_bias_key"] ];
+      data["color_noise_variation"] = 10000;
+
+      data["nr_of_levels"] = 1;
+
+      if (gene() < 0.50) {
+        data["rand_dither_key_1"] = gene_pick_key(dither_params_json);
+        data["dither_params_1"] = dither_params_json[ data["rand_dither_key_1"] ];
+
+      } else {
+        data["rand_dither_key_1"] = gene_pick_key(extreme_dither_params_json);
+        data["dither_params_1"] = extreme_dither_params_json[ data["rand_dither_key_1"] ];
+      }
+
+      if (gene() < 0.50) {
+        data["rand_dither_key_2"] = gene_pick_key(dither_params_json);
+        data["dither_params_2"] = dither_params_json[ data["rand_dither_key_2"] ];
+
+      } else {
+        data["rand_dither_key_2"] = gene_pick_key(extreme_dither_params_json);
+        data["dither_params_2"] = extreme_dither_params_json[ data["rand_dither_key_2"] ];
+      }
+
+      data["pix_scaling"] = 8.0;
+      data["layer_shift"] = 4;
+      data["invert_mask"] = false;
+
+      data["tint_palette_key_1"] = gene_pick_key(three_bit_palette);
+      data["tint_palette_key_2"] = gene_pick_key(three_bit_palette);
+      data["tint_palette_1"] = three_bit_palette[ data["tint_palette_key_1"] ];
+      data["tint_palette_2"] = three_bit_palette[ data["tint_palette_key_2"] ];
 
       data["delta_factor"] = 0.05; // scaling animation effects
       data["chosen_effect_function"] = applyLoFiEffect;
@@ -519,8 +579,8 @@ function applyCorruptedEffect(img, stack_data) {
 }
 
 
-// apply effect stack "lo-fi"
-function applyLoFiEffect(img, stack_data) {
+// apply effect stack "abstract"
+function applyAbstractEffect(img, stack_data) {
 
   setBrightness(img, stack_data["new_brightness"]);
 
@@ -552,6 +612,77 @@ function applyLoFiEffect(img, stack_data) {
   img.resizeNN(img.width * 2.0, 0); // we resize back double to get to the size of the original input image
   image(img, output_border[0]/2, output_border[1]/2);
 
+  blendMode(BLEND);
+  noTint();
+}
+
+
+// apply effect stack "lo-fi"
+function applyLoFiEffect(img, stack_data) {
+
+  setBrightness(img, stack_data["new_brightness"]);
+  img_2 = img.get(); // copy image pixels
+
+  // 1. Full image
+  blendMode(BLEND);
+  grayscale(img, stack_data["contrast"]);
+  img.resize(img.width / stack_data["pix_scaling"], 0);
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);}
+  tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
+  img.resizeNN(img.width * stack_data["pix_scaling"] / 2.0, 0); // we resize back only half way
+
+  // here we had to take out pixelSortRow option as it didn't produce nice results
+  switch (stack_data["sorting_order_1"]) {
+    case 0:
+      pixelSortColumn(img, stack_data["sorting_mode_1"], stack_data["sorting_type_1"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      break;
+    case 1:
+      pixelSortColumn(img, stack_data["sorting_mode_1"], stack_data["sorting_type_1"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortRow(img, stack_data["sorting_mode_1"], stack_data["sorting_type_1"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      break;
+    case 2:
+      pixelSortRow(img, stack_data["sorting_mode_1"], stack_data["sorting_type_1"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortColumn(img, stack_data["sorting_mode_1"], stack_data["sorting_type_1"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      break;
+    default:
+      break;
+  }
+
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img, stack_data["nr_of_levels"], stack_data["dither_params_1"]);}
+  img.resizeNN(img.width * 2.0, 0); // we resize back double to get to the size of the original input image
+  image(img, output_border[0]/2, output_border[1]/2);
+
+  // 2. Bright part of the image
+  blendMode(ADD);
+  noTint();
+  grayscale(img_2, stack_data["contrast"]);
+  img_2.resize(img_2.width / stack_data["pix_scaling"], 0);
+  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);}
+  tint(stack_data["tint_palette_2"][0], stack_data["tint_palette_2"][1], stack_data["tint_palette_2"][2]);
+  img_2.resizeNN(img_2.width * stack_data["pix_scaling"] / 2.0, 0); // we resize back only half way
+
+  // here we had to take out pixelSortRow option as it didn't produce nice results
+  switch (stack_data["sorting_order_2"]) {
+    case 0:
+      pixelSortColumn(img_2, stack_data["sorting_mode_2"], stack_data["sorting_type_2"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      break;
+    case 1:
+      pixelSortColumn(img_2, stack_data["sorting_mode_2"], stack_data["sorting_type_2"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortRow(img_2, stack_data["sorting_mode_2"], stack_data["sorting_type_2"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      break;
+    case 2:
+      pixelSortRow(img_2, stack_data["sorting_mode_2"], stack_data["sorting_type_2"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      pixelSortColumn(img_2, stack_data["sorting_mode_2"], stack_data["sorting_type_2"], stack_data["color_noise_density"], stack_data["color_noise_bias"], stack_data["color_noise_variation"], stack_data["blackValue"], stack_data["whiteValue"], stack_data["brigthnessValue"]);
+      break;
+    default:
+      break;
+  }
+
+  if (stack_data["effect_era"] == "'80s") {makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);}
+  img_2.resizeNN(img_2.width * 2.0, 0); // we resize back double to get to the size of the original input image
+  image(img_2, output_border[0]/2 + stack_data["layer_shift"], output_border[1]/2 + stack_data["layer_shift"]);
+  
   blendMode(BLEND);
   noTint();
 }

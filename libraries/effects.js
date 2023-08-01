@@ -33,7 +33,7 @@ function setupGif() {
   const uuid = parseInt(Math.random() * 10000000);
 
   gif.on('finished', function (blob) {
-    print('Finished creating gif')
+    print('\n- initiate gif download -\n');
     rendering = false;
     window.open(URL.createObjectURL(blob));
     saveAs(blob, `retro_digitizer_${effects_main_name}_anim_${uuid}.gif`);
@@ -1494,13 +1494,9 @@ function showStartScreen() {
   textAlign(CENTER, CENTER);
   noStroke();
 
-  // adjust text based on the canvas format
-  if (format == "portrait") { txt = "+         +\n\n\n\nR E T R O\ndigitizer\n\n\n\n+         +"; } // portrait proportion
-  else if (format == "landscape") { txt = "+                +\n\nR E T R O\ndigitizer\n\n+                +"; } // landscape proportion
-  else { txt = "+            +\n\n\nR E T R O\ndigitizer\n\n\n+            +"; } // square proportion
-
-  txt_size = 16; // 5x - 80
-  txt_shift = 1; // 5x - 5
+  txt = "+              +\n\n\nr t r\n- d g\nt z r\n\n\n+              +";
+  txt_size = 15;
+  txt_shift = 1;
   offset_y = 0;
 
   showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
@@ -1508,7 +1504,7 @@ function showStartScreen() {
   txt = "press any key\nto start";
   txt_size = 6; // 5x - 30
   txt_shift = 0.4; // 5x - 2
-  offset_y = height / 4; // 220
+  offset_y = height / 3; // 220
 
   // make text blink
   if (frame_counter % 20 < 13) { showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c); }
@@ -1517,7 +1513,7 @@ function showStartScreen() {
   if (frame_counter % 35 < 22) { txt = "{protocell:labs}"; }
   else { txt = "presents"; }
 
-  offset_y = -height / 4; // -220
+  offset_y = -height / 3; // -220
 
   showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
 }
@@ -1541,10 +1537,10 @@ function showEraScreen() {
   textAlign(CENTER, CENTER);
   noStroke();
 
-  txt_size = 16;
+  txt_size = 15;
   txt_shift = 1;
   offset_y = 0;
-  txt = "+            +\n\n\n\n\n\n\n+            +";
+  txt = "+              +\n\n\n\n\n\n\n\n+              +";
 
   showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
 
@@ -1657,13 +1653,13 @@ function showDropScreen() {
   textAlign(CENTER, CENTER);
   noStroke();
 
-  txt_size = 16;
+  txt_size = 15;
   txt_shift = 1;
   offset_y = 0;
   
   // text proportion for square format
-  if (drop_zone == 0) { txt = frame_counter % 20 < 17 ? "+            +\n\n`\ndrop\nimg\n^\n\n+            +" : "+            +\n\n\ndrop\nimg\n\n\n+            +"; }
-  else { txt = "+            +\n\n\n\n\n\n\n+            +"; }
+  if (drop_zone == 0) { txt = frame_counter % 20 < 17 ? "+              +\n\n`\ndrop\nimg\n^\n\n\n+              +" : "+              +\n\n\ndrop\nimg\n\n\n\n+              +"; }
+  else { txt = "+              +\n\n\n\n\n\n\n\n+              +"; }
 
   showText(txt, width / 2, height / 2, txt_size, txt_shift, offset_y, color_a, color_b, color_c);
 
@@ -1719,14 +1715,14 @@ function showSignalInfo() {
   signal_info_txt_1 = "decompressed chars > " + decompressed_signal_size.toString() + "\n";
 
   compressed_signal_size = signal.length;
-  compression_ratio = compressed_signal_size / decompressed_signal_size;
+  image_compression_ratio = compressed_signal_size / target_pixel_nr;
   signal_info_txt_2 = "compressed chars > " + compressed_signal_size + "\n";
 
   signal_info_txt_3 = "";
-  if (compressed_signal_size > 1900) { signal_info_txt_3 = "chars over limit > " + (compressed_signal_size - 1900).toString() + "\n"; }
+  if (compressed_signal_size > max_chars) { signal_info_txt_3 = "chars over limit > " + (compressed_signal_size - max_chars).toString() + "\n"; }
   else { signal_info_txt_3 = "chars fit into params\n"; }
 
-  signal_info_txt_4 = "compression ratio > " + Math.round(compression_ratio * 100).toString() + "%\n";
+  signal_info_txt_4 = "image compression > " + Math.round(image_compression_ratio * 100).toString() + "%\n";
 
   signal_info_txt_5 = "quality > " + quality.toString() + "\n";
   signal_info_txt_6 = "quantization > " + quant_f.toString();
@@ -2426,8 +2422,14 @@ function serializeSignal(thumbnail) {
     }
   }
 
-  console.log("image characters total ->", signal.length);
-  console.log(signal);
+  console.log("\n", "image dimensions ->", target_dim[0], "x", target_dim[1],
+              "\n", "format ->", format, 
+              "\n", "quality ->", quality, 
+              "\n", "quantization ->", quant_f, 
+              "\n", "decompressed characters ->", squares_nr[0] * squares_nr[1] * quality,
+              "\n", "compressed characters ->", signal.length, 
+              "\n", "image compression ->", Math.round(100 * signal.length / target_pixel_nr), "%", 
+              "\n", "signal ->", "\n\n", signal);
 
   // update the parameter values
   $fx.emit("params:update", {
@@ -2465,6 +2467,7 @@ function resizeThumbnailAndSerialize(thumbnail) {
   // recalculate dimensions
   w_h_ratio = squares_nr[0] / squares_nr[1];
   target_dim = [squares_nr[0] * 8, squares_nr[1] * 8];
+  target_pixel_nr = target_dim[0] * target_dim[1];
 
   if (windowWidth / windowHeight < w_h_ratio) {
     thumbnail_scale = windowWidth / (target_dim[0] + target_dim[0] * image_border[0]);

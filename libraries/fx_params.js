@@ -4,18 +4,18 @@
 $fx.params([
   {
     id: "signal",
-    name: "Signal",
+    name: "signal",
     type: "string",
     default: "",
     update: "code-driven",
     options: {
       minLength: 0,
-      maxLength: 1900, // 1900
+      maxLength: 2000, // initially we had it at 1900
     }
   },
   {
     id: "format",
-    name: "Format",
+    name: "format",
     type: "select",
     default: "square",
     update: "code-driven",
@@ -25,7 +25,7 @@ $fx.params([
   },
   {
     id: "quality",
-    name: "Quality",
+    name: "quality",
     type: "number",
     default: 10,
     update: "code-driven",
@@ -37,7 +37,7 @@ $fx.params([
   },
   {
     id: "quant_f",
-    name: "Quantization",
+    name: "quantization",
     type: "number",
     default: 1,
     update: "code-driven",
@@ -48,8 +48,8 @@ $fx.params([
     },
   },
   {
-    id: "effect_main",
-    name: "Effect main",
+    id: "effect_primary",
+    name: "effect primary",
     type: "select",
     default: "lo-fi",
     update: "page-reload",
@@ -58,8 +58,8 @@ $fx.params([
     }
   },
   {
-    id: "effect_background",
-    name: "Effect background",
+    id: "effect_secondary",
+    name: "effect secondary",
     type: "select",
     default: "mono",
     update: "page-reload",
@@ -69,7 +69,7 @@ $fx.params([
   },
   {
     id: "effect_era",
-    name: "Era",
+    name: "era",
     type: "select",
     default: "80-ties",
     update: "code-driven",
@@ -79,7 +79,7 @@ $fx.params([
   },
   {
     id: "border_type",
-    name: "Border",
+    name: "border",
     type: "select",
     default: "none",
     update: "code-driven",
@@ -89,14 +89,14 @@ $fx.params([
   },
   {
     id: "invert_input",
-    name: "Invert",
+    name: "invert",
     type: "boolean",
     default: false,
     update: "page-reload",
   },
   {
     id: "brightness",
-    name: "Brightness",
+    name: "brightness",
     type: "number",
     default: "1.0",
     update: "page-reload",
@@ -108,7 +108,7 @@ $fx.params([
   },
   {
     id: "contrast",
-    name: "Contrast",
+    name: "contrast",
     type: "number",
     default: "0.50",
     update: "page-reload",
@@ -120,7 +120,7 @@ $fx.params([
   },
   {
     id: "light_treshold",
-    name: "Light treshold",
+    name: "light treshold",
     type: "number",
     default: "50",
     update: "page-reload",
@@ -132,7 +132,7 @@ $fx.params([
   },
   {
     id: "dark_treshold",
-    name: "Dark treshold",
+    name: "dark treshold",
     type: "number",
     default: "30",
     update: "page-reload",
@@ -144,7 +144,7 @@ $fx.params([
   },
   {
     id: "alpha_brightness",
-    name: "Alpha brightness",
+    name: "alpha brightness",
     type: "number",
     default: "50",
     update: "page-reload",

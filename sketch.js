@@ -93,7 +93,10 @@ function setup() {
                 "\n", "image compression ->", Math.round(100 * signal.length / target_pixel_nr), "%", 
                 "\n", "effects primary ->", effects_main_name, 
                 "\n", "effects secondary ->", effects_background_name, 
+                "\n", "invert ->", invert_input, 
                 "\n", "era ->", effect_era, 
+                "\n", "effect seed ->", effect_seed, 
+                "\n", "minter ->", $fx.minter, 
                 "\n", "signal ->", "\n\n", signal);
 
     // deserialize signal data into an input image - this is the starting point for all effect stacks

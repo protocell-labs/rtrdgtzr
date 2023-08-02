@@ -30,13 +30,13 @@ function setupGif() {
     height: input_img.height + output_border[1]
   });
 
-  const uuid = parseInt(Math.random() * 10000000);
+  const uuid = parseInt(Math.random() * 100000);
 
   gif.on('finished', function (blob) {
     print('\n- initiate gif download -\n');
     rendering = false;
     window.open(URL.createObjectURL(blob));
-    saveAs(blob, `retro_digitizer_${effects_main_name}_anim_${uuid}.gif`);
+    saveAs(blob, `rtrdgtzr_${effects_main_name}_anim_${artwork_seed}_id_${uuid}.gif`);
     setupGif();
   });
 }
@@ -170,7 +170,7 @@ function setEffectData(effects_stack_name) {
       data["sorting_mode"] = gene_rand_int(0, 3); // 0, 1, 2
       data["sorting_type"] = gene_rand_int(0, 2); // 0, 1
       data["sorting_order"] = gene_rand_int(0, 4); // 0, 1, 2, 3
-      data["color_noise_density"] = gene() < 0.35 ? 50 : 5;
+      data["color_noise_density"] = gene() < 0.25 ? 50 : 5;
       data["rand_color_bias_key"] = gene_pick_key(color_bias_palette);
       data["color_noise_bias"] = color_bias_palette[ data["rand_color_bias_key"] ];
       data["color_noise_variation"] = 10000;
@@ -222,7 +222,7 @@ function setEffectData(effects_stack_name) {
       data["sorting_type_2"] = gene_rand_int(0, 2); // 0, 1
       data["sorting_order_2"] = gene_rand_int(0, 4); // 0, 1, 2, 3
 
-      data["color_noise_density"] = gene() < 0.35 ? 50 : 5;
+      data["color_noise_density"] = gene() < 0.25 ? 50 : 5;
       data["rand_color_bias_key"] = gene_pick_key(color_bias_palette);
       data["color_noise_bias"] = color_bias_palette[ data["rand_color_bias_key"]];
       data["color_noise_variation"] = 10000; //10000
@@ -322,7 +322,7 @@ function setEffectData(effects_stack_name) {
         data["sorting_order_2"] = data["sorting_order_1"]
       }
 
-      data["color_noise_density"] = gene() < 0.35 ? 50 : 5;
+      data["color_noise_density"] = gene() < 0.25 ? 50 : 5;
       data["rand_color_bias_key"] = gene_pick_key(color_bias_palette);
       data["color_noise_bias"] = color_bias_palette[ data["rand_color_bias_key"] ];
       data["color_noise_variation"] = 10000;
@@ -2771,8 +2771,8 @@ function keyPressed() {
 
     // works only if effects are applied, not during image editing
     if ((signal.length != 0) && (thumbnail == undefined)) {
-      const saveid = parseInt(Math.random() * 10000000);
-      saveCanvas(canvas, `retro_digitizer_${effects_main_name}_still_${saveid}`, "png");
+      const saveid = parseInt(Math.random() * 100000);
+      saveCanvas(canvas, `rtrdgtzr_${effects_main_name}_still_${artwork_seed}_id_${saveid}`, "png");
     }
   }
 

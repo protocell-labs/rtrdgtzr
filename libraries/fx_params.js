@@ -48,6 +48,26 @@ $fx.params([
     },
   },
   {
+    id: "effect_era",
+    name: "era",
+    type: "select",
+    default: "'80s",
+    update: "code-driven",
+    options: {
+      options: ["'80s", "'90s"],
+    }
+  },
+  {
+    id: "border_type",
+    name: "border",
+    type: "select",
+    default: "none",
+    update: "code-driven",
+    options: {
+      options: ["none", "thin", "thick"],
+    }
+  },
+  /*{
     id: "effect_primary",
     name: "effect primary",
     type: "select",
@@ -68,37 +88,17 @@ $fx.params([
     }
   },
   {
-    id: "effect_era",
-    name: "era",
-    type: "select",
-    default: "80-ties",
-    update: "code-driven",
-    options: {
-      options: ["'80s", "'90s"],
-    }
-  },
-  {
-    id: "border_type",
-    name: "border",
-    type: "select",
-    default: "none",
-    update: "code-driven",
-    options: {
-      options: ["none", "thin", "thick"],
-    }
-  },
-  {
     id: "invert_input",
     name: "invert",
     type: "boolean",
     default: false,
     update: "page-reload",
-  },
+  },*/
   {
     id: "brightness",
     name: "brightness",
     type: "number",
-    default: "1.0",
+    default: 1.0,
     update: "page-reload",
     options: {
       min: 0,
@@ -110,7 +110,7 @@ $fx.params([
     id: "contrast",
     name: "contrast",
     type: "number",
-    default: "0.50",
+    default: 0.50,
     update: "page-reload",
     options: {
       min: 0,
@@ -122,7 +122,7 @@ $fx.params([
     id: "light_treshold",
     name: "light treshold",
     type: "number",
-    default: "50",
+    default: 50,
     update: "page-reload",
     options: {
       min: 0,
@@ -134,7 +134,7 @@ $fx.params([
     id: "dark_treshold",
     name: "dark treshold",
     type: "number",
-    default: "30",
+    default: 30,
     update: "page-reload",
     options: {
       min: 0,
@@ -146,12 +146,24 @@ $fx.params([
     id: "alpha_brightness",
     name: "alpha brightness",
     type: "number",
-    default: "50",
+    default: 50,
     update: "page-reload",
     options: {
       min: 0,
       max: 100,
       step: 5,
+    },
+  },
+  {
+    id: "effect_seed",
+    name: "effect seed",
+    type: "number",
+    default: 0,
+    update: "page-reload",
+    options: {
+      min: 0,
+      max: 1000,
+      step: 1,
     },
   },
 ]);

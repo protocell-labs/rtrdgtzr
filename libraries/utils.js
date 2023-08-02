@@ -2,9 +2,13 @@
 // by @LukaPiskorec, 2023
 
 
-// FXHASH random function for specific implimentation
+// FXHASH random function for specific implementation
 //gene = fxrand;
-const gene = fxrandminter;
+//const gene = fxrandminter; // PRNG from fxhash snippet which uses minter wallet address as the seed
+let effect_seed = $fx.getParam("effect_seed").toString();
+let artwork_seed = $fx.minter + "_effect_seed_" + effect_seed; // artwork seed is composed of minter wallet address and chosen effect number
+const gene = new Math.seedrandom(artwork_seed); // creating a seeded PRNG
+
 
 // rand functions for random generator
 // assumes generator producing float point between 0 and 1

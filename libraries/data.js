@@ -27,6 +27,8 @@ banner_txt += "\n";
 banner_txt += "\n     r t r d g t z r  |  { p r o t o c e l l : l a b s }  |  2 0 2 3     \n\n";
 
 
+
+
 let input_img, frame_to_draw, buffer_frames, squares_nr, gif, canvas, image_border, output_border;
 let thumbnail, thumbnail_scale, output_scale, dropped_image, dropped_file, drop_zone_x, drop_zone_y, manaspace;
 let stack_data_main, stack_data_background;
@@ -43,14 +45,15 @@ let offset_rgb = [-25, -25, 25]; // rgb offset applied to the droped image - jus
 let signal = ""; // initialize the signal, this is where the image data will be stored
 let max_chars = 2000; // maximum number of characters in the compressed signal - this is separately set inside fx_params.js for the signal param
 
-let effects_main_name = $fx.getParam("effect_primary"); // type of effects workflow to be used on the main image
-let effects_background_name = $fx.getParam("effect_secondary"); // type of effects workflow to be used on the background
-let effect_era = $fx.getParam("effect_era"); // era of the effects
 let format = $fx.getParam("format"); // get format string from params
 let border_type = $fx.getParam("border_type"); // type of border - "none", "thin", "thick"
 let quality = $fx.getParam("quality"); // corresponds to the number of coefficients being selected, higher is better, 1-10
 let quant_f = $fx.getParam("quant_f"); // additional factor which modifies quantization levels, higher means stronger compression, needs to be >= 1
-let invert_input = $fx.getParam("invert_input"); // inverts both the input image and the effects applied to it after
+let effect_era = $fx.getParam("effect_era"); // era of the effects
+
+//let effects_main_name = $fx.getParam("effect_primary"); // type of effects workflow to be used on the main image
+//let effects_background_name = $fx.getParam("effect_secondary"); // type of effects workflow to be used on the background
+//let invert_input = $fx.getParam("invert_input"); // inverts both the input image and the effects applied to it after
 
 let image_border_none = [0, 0]; // in precentage of the image dimensions
 let image_border_thin = [0.05, 0.05]; // in precentage of the image dimensions
@@ -89,8 +92,19 @@ if (border_type == "none") { output_border = [0, 0]; }  // no border
 else if (border_type == "thin") { output_border = [10 * output_scale, 10 * output_scale]; } // thin border
 else { output_border = [20 * output_scale, 20 * output_scale]; } // thick border
 
+// primary effect stacks - [value, probability]
+const allel_effect_stacks = [
+  ["mono", 1],
+  ["hi-fi", 1],
+  ["noisy", 1],
+  ["corrupted", 1],
+  ["abstract", 1],
+  ["lo-fi", 1]
+];
 
-
+let effects_main_name = gene_weighted_choice(allel_effect_stacks); // type of effects workflow to be used on the main image
+let effects_background_name = gene_weighted_choice(allel_effect_stacks); // type of effects workflow to be used on the background
+let invert_input = gene() < 0.25 ? true : false; // inverts both the input image and the effects applied to it after
 
 let start_screen = true; // this will show the start screen at the beginning and be switched off after any key is pressed
 let era_screen = false; // era screen will come after start screen and be switched off when era is selected by clicking

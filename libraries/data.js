@@ -38,7 +38,7 @@ let frame_duration = 100; // in mms
 let frame_rate = 1000/frame_duration; // animation frame rate
 let frame_counter = 0; // this will increment inside draw()
 let frame_counter_after_drop = 0; // this will increment inside draw()
-let nr_of_frames = 2; // number of frames in a gif animation
+let nr_of_frames = 5; // number of frames in a gif animation
 let drop_zone = 0; // 0, 1, 2, 3 - none, square, portrait, landscape
 let era_zone = 0; // 0, 1, 2 - none, '80s, '90s
 let offset_rgb = [-25, -25, 25]; // rgb offset applied to the droped image - just for preview purposes during editing, the actual pixel values are not changes
@@ -106,6 +106,7 @@ let effects_main_name = gene_weighted_choice(allel_effect_stacks); // type of ef
 let effects_background_name = gene_weighted_choice(allel_effect_stacks); // type of effects workflow to be used on the background
 let invert_input = gene() < 0.25 ? true : false; // inverts both the input image and the effects applied to it after
 
+
 let start_screen = true; // this will show the start screen at the beginning and be switched off after any key is pressed
 let era_screen = false; // era screen will come after start screen and be switched off when era is selected by clicking
 let drop_screen = false; // drop screen will come after era screen and be switched off after the image is dropped
@@ -113,6 +114,13 @@ let thumbnail_ready = false; // additional flag for when thumbnail is ready for 
 let display_signal = false; // display signal characters at key press
 
 
+// defining fxhash token features
+$fx.features({
+  "title" : $fx.getParam("title"),
+  "author" : $fx.minter,
+  "format" : $fx.getParam("format"),
+  "era" : $fx.getParam("effect_era"),
+})
 
 
 // 8x8 luminance quantization table provided by the JPEG standard
@@ -234,9 +242,10 @@ const color_bias_palette = {
 
 
 // parameters for changing effect stack values between different animation frames (5 frames total)
+// only first 4 are applied, the last one is a placeholder (applied after the last frame is already rendered)
 const animation_params = {
-  'contrast t0' : [0.01, 0.01, 0.01, 0.01],
-  'brightness t0' : [0.005, 0.005, 0.005, 0.005],
-  'contrast t1' : [0.02, 0.02, -0.03, 0.02],
-  'brightness t1' : [0.01, 0.01, -0.015, 0.01],
+  'contrast t0' : [0.01, 0.01, 0.01, 0.01, 0],
+  'brightness t0' : [0.005, 0.005, 0.005, 0.005, 0],
+  'contrast t1' : [0.02, 0.02, -0.03, 0.02, 0],
+  'brightness t1' : [0.01, 0.01, -0.015, 0.01, 0],
 };

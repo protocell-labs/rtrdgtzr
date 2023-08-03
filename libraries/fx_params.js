@@ -3,6 +3,18 @@
 
 $fx.params([
   {
+    id: "effect_seed",
+    name: "seed",
+    type: "number",
+    default: 0,
+    update: "page-reload",
+    options: {
+      min: 0,
+      max: 1000,
+      step: 1,
+    },
+  },
+  {
     id: "signal",
     name: "signal",
     type: "string",
@@ -21,6 +33,26 @@ $fx.params([
     update: "code-driven",
     options: {
       options: ["square", "portrait", "landscape"],
+    }
+  },
+  {
+    id: "effect_era",
+    name: "era",
+    type: "select",
+    default: "'80s",
+    update: "code-driven",
+    options: {
+      options: ["'80s", "'90s"],
+    }
+  },
+  {
+    id: "border_type",
+    name: "border",
+    type: "select",
+    default: "none",
+    update: "code-driven",
+    options: {
+      options: ["none", "thin", "thick"],
     }
   },
   {
@@ -46,26 +78,6 @@ $fx.params([
       max: 10,
       step: 1,
     },
-  },
-  {
-    id: "effect_era",
-    name: "era",
-    type: "select",
-    default: "'80s",
-    update: "code-driven",
-    options: {
-      options: ["'80s", "'90s"],
-    }
-  },
-  {
-    id: "border_type",
-    name: "border",
-    type: "select",
-    default: "none",
-    update: "code-driven",
-    options: {
-      options: ["none", "thin", "thick"],
-    }
   },
   /*{
     id: "effect_primary",
@@ -142,7 +154,7 @@ $fx.params([
       step: 5,
     },
   },
-  {
+  /*{
     id: "alpha_brightness",
     name: "alpha brightness",
     type: "number",
@@ -153,19 +165,19 @@ $fx.params([
       max: 100,
       step: 5,
     },
-  },
+  },*/
   {
-    id: "effect_seed",
-    name: "effect seed",
-    type: "number",
-    default: 0,
+    id: "title",
+    name: "title",
+    type: "string",
+    default: "untitled",
     update: "page-reload",
     options: {
-      min: 0,
-      max: 1000,
-      step: 1,
-    },
+      minLength: 0,
+      maxLength: 100,
+    }
   },
+
 ]);
 
 

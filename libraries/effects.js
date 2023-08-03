@@ -54,14 +54,16 @@ function setEffectData(effects_stack_name) {
   let data = {};
 
   // settings taken from params are defined here
+  data["effect_era"] = $fx.getParam("effect_era");
   data["new_brightness"] = $fx.getParam("brightness");
   data["contrast"] = $fx.getParam("contrast");
   data["mask_contrast"] = clamp(data["contrast"] * 1.2, 0, 1); // 20% larger than contrast, clamped between 0 and 1
   data["light_treshold"] = $fx.getParam("light_treshold");
   data["dark_treshold"] = $fx.getParam("dark_treshold");
-  data["alpha_brightness"] = $fx.getParam("alpha_brightness");
-  data["effect_era"] = $fx.getParam("effect_era");
 
+  let non_mid_gray = gene() < 0.50 ? 40 : 60; // gray value that is either 40 or 60
+  data["alpha_brightness"] = gene() < 0.50 ? 50 : non_mid_gray; // can be 40, 50 or 60
+  
   data["contrast_delta"] = animation_params["contrast t1"]; // values from this list will be added to the contrast for each frame
   data["brightness_delta"] = animation_params["brightness t1"]; // values from this list will be added to the brightness for each frame
 
@@ -111,7 +113,8 @@ function setEffectData(effects_stack_name) {
         data["tint_palette_1"] = three_bit_palette[ data["tint_palette_key_1"] ];
       }
 
-      data["delta_factor"] = 0.5; // scaling animation effects
+      data["delta_factor_1"] = 0.5; // scaling animation effects - main image
+      data["delta_factor_2"] = 50.0; // scaling animation effects - background
       data["chosen_effect_function"] = applyMonoEffect;
 
       break;
@@ -156,7 +159,8 @@ function setEffectData(effects_stack_name) {
       data["tint_palette_2"] = three_bit_palette[ data["tint_palette_key_2"] ];
       data["tint_palette_3"] = three_bit_palette[ data["tint_palette_key_3"] ];
 
-      data["delta_factor"] = 0.5; // scaling animation effects
+      data["delta_factor_1"] = 0.5; // scaling animation effects - main image
+      data["delta_factor_2"] = 50.0; // scaling animation effects - background
       data["chosen_effect_function"] = applyHiFiEffect;
 
       break;
@@ -202,7 +206,8 @@ function setEffectData(effects_stack_name) {
       data["tint_palette_1"] = three_bit_palette[ data["tint_palette_key_1"] ];
       data["tint_palette_2"] = three_bit_palette[ data["tint_palette_key_2"] ];
 
-      data["delta_factor"] = 0.5; // scaling animation effects
+      data["delta_factor_1"] = 0.5; // scaling animation effects - main image
+      data["delta_factor_2"] = 50.0; // scaling animation effects - background
       data["chosen_effect_function"] = applyNoisyEffect;
 
       break;
@@ -254,7 +259,8 @@ function setEffectData(effects_stack_name) {
       data["tint_palette_1"] = three_bit_palette[ data["tint_palette_key_1"] ];
       data["tint_palette_2"] = three_bit_palette[ data["tint_palette_key_2"] ];
 
-      data["delta_factor"] = 0.5; // scaling animation effects
+      data["delta_factor_1"] = 0.5; // scaling animation effects - main image
+      data["delta_factor_2"] = 50.0; // scaling animation effects - background
       data["chosen_effect_function"] = applyCorruptedEffect;
 
       break;
@@ -296,7 +302,8 @@ function setEffectData(effects_stack_name) {
 
       data["invert_mask"] = false;
 
-      data["delta_factor"] = 0.05; // scaling animation effects
+      data["delta_factor_1"] = 0.05; // scaling animation effects - main image
+      data["delta_factor_2"] = 5.0; // scaling animation effects - background
       data["chosen_effect_function"] = applyAbstractEffect;
 
       break;
@@ -356,7 +363,8 @@ function setEffectData(effects_stack_name) {
       data["tint_palette_1"] = three_bit_palette[ data["tint_palette_key_1"] ];
       data["tint_palette_2"] = three_bit_palette[ data["tint_palette_key_2"] ];
 
-      data["delta_factor"] = 0.05; // scaling animation effects
+      data["delta_factor_1"] = 0.05; // scaling animation effects - main image
+      data["delta_factor_2"] = 5.0; // scaling animation effects - background
       data["chosen_effect_function"] = applyLoFiEffect;
 
       break;
@@ -725,6 +733,7 @@ function animateEffectStack(img, stack_data_main, stack_data_background, downloa
     // create an animated background which shows through the transparent squares
     let buffer_graphics = createGraphics(output_dim[0], output_dim[1]);
     buffer_graphics.background(stack_data_background["alpha_brightness"] * 2.55);
+    // convert p5.Graphics into p5.Image
     let buffer_image = createImage(buffer_graphics.width, buffer_graphics.height);
     buffer_image.copy(buffer_graphics, 0, 0, buffer_graphics.width, buffer_graphics.height, 0, 0, buffer_graphics.width, buffer_graphics.height);
     let chosen_effect_function_background = stack_data_background["chosen_effect_function"];
@@ -743,9 +752,9 @@ function animateEffectStack(img, stack_data_main, stack_data_background, downloa
     buffer_frames[i].copy(canvas, 0, 0, buffer_width, buffer_height, 0, 0, buffer_width, buffer_height);
 
     // change contrast and brightness slightly to get a shimmering effect during animation
-    stack_data_main["contrast"] += stack_data_main["contrast_delta"][0] * stack_data_main["delta_factor"];
-    stack_data_main["new_brightness"] += stack_data_main["brightness_delta"][0] * stack_data_main["delta_factor"];
-    stack_data_background["alpha_brightness"] += stack_data_background["brightness_delta"][0] * stack_data_background["delta_factor"];
+    stack_data_main["contrast"] += stack_data_main["contrast_delta"][i] * stack_data_main["delta_factor_1"];
+    stack_data_main["new_brightness"] += stack_data_main["brightness_delta"][i] * stack_data_main["delta_factor_1"];
+    stack_data_background["alpha_brightness"] += stack_data_background["brightness_delta"][i] * stack_data_background["delta_factor_2"];
 
   }
 

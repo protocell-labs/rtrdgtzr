@@ -91,12 +91,12 @@ function setup() {
                 "\n", "decompressed characters ->", squares_nr[0] * squares_nr[1] * quality,
                 "\n", "compressed characters ->", signal.length, 
                 "\n", "image compression ->", Math.round(100 * signal.length / target_pixel_nr), "%", 
-                "\n", "effects primary ->", effects_main_name, 
-                "\n", "effects secondary ->", effects_background_name, 
+                "\n", "effect primary ->", effects_main_name, 
+                "\n", "effect secondary ->", effects_background_name, 
                 "\n", "invert ->", invert_input, 
                 "\n", "era ->", effect_era, 
-                "\n", "effect seed ->", effect_seed, 
-                "\n", "minter ->", $fx.minter, 
+                "\n", "seed ->", effect_seed, 
+                "\n", "author ->", $fx.minter, 
                 "\n", "signal ->", "\n\n", signal);
 
     // deserialize signal data into an input image - this is the starting point for all effect stacks
@@ -108,6 +108,7 @@ function setup() {
     // sets global data for the effect stack
     stack_data_main = setEffectData(effects_main_name);
     stack_data_background = setEffectData(effects_background_name);
+    stack_data_background["light_treshold"] = 50; // override for effects on background
 
     // create 5 frame animation using one of the effect stacks
     animateEffectStack(input_img, stack_data_main, stack_data_background, false);

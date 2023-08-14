@@ -23,7 +23,31 @@ SOFTWARE.
 
 Attribution of dependencies
 
+rtrdgtzr code base.
+Available from: https://github.com/protocell-labs/rtrdgtzr
+This code is provided under MIT License.
+Copyright (c) 2023 Kane Borg and Luka Piskorec
+
 Manaspace, font from Squaresoft's classic Super Nintendo RPG Secret of Mana.
 Available from: http://www.zone38.net/
 This font is free for personal and commerical use.
 Created by codeman38
+
+ASDF Pixel Sort Color repository provided the base for pixel sorting
+functions, which were rewritten from Java into JavaScript.
+Available from: https://github.com/shmam/ASDFPixelSort_Color
+Copyright (c) 2017 Sam Crochet
+
+Floyd-Steinberg dithering was adapted from Coding Challenge #90.
+Video from: https://www.youtube.com/watch?v=0L2n8Tg2FwI
+Code from: https://editor.p5js.org/codingtrain/sketches/-YkMaf9Ea
+Copyright (c) 2018 Coding Train
+
+DCT functions for custom JPEG compression algorithm.
+Available from: https://github.com/MatthiasLiszt/discreteCosineTransformOnImages
+Copyright (c) 2022 Matthias Liszt
+
+CCapture.js is used for capturing animation clips in GIF format.
+Downloaded from: https://github.com/spite/ccapture.js
+This code is provided under MIT License.
+Copyright (c) 2012 Jaume Sanchez Elias

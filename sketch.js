@@ -93,6 +93,7 @@ function setup() {
                 "\n", "era ->", effect_era, 
                 "\n", "seed ->", effect_seed, 
                 "\n", "author ->", $fx.minter, 
+                "\n", "type ->", signal_type, 
                 "\n", "signal ->", "\n\n", signal);
 
     // deserialize signal data into an input image - this is the starting point for all effect stacks

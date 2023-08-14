@@ -109,10 +109,13 @@ const allel_effect_stacks_background = [
   ["lo-fi", 1] // same probability as the rest
 ];
 
+// used only with broken tokens (when the signal is undefined) - [value, probability]
+const allel_random_alpha_prob = [[0.0, 1], [0.01, 1], [0.1, 1], [0.25, 1]];
+
 let effects_main_name = gene_weighted_choice(allel_effect_stacks_main); // type of effects workflow to be used on the main image
 let effects_background_name = gene_weighted_choice(allel_effect_stacks_background); // type of effects workflow to be used on the background
 let invert_input = gene() < 0.25 ? true : false; // inverts both the input image and the effects applied to it after
-
+let random_alpha_prob = gene_weighted_choice(allel_random_alpha_prob); // approx. chance that the square of pixels will be transparent (used only with broken tokens)
 
 let start_screen = true; // this will show the start screen at the beginning and be switched off after any key is pressed
 let era_screen = false; // era screen will come after start screen and be switched off when era is selected by clicking
@@ -120,16 +123,6 @@ let drop_screen = false; // drop screen will come after era screen and be switch
 let thumbnail_ready = false; // additional flag for when thumbnail is ready for use
 let display_signal = false; // display signal characters at key press
 let hide_info = false; // hide info text during image editing at key press
-
-
-// defining fxhash token features
-$fx.features({
-  "title" : $fx.getParam("title"),
-  "author" : $fx.minter,
-  "seed" : $fx.getParam("effect_seed"),
-  "format" : $fx.getParam("format"),
-  "era" : $fx.getParam("effect_era"),
-})
 
 
 // 8x8 luminance quantization table provided by the JPEG standard
@@ -175,6 +168,19 @@ const repeatingAlphaChars = getCharacterArray(0x95E9, 2200); // from "闩" (one 
 let alphaSquaresToSignalMap = {};
 
 
+// returns signal type - "signal" for valid, "noise" for invalid signals or "empty" for no signal
+let signal_type = getSignalType($fx.getParam("signal"));
+
+
+// defining fxhash token features
+$fx.features({
+  "title" : $fx.getParam("title"),
+  "author" : $fx.minter,
+  "seed" : $fx.getParam("effect_seed"),
+  "format" : $fx.getParam("format"),
+  "era" : $fx.getParam("effect_era"),
+  "type" : signal_type
+})
 
 
 // Floyd-Steinberg dithering parameters

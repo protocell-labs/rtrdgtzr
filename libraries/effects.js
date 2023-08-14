@@ -2251,7 +2251,17 @@ function deserializeCoefficients(coeff_string, charToCoeffMap, bufferChar, alpha
     if (coeff_string.charAt(i) == bufferChar) { continue; } // early termination, we skip buffer characters and leave them at zero
     if (coeff_string.charAt(i) == alphaChar) { alpha_on = true; continue; } // early termination, if we encounter alphaChar we set a flag to indicate the square will not be drawn
     let coeffJSON = charToCoeffMap[coeff_string.charAt(i)];
-    coefficients[coeffJSON["x"]][coeffJSON["y"]] = coeffJSON["coeff"];
+    // check if signal string is valid
+    if (coeffJSON != undefined) {
+      coefficients[coeffJSON["x"]][coeffJSON["y"]] = coeffJSON["coeff"];
+    } else {
+      // if the signal string is invalid (someone pressed Randomize Params), coeffJSON will be undefined (BAD!)
+      // pick a random coefficient from the map
+      let randCoeffJSON = gene_pick_property(charToCoeffMap);
+      coefficients[randCoeffJSON["x"]][randCoeffJSON["y"]] = randCoeffJSON["coeff"];
+      // some chance for the square to be randomly transparent
+      if (gene() < random_alpha_prob) { alpha_on = true; continue; }
+    }
   }
 
   return [alpha_on, coefficients];
@@ -2526,6 +2536,14 @@ function resizeThumbnailAndSerialize(thumbnail) {
   // serializes and draws the image
   serializeSignal(thumbnail);
 
+}
+
+
+// returns signal type - "signal" for valid, "noise" for invalid signals or "empty" for no signal
+function getSignalType(signal_string) {
+  if (signal_string.length == 0) { return "empty"; } // signal string is empty
+  else if (charToCoeffMap[signal_string.charAt(0)] == undefined) { return "noise"; } // first character in the signal string is not a valid signal character
+  else { return "signal"; } // in any other case, this is a valid signal
 }
 
 

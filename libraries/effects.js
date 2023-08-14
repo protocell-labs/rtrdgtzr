@@ -58,8 +58,8 @@ function setEffectData(effects_stack_name) {
   data["new_brightness"] = $fx.getParam("brightness");
   data["contrast"] = $fx.getParam("contrast");
   data["mask_contrast"] = clamp(data["contrast"] * 1.2, 0, 1); // 20% larger than contrast, clamped between 0 and 1
-  data["light_treshold"] = $fx.getParam("light_treshold");
-  data["dark_treshold"] = $fx.getParam("dark_treshold");
+  data["light_threshold"] = $fx.getParam("light_threshold");
+  data["dark_threshold"] = $fx.getParam("dark_threshold");
 
   let non_mid_gray = gene() < 0.50 ? 40 : 60; // gray value that is either 40 or 60
   data["alpha_brightness"] = gene() < 0.50 ? 50 : non_mid_gray; // can be 40, 50 or 60
@@ -102,7 +102,7 @@ function setEffectData(effects_stack_name) {
       data["pix_scaling"] = 2.0;
       data["pix_scaling_dark"] = 2.0;
       data["layer_shift"] = 4;
-      data["dark_treshold"] = 20;
+      data["dark_threshold"] = 20;
       data["invert_mask"] = false;
 
       if (gene() < 0.25) {
@@ -399,7 +399,7 @@ function applyMonoEffect(img, stack_data) {
 
   // 2. Bright part of the image
   blendMode(BLEND);
-  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
+  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_threshold"], stack_data["invert_mask"]);
   if (stack_data["effect_era"] == "'80s") {makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);}
   tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
   image(img_2, output_border[0]/2 + stack_data["layer_shift"], output_border[1]/2 + stack_data["layer_shift"]);
@@ -407,7 +407,7 @@ function applyMonoEffect(img, stack_data) {
   // 3. Dark part of the image
   blendMode(ADD);
   img_3.resize(img_3.width / stack_data["pix_scaling_dark"], 0);
-  brightnessMask(img_3, stack_data["mask_contrast"], stack_data["dark_treshold"], !stack_data["invert_mask"]);
+  brightnessMask(img_3, stack_data["mask_contrast"], stack_data["dark_threshold"], !stack_data["invert_mask"]);
   if (stack_data["effect_era"] == "'80s") {makeDithered(img_3, stack_data["nr_of_levels"], stack_data["dither_params_3"]);}
   tint(stack_data["tint_palette_1"][0], stack_data["tint_palette_1"][1], stack_data["tint_palette_1"][2]);
   img_3.resizeNN(img_3.width * stack_data["pix_scaling_dark"], 0);
@@ -439,7 +439,7 @@ function applyHiFiEffect(img, stack_data) {
   noTint();
   grayscale(img_2, stack_data["contrast"]);
   img_2.resize(img_2.width / stack_data["pix_scaling"], 0);
-  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
+  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_threshold"], stack_data["invert_mask"]);
   if (stack_data["effect_era"] == "'80s") {makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);}
   tint(stack_data["tint_palette_2"][0], stack_data["tint_palette_2"][1], stack_data["tint_palette_2"][2]);
   img_2.resizeNN(img_2.width * stack_data["pix_scaling"], 0);
@@ -450,7 +450,7 @@ function applyHiFiEffect(img, stack_data) {
   noTint();
   grayscale(img_3, stack_data["contrast"]);
   img_3.resize(img_3.width / stack_data["pix_scaling_dark"], 0);
-  brightnessMask(img_3, stack_data["mask_contrast"], stack_data["dark_treshold"], !stack_data["invert_mask"]);
+  brightnessMask(img_3, stack_data["mask_contrast"], stack_data["dark_threshold"], !stack_data["invert_mask"]);
   if (stack_data["effect_era"] == "'80s") {makeDithered(img_3, stack_data["nr_of_levels"], stack_data["dither_params_3"]);}
   tint(stack_data["tint_palette_3"][0], stack_data["tint_palette_3"][1], stack_data["tint_palette_3"][2]);
   img_3.resizeNN(img_3.width * stack_data["pix_scaling_dark"], 0);
@@ -503,7 +503,7 @@ function applyNoisyEffect(img, stack_data) {
   noTint();
   grayscale(img_2, stack_data["contrast"]);
   img_2.resize(img_2.width / stack_data["pix_scaling"], 0);
-  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
+  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_threshold"], stack_data["invert_mask"]);
   if (stack_data["effect_era"] == "'80s") {makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);}
   tint(stack_data["tint_palette_2"][0], stack_data["tint_palette_2"][1], stack_data["tint_palette_2"][2]);
   img_2.resizeNN(img_2.width * stack_data["pix_scaling"], 0);
@@ -554,7 +554,7 @@ function applyCorruptedEffect(img, stack_data) {
   noTint();
   grayscale(img_2, stack_data["contrast"]);
   img_2.resize(img_2.width / stack_data["pix_scaling"], 0);
-  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
+  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_threshold"], stack_data["invert_mask"]);
   
   if (stack_data["second_sorting"]) {
     switch (stack_data["sorting_order_2"]) {
@@ -665,7 +665,7 @@ function applyLoFiEffect(img, stack_data) {
   noTint();
   grayscale(img_2, stack_data["contrast"]);
   img_2.resize(img_2.width / stack_data["pix_scaling"], 0);
-  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_treshold"], stack_data["invert_mask"]);
+  brightnessMask(img_2, stack_data["mask_contrast"], stack_data["light_threshold"], stack_data["invert_mask"]);
   if (stack_data["effect_era"] == "'80s") {makeDithered(img_2, stack_data["nr_of_levels"], stack_data["dither_params_2"]);}
   tint(stack_data["tint_palette_2"][0], stack_data["tint_palette_2"][1], stack_data["tint_palette_2"][2]);
   img_2.resizeNN(img_2.width * stack_data["pix_scaling"] / 2.0, 0); // we resize back only half way
@@ -1383,7 +1383,7 @@ function makeStriped(img, stripe_width, stripe_offset = 0, invert = false) {
 
 
 // make parts of the image transparent based on brightness
-function brightnessMask(img, contrast, treshold, invert = false) {
+function brightnessMask(img, contrast, threshold, invert = false) {
   img.loadPixels();
   for (let y = 0; y < img.height; y++) {
     for (let x = 0; x < img.width; x++) {
@@ -1396,7 +1396,7 @@ function brightnessMask(img, contrast, treshold, invert = false) {
       let v = (0.3 * r + 0.58 * g + 0.11 * b) * a / 255;
       // stretch to increase contrast
       v = v + (v - 128) * contrast;
-      let newAlpha = brightness(clr) > treshold ? 255 * !invert : 255 * invert;
+      let newAlpha = brightness(clr) > threshold ? 255 * !invert : 255 * invert;
       let newClr = color(r, g, b, newAlpha);
       setColorAtIndex(img, x, y, newClr);
     }
@@ -1565,17 +1565,18 @@ function showEraScreen() {
   if (era_zone == 1) {
 
     txt = frame_counter % 20 < 17 ? "`\n'80s" : "\n'80s";
-    showText(txt, width / 3, height / 2, 16, 1, height / 12, color_a, color_b, color_c);
     showText("'90s", 2 * width / 3, height / 2, 8, 0.4, height / 12, color_a, color_b, color_c);
+    showText(txt, width / 3, height / 2, 16, 1, height / 12, color_a, color_b, color_c);
     
-    // '90s selected
+  // '90s selected
   } else if (era_zone == 2) {
 
     txt = frame_counter % 20 < 17 ? "`\n'90s" : "\n'90s";
     showText("'80s", width / 3, height / 2, 8, 0.4, height / 12, color_a, color_b, color_c);
     showText(txt, 2 * width / 3, height / 2, 16, 1, height / 12, color_a, color_b, color_c);
+    showText("(no dither)", 2 * width / 3, height / 2, 6, 0.4, height / 4, color_a, color_b, color_c);
     
-    // nothing selected
+  // nothing selected
   } else {
 
     showText("'80s", width / 3, height / 2, 8, 0.4, height / 12, color_a, color_b, color_c);
@@ -1992,13 +1993,15 @@ function draw_image(img, scale) {
 
 // shows the contents of the 2D tables (data) in the console
 function plot_data(data) {
+  let data_string = "dct coefficients ->\n\n";
   for (let i = 0; i < data.length; i++) {
     let data_row = "";
     for (let j = 0; j < data[0].length; j++) {
       data_row += data[i][j].toFixed(2) + "\t";
     }
-    console.log(data_row);
+    data_string += data_row + "\n";
   }
+  console.log(data_string);
 }
 
 
@@ -2473,9 +2476,18 @@ function resizeThumbnailAndSerialize(thumbnail) {
   // reset drop_zone so we can re-drop an image later
   drop_zone = 0;
 
+  // recalculate image border
+  if (border_type == "none")                                    { image_border = [0, 0]; }
+  else if ((border_type == "thin") && (format == "portrait"))   { image_border = [0.075, 0.05]; }
+  else if ((border_type == "thin") && (format == "landscape"))  { image_border = [0.05, 0.075]; }
+  else if ((border_type == "thin") && (format == "square"))     { image_border = [0.05, 0.05]; }
+  else if ((border_type == "thick") && (format == "portrait"))  { image_border = [0.225, 0.15]; }
+  else if ((border_type == "thick") && (format == "landscape")) { image_border = [0.15, 0.225]; }
+  else if ((border_type == "thick") && (format == "square"))    { image_border = [0.15, 0.15]; }
+
   // recalculate dimensions
-  w_h_ratio = squares_nr[0] / squares_nr[1];
   target_dim = [squares_nr[0] * 8, squares_nr[1] * 8];
+  w_h_ratio = (target_dim[0] + target_dim[0] * image_border[0]) / (target_dim[1] + target_dim[1] * image_border[1]);
   target_pixel_nr = target_dim[0] * target_dim[1];
 
   if (windowWidth / windowHeight < w_h_ratio) {
@@ -2496,11 +2508,13 @@ function resizeThumbnailAndSerialize(thumbnail) {
   // move canvas to the middle of the browser window
   select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2);
 
+  let thumbnail_ratio = target_dim[0] / target_dim[1];
+
   // cropping portrait, square and landscape formats into the right proportion
-  if (thumbnail.width / thumbnail.height < w_h_ratio) {
-    thumbnail = thumbnail.get(0, (thumbnail.height - thumbnail.width / w_h_ratio) / 2, thumbnail.width, thumbnail.width / w_h_ratio);
+  if (thumbnail.width / thumbnail.height < thumbnail_ratio) {
+    thumbnail = thumbnail.get(0, (thumbnail.height - thumbnail.width / thumbnail_ratio) / 2, thumbnail.width, thumbnail.width / thumbnail_ratio);
   } else {
-    thumbnail = thumbnail.get((thumbnail.width - thumbnail.height * w_h_ratio) / 2, 0, thumbnail.height * w_h_ratio, thumbnail.height);
+    thumbnail = thumbnail.get((thumbnail.width - thumbnail.height * thumbnail_ratio) / 2, 0, thumbnail.height * thumbnail_ratio, thumbnail.height);
   }
 
   // resizing uniformly to a target dimension
@@ -2547,6 +2561,7 @@ function mouseClicked() {
   if (thumbnail != undefined) {
     // serialized signal will be compressed and needs to be decompressed before deserialization
     signal = decompressSignal(signal, repeatingBufferChars, repeatingAlphaChars);
+    console.log("decompressed signal ->", "\n\n", signal);
 
     // detect which square was clicked on
     let square_x_nr = Math.floor((mouseX - (canvas_dim[0] * image_border[0])/2) / (8 * thumbnail_scale));
@@ -2577,6 +2592,13 @@ function mouseClicked() {
     let signal_after = signal.slice(end_idx);
     let signal_clicked = signal.slice(start_idx, end_idx);
 
+    // show signal part and coefficients that were clicked on in the console
+    console.log("square clicked ->", signal_clicked);
+    let alpha_on, coefficients;
+    [alpha_on, coefficients] = deserializeCoefficients(signal_clicked, charToCoeffMap, bufferChar, alphaChar);
+    coefficients = dequantizeCoefficients(coefficients, jpeg_lum_quant_table, quant_f);
+    plot_data(coefficients);
+
     // clicked on the already transparent square
     if (signal_clicked == alphaChar.repeat(quality)) {
       // retrieve previous part of the signal stored after the first click
@@ -2601,7 +2623,7 @@ function mouseClicked() {
     // show some data in the console
     compressed_signal_size = signal.length;
     compression_ratio = compressed_signal_size / decompressed_signal_size;
-    console.log(signal);
+    //console.log(signal);
 
     // update the signal parameter value
     // NOTE: this will trim the signal to maxLength if it's too long
@@ -2725,19 +2747,24 @@ function keyPressed() {
     if (thumbnail != undefined) {
       
       // cycle border type
-      if (border_type == "none") {
-        border_type = "thin"
-        image_border = image_border_thin;
-
-      } else if (border_type == "thin") {
-        border_type = "thick"
-        image_border = image_border_thick;
-
-      } else {
-        border_type = "none"
-        image_border = image_border_none;
-      }
+      if (border_type == "none") { border_type = "thin"; }
+      else if (border_type == "thin") { border_type = "thick"; }
+      else { border_type = "none"; }
       
+      // recalculate image border
+      if (border_type == "none")                                    { image_border = [0, 0]; }
+      else if ((border_type == "thin") && (format == "portrait"))   { image_border = [0.075, 0.05]; }
+      else if ((border_type == "thin") && (format == "landscape"))  { image_border = [0.05, 0.075]; }
+      else if ((border_type == "thin") && (format == "square"))     { image_border = [0.05, 0.05]; }
+      else if ((border_type == "thick") && (format == "portrait"))  { image_border = [0.225, 0.15]; }
+      else if ((border_type == "thick") && (format == "landscape")) { image_border = [0.15, 0.225]; }
+      else if ((border_type == "thick") && (format == "square"))    { image_border = [0.15, 0.15]; }
+
+      // recalculate dimensions
+      target_dim = [squares_nr[0] * 8, squares_nr[1] * 8];
+      w_h_ratio = (target_dim[0] + target_dim[0] * image_border[0]) / (target_dim[1] + target_dim[1] * image_border[1]);
+      target_pixel_nr = target_dim[0] * target_dim[1];
+
       if (windowWidth / windowHeight < w_h_ratio) {
         thumbnail_scale = windowWidth / (target_dim[0] + target_dim[0] * image_border[0]);
       } else {
@@ -2762,11 +2789,30 @@ function keyPressed() {
       select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2);
     }
 
+    // in case effects are displayed, "b" toggles the background color
+    if ((signal.length != 0) && (thumbnail == undefined)) {
+      background_toggle = !background_toggle;
+      if (background_toggle) {
+        select('body').style('background-color', 'white');
+        console.log("background color -> white")
+      } else {
+        select('body').style('background-color', 'black');
+        console.log("background color -> black")
+      }
+    }
+
   } else if (keyCode === 67) { // "c" - toggle signal characters as text on the canvas
 
     // if the thumbnail was already loaded (during editing phase)
     if (thumbnail != undefined) {
       display_signal = !display_signal;
+    }
+
+  } else if (keyCode === 72) { // "h" - toggle info text on the canvas during image editing
+
+    // if the thumbnail was already loaded (during editing phase)
+    if (thumbnail != undefined) {
+      hide_info = !hide_info;
     }
 
   } else if (keyCode === 71) { // "g" - save gif
@@ -2794,6 +2840,8 @@ function windowResized() {
   // canvas resize in case we are in the selection screens or image editing
   if (start_screen || era_screen || drop_screen || (thumbnail != undefined)) {
 
+    w_h_ratio = (target_dim[0] + target_dim[0] * image_border[0]) / (target_dim[1] + target_dim[1] * image_border[1]); // image width to height ratio
+
     if (windowWidth / windowHeight < w_h_ratio) {
       thumbnail_scale = windowWidth / (target_dim[0] + target_dim[0] * image_border[0]);
     } else {
@@ -2810,7 +2858,7 @@ function windowResized() {
     }
   }
 
-  // canvas resize in case effects are displayed
+  // canvas resize in case effects are displayed - no automatic resize!
   if ((signal.length != 0) && (thumbnail == undefined)) {
     
   }

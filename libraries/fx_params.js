@@ -10,7 +10,7 @@ $fx.params([
     update: "page-reload",
     options: {
       min: 0,
-      max: 1000,
+      max: 999,
       step: 1,
     },
   },
@@ -22,7 +22,7 @@ $fx.params([
     update: "code-driven",
     options: {
       minLength: 0,
-      maxLength: 2000, // initially we had it at 1900
+      maxLength: 2000,
     }
   },
   {
@@ -79,33 +79,6 @@ $fx.params([
       step: 1,
     },
   },
-  /*{
-    id: "effect_primary",
-    name: "effect primary",
-    type: "select",
-    default: "lo-fi",
-    update: "page-reload",
-    options: {
-      options: ["mono", "hi-fi", "noisy", "corrupted", "abstract", "lo-fi"],
-    }
-  },
-  {
-    id: "effect_secondary",
-    name: "effect secondary",
-    type: "select",
-    default: "mono",
-    update: "page-reload",
-    options: {
-      options: ["mono", "hi-fi", "noisy", "corrupted", "abstract", "lo-fi"],
-    }
-  },
-  {
-    id: "invert_input",
-    name: "invert",
-    type: "boolean",
-    default: false,
-    update: "page-reload",
-  },*/
   {
     id: "brightness",
     name: "brightness",
@@ -131,8 +104,8 @@ $fx.params([
     },
   },
   {
-    id: "light_treshold",
-    name: "light treshold",
+    id: "light_threshold",
+    name: "light threshold",
     type: "number",
     default: 50,
     update: "page-reload",
@@ -143,8 +116,8 @@ $fx.params([
     },
   },
   {
-    id: "dark_treshold",
-    name: "dark treshold",
+    id: "dark_threshold",
+    name: "dark threshold",
     type: "number",
     default: 30,
     update: "page-reload",
@@ -154,18 +127,6 @@ $fx.params([
       step: 5,
     },
   },
-  /*{
-    id: "alpha_brightness",
-    name: "alpha brightness",
-    type: "number",
-    default: 50,
-    update: "page-reload",
-    options: {
-      min: 0,
-      max: 100,
-      step: 5,
-    },
-  },*/
   {
     id: "title",
     name: "title",
@@ -177,19 +138,4 @@ $fx.params([
       maxLength: 100,
     }
   },
-
 ]);
-
-
-// maximum length for a string param on fxhash (July 2023)
-
-// 1. maxLength: 3900 in fxlens (Chrome)
-
-// 2. maxLength: 1900 while minting the token on fxhash
-//    413 ERROR - The request could not be satisfied.
-
-// 3. maxLength: 900 is the max in fxhash sandbox
-//    Uncaught (in promise) TypeError: Failed to construct 'URL': Invalid URL at worker.js:14:15
-
-// who? - 8k character limit on urls served via cloudfront - that's consistent with point 2. for you, each string param character gets encoded as 4 hex url param characters
-// ciphrd - cloudfront has a 20480 bytes request limit (each string character is 2 bytes - 4 hex values, 16 bits)

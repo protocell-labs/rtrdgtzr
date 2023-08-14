@@ -42,6 +42,7 @@ let nr_of_frames = 5; // number of frames in a gif animation
 let drop_zone = 0; // 0, 1, 2, 3 - none, square, portrait, landscape
 let era_zone = 0; // 0, 1, 2 - none, '80s, '90s
 let offset_rgb = [-25, -25, 25]; // rgb offset applied to the droped image - just for preview purposes during editing, the actual pixel values are not changes
+let background_toggle = false; // will be used to toggle the color of the html body background
 let signal = ""; // initialize the signal, this is where the image data will be stored
 let max_chars = 2000; // maximum number of characters in the compressed signal - this is separately set inside fx_params.js for the signal param
 
@@ -51,24 +52,20 @@ let quality = $fx.getParam("quality"); // corresponds to the number of coefficie
 let quant_f = $fx.getParam("quant_f"); // additional factor which modifies quantization levels, higher means stronger compression, needs to be >= 1
 let effect_era = $fx.getParam("effect_era"); // era of the effects
 
-//let effects_main_name = $fx.getParam("effect_primary"); // type of effects workflow to be used on the main image
-//let effects_background_name = $fx.getParam("effect_secondary"); // type of effects workflow to be used on the background
-//let invert_input = $fx.getParam("invert_input"); // inverts both the input image and the effects applied to it after
-
-let image_border_none = [0, 0]; // in precentage of the image dimensions
-let image_border_thin = [0.05, 0.05]; // in precentage of the image dimensions
-let image_border_thick = [0.15, 0.15]; // in precentage of the image dimensions
-
-if (border_type == "none") { image_border = image_border_none; }  // no border
-else if (border_type == "thin") { image_border = image_border_thin; } // thin border
-else { image_border = image_border_thick; } // thick border
+if (border_type == "none")                                    { image_border = [0, 0]; } // in precentage of the image dimensions
+else if ((border_type == "thin") && (format == "portrait"))   { image_border = [0.075, 0.05]; } // in precentage of the image dimensions
+else if ((border_type == "thin") && (format == "landscape"))  { image_border = [0.05, 0.075]; } // in precentage of the image dimensions
+else if ((border_type == "thin") && (format == "square"))     { image_border = [0.05, 0.05]; } // in precentage of the image dimensions
+else if ((border_type == "thick") && (format == "portrait"))  { image_border = [0.225, 0.15]; } // in precentage of the image dimensions
+else if ((border_type == "thick") && (format == "landscape")) { image_border = [0.15, 0.225]; } // in precentage of the image dimensions
+else if ((border_type == "thick") && (format == "square"))    { image_border = [0.15, 0.15]; } // in precentage of the image dimensions
 
 if (format == "portrait") { squares_nr = [16, 25]; } // portrait proportion
 else if (format == "landscape") { squares_nr = [25, 16]; } // landscape proportion
 else { squares_nr = [20, 20]; } // square proportion
 
-let w_h_ratio = squares_nr[0] / squares_nr[1]; // image width to height ratio
 let target_dim = [squares_nr[0] * 8, squares_nr[1] * 8]; // target dimensions for the source image in pixels
+let w_h_ratio = (target_dim[0] + target_dim[0] * image_border[0]) / (target_dim[1] + target_dim[1] * image_border[1]); // image width to height ratio
 let target_pixel_nr = target_dim[0] * target_dim[1]; // number of pixels in the image - used to calculate image compression ratio
 
 if (window.innerWidth / window.innerHeight < w_h_ratio) {
@@ -93,17 +90,27 @@ else if (border_type == "thin") { output_border = [10 * output_scale, 10 * outpu
 else { output_border = [20 * output_scale, 20 * output_scale]; } // thick border
 
 // primary effect stacks - [value, probability]
-const allel_effect_stacks = [
+const allel_effect_stacks_main = [
+  ["mono", 2],
+  ["hi-fi", 2],
+  ["noisy", 2],
+  ["corrupted", 2],
+  ["abstract", 1], // half the probability as the rest
+  ["lo-fi", 1] // half the probability as the rest
+];
+
+// secondary effect stacks - [value, probability]
+const allel_effect_stacks_background = [
   ["mono", 1],
   ["hi-fi", 1],
   ["noisy", 1],
   ["corrupted", 1],
-  ["abstract", 1],
-  ["lo-fi", 1]
+  ["abstract", 1], // same probability as the rest
+  ["lo-fi", 1] // same probability as the rest
 ];
 
-let effects_main_name = gene_weighted_choice(allel_effect_stacks); // type of effects workflow to be used on the main image
-let effects_background_name = gene_weighted_choice(allel_effect_stacks); // type of effects workflow to be used on the background
+let effects_main_name = gene_weighted_choice(allel_effect_stacks_main); // type of effects workflow to be used on the main image
+let effects_background_name = gene_weighted_choice(allel_effect_stacks_background); // type of effects workflow to be used on the background
 let invert_input = gene() < 0.25 ? true : false; // inverts both the input image and the effects applied to it after
 
 
@@ -112,12 +119,14 @@ let era_screen = false; // era screen will come after start screen and be switch
 let drop_screen = false; // drop screen will come after era screen and be switched off after the image is dropped
 let thumbnail_ready = false; // additional flag for when thumbnail is ready for use
 let display_signal = false; // display signal characters at key press
+let hide_info = false; // hide info text during image editing at key press
 
 
 // defining fxhash token features
 $fx.features({
   "title" : $fx.getParam("title"),
   "author" : $fx.minter,
+  "seed" : $fx.getParam("effect_seed"),
   "format" : $fx.getParam("format"),
   "era" : $fx.getParam("effect_era"),
 })
@@ -207,7 +216,7 @@ const extreme_dither_params_json = {
 };
 
 
-// three-bit color palettes used for tinting
+// three-bit color palettes used for tinting (black is missing)
 const three_bit_palette = {
   'red' : [255, 0, 0],
   'green' : [0, 255, 0],

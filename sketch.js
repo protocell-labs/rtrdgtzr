@@ -63,10 +63,6 @@ function setup() {
   select('canvas').id('retrodigitizer'); // change id of the canvas
   select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2); // move canvas to the middle of the browser window
 
-  // check this:
-  // https://stackoverflow.com/questions/75489567/how-to-set-canvas-attributes-from-p5-js
-  //console.log(drawingContext.getContextAttributes());
-
   // DESERIALIZE AN INPUT IMAGE - if signal param is not empty, which means it was stored already before
   if ($fx.getParam("signal").length != 0) {
 
@@ -108,7 +104,8 @@ function setup() {
     // sets global data for the effect stack
     stack_data_main = setEffectData(effects_main_name);
     stack_data_background = setEffectData(effects_background_name);
-    stack_data_background["light_treshold"] = 50; // override for effects on background
+    stack_data_background["light_threshold"] = 50; // override for effects on background
+    stack_data_background["layer_shift"] = 0; // override for effects on background
 
     // create 5 frame animation using one of the effect stacks
     animateEffectStack(input_img, stack_data_main, stack_data_background, false);
@@ -167,13 +164,15 @@ function draw() {
       deserializeSignal(signal);
     }
 
-    if (!display_signal) {
+    if (!display_signal && !hide_info) {
       // shows signal and control info as text on the canvas
       showSignalInfo();
       showControlInfo();
-    } else {
+    } else if (display_signal) {
       // show signal characters as text on the canvas
       showSignalOnScreen();
+    } else {
+      // no info is shown on screen
     }
   }
 

@@ -60,7 +60,7 @@ function setup() {
     canvas = createCanvas(windowHeight * w_h_ratio, windowHeight);
   }
 
-  select('canvas').id('retrodigitizer'); // change id of the canvas
+  select('canvas').id('rtrdgtzr'); // change id of the canvas, we can access it with canvas#rtrdgtzr.p5Canvas
   select('canvas').position((windowWidth - width) / 2, (windowHeight - height) / 2); // move canvas to the middle of the browser window
 
   // DESERIALIZE AN INPUT IMAGE - if signal param is not empty, which means it was stored already before
@@ -192,14 +192,23 @@ function draw() {
   // EDITING EFFECTS (AFTER REFRESH) - execute if the signal is not empty but the thumbnail is not defined (we lost it after the refresh)
   if ((signal.length != 0) && (thumbnail == undefined)) {
     
-    // decide which frame to draw - we will loop through all 5 frames repeatedly to imitate the gif animation
-    frame_to_draw = buffer_frames[frame_counter % nr_of_frames];
+    if (animation_paused) {
+      // animation is paused so we will draw a fixed random frame (this is determined in keyPressed())
+      frame_to_draw = buffer_frames[random_frame_nr];
+    } else {
+      // decide which frame to draw - we will loop through all 5 frames repeatedly to imitate the gif animation
+      frame_to_draw = buffer_frames[frame_counter % nr_of_frames];
+    }
   
     // black background when showing the final image with effects
     background(0, 0, 0);
 
     // draw appropriate frame
     copy(frame_to_draw, 0, 0, frame_to_draw.width, frame_to_draw.height, 0, 0, frame_to_draw.width, frame_to_draw.height)
+
+    // trigger screen capture once for the first frame and never again
+    if (trigger_preview) {fxpreview(); trigger_preview = false;}
+
   }
 
 

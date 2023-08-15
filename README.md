@@ -39,6 +39,7 @@ Key controls:
 - **s**: export png image (current output scale)
 - **left + right arrow**: change output scale (1x-10x)
 - **b**: toggle page background color
+- **p**: pause / run animation
 
 Created with _p5.js_ in 2023 by _{protocell:labs}_.
 

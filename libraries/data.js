@@ -123,7 +123,9 @@ let drop_screen = false; // drop screen will come after era screen and be switch
 let thumbnail_ready = false; // additional flag for when thumbnail is ready for use
 let display_signal = false; // display signal characters at key press
 let hide_info = false; // hide info text during image editing at key press
-
+let trigger_preview = true; // this will trigger fxpreview() once and then set itself to false
+let animation_paused = false; // trigger animation pause
+let random_frame_nr = 0; // fixed random frame to display during animation pause
 
 // 8x8 luminance quantization table provided by the JPEG standard
 // source: https://www.sciencedirect.com/topics/engineering/quantization-table
@@ -230,15 +232,6 @@ const three_bit_palette = {
   'magenta' : [255, 0, 255],
   'cyan' : [0, 255, 255],
   'yellow' : [255, 255, 0],
-  'white' : [255, 255, 255],
-};
-
-
-// three-bit color palettes used for tinting
-const three_bit_palette_reduced = {
-  'red' : [255, 0, 0],
-  'green' : [0, 255, 0],
-  'blue' : [0, 0, 255],
   'white' : [255, 255, 255],
 };
 

@@ -2823,14 +2823,14 @@ function keyPressed() {
 
     // if the thumbnail was already loaded (during editing phase)
     if (thumbnail != undefined) {
-      display_signal = !display_signal;
+      display_signal = !display_signal; // toggle display_signal
     }
 
   } else if (keyCode === 72) { // "h" - toggle info text on the canvas during image editing
 
     // if the thumbnail was already loaded (during editing phase)
     if (thumbnail != undefined) {
-      hide_info = !hide_info;
+      hide_info = !hide_info; // toggle hide_info
     }
 
   } else if (keyCode === 71) { // "g" - save gif
@@ -2847,6 +2847,15 @@ function keyPressed() {
       const saveid = parseInt(Math.random() * 100000);
       saveCanvas(canvas, `rtrdgtzr_${effects_main_name}_still_${artwork_seed}_id_${saveid}`, "png");
     }
+
+  } else if (keyCode === 80) { // "p" - pause animation
+
+    // works only if effects are applied, not during image editing
+    if ((signal.length != 0) && (thumbnail == undefined)) {
+      animation_paused = !animation_paused; // toggle animation_paused
+      random_frame_nr = gene_rand_int(0, nr_of_frames); // choose fixed random frame to display during animation pause, 0, 1, 2, 3, 4
+    }
+
   }
 
 }

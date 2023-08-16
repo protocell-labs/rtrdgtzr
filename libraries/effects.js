@@ -1835,8 +1835,8 @@ function showControlInfo() {
   txt_size = 4;
   txt_shift = 0.2;
 
-  if (frame_counter % 20 < 13) {controls_info_txt = "CONTROLS\n<> : -+ quality\n`^ : -+ quantization\nclick : -+ square\nb : cycle border\nc : show/hide signal\nredrop : new image\nrefresh : fix image";}
-  else {controls_info_txt = "CONTROLS\n<> : -+ quality\n`^ : -+ quantization\nclick : -+ square\nb : cycle border\nc : show/hide signal\nredrop : new image\n";}
+  if (frame_counter % 20 < 13) {controls_info_txt = "CONTROLS\n<> : -+ quality\n`^ : -+ quantization\nclick : -+ square\nb : cycle border\nc : show/hide signal\nh : hide/show controls\nredrop : new image\nrefresh : fix image";}
+  else {controls_info_txt = "CONTROLS\n<> : -+ quality\n`^ : -+ quantization\nclick : -+ square\nb : cycle border\nc : show/hide signal\nh : hide/show controls\nredrop : new image\n";}
   
   showText(controls_info_txt, width / 30, height - width / 30, txt_size, txt_shift, 0, color_a, color_b, color_c)
 }

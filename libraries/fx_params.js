@@ -107,7 +107,7 @@ $fx.params([
     id: "light_threshold",
     name: "light threshold",
     type: "number",
-    default: 50,
+    default: 45,
     update: "page-reload",
     options: {
       min: 0,

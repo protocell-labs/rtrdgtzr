@@ -35,7 +35,7 @@ let stack_data_main, stack_data_background;
 let compressed_signal_size, image_compression_ratio;
 
 let frame_duration = 100; // in mms
-let frame_rate = 1000/frame_duration; // animation frame rate
+let frame_rate = 1000 / frame_duration; // animation frame rate
 let frame_counter = 0; // this will increment inside draw()
 let frame_counter_after_drop = 0; // this will increment inside draw()
 let nr_of_frames = 5; // number of frames in a gif animation

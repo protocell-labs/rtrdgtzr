@@ -24,6 +24,21 @@
 : l a b s }  |  2 0 2 3
 </pre>
 
+Code for a GENTK generative token on [fxhash.xyz](https://www.fxhash.xyz/) Tezos NFT platform.
+
+When run locally, this generator needs to be used in conjunction with [fxlens](https://github.com/fxhash/fxlens) for full functionality.
+
+Collection overview on fxhash.xyz (original minting site):
+- [rtrdgtzr (fxhash)](https://www.fxhash.xyz/generative/slug/rtrdgtzr)
+
+Collection overview on fxfam.xyz (better layout and filtering):
+- [rtrdgtzr (fxfam)](https://fxfam.xyz/28552)
+
+You can find a detailed description of the project in this fx(text) article:
+- [rtrdgtzr - Minter's Guide](https://www.fxhash.xyz/article/rtrdgtzr-minter's-guide)
+
+# Token description
+
 _“And in the bloodlit dark behind his eyes, silver phosphenes boiled in from the edge of space, hypnagogic images jerking past like a film compiled of random frames.”_
 
 _William Gibson, “Neuromancer”, 1984_
@@ -42,5 +57,3 @@ Key controls:
 - **p**: pause / run animation
 
 Created with _p5.js_ in 2023 by _{protocell:labs}_.
-
-**NOTE**: when run locally, this generator needs to be used in conjunction with [fxlens](https://github.com/fxhash/fxlens) for full functionality.
